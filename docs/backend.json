@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -112,6 +113,10 @@
         "stockStatus": {
           "type": "string",
           "description": "Indicates the current availability of the product (e.g., 'In Stock', 'Out of Stock', 'Limited Stock')."
+        },
+        "customTag": {
+          "type": "string",
+          "description": "A custom label or badge to display on the product, such as 'HOT', 'NEW', or 'OFFER'."
         },
         "availability": {
           "type": "boolean",

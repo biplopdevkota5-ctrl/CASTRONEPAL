@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { 
   LayoutDashboard, 
   Package, 
@@ -8,22 +9,17 @@ import {
   Bell, 
   Plus, 
   LogOut, 
-  Search,
   Trash2,
-  CheckCircle2,
-  AlertTriangle,
   Lock,
   Gamepad2,
-  X,
   Upload,
   Loader2,
-  Clock,
   Database,
-  Sparkles
+  Tag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   Table, 
@@ -38,7 +34,6 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -72,25 +67,26 @@ export default function AdminPage() {
     if (!db || !isAuthenticated) return null;
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'));
   }, [db, isAuthenticated]);
-  const { data: products, loading: productsLoading } = useCollection<any>(productsQuery);
+  const { data: products } = useCollection<any>(productsQuery);
 
   const ordersQuery = useMemoFirebase(() => {
     if (!db || !isAuthenticated) return null;
     return query(collection(db, 'orders'), orderBy('orderTime', 'desc'));
   }, [db, isAuthenticated]);
-  const { data: orders, loading: ordersLoading } = useCollection<any>(ordersQuery);
+  const { data: orders } = useCollection<any>(ordersQuery);
 
   const announcementsQuery = useMemoFirebase(() => {
     if (!db || !isAuthenticated) return null;
     return query(collection(db, 'announcements'), orderBy('postedAt', 'desc'));
   }, [db, isAuthenticated]);
-  const { data: announcements, loading: announcementsLoading } = useCollection<any>(announcementsQuery);
+  const { data: announcements } = useCollection<any>(announcementsQuery);
 
   const [productForm, setProductForm] = useState({
     name: '',
     category: 'PlayStation',
     price: '',
     stockStatus: 'In Stock',
+    customTag: '',
     shortDescription: '',
     fullDescription: '',
     imageUrl: ''
@@ -157,6 +153,7 @@ export default function AdminPage() {
       categoryId: productForm.category,
       price: parseFloat(productForm.price),
       stockStatus: productForm.stockStatus,
+      customTag: productForm.customTag || '',
       availability: true,
       shortDescription: productForm.shortDescription,
       fullDescription: productForm.fullDescription || productForm.shortDescription,
@@ -171,7 +168,7 @@ export default function AdminPage() {
     setDoc(productRef, data)
       .then(() => {
         setIsAddProductOpen(false);
-        setProductForm({ name: '', category: 'PlayStation', price: '', stockStatus: 'In Stock', shortDescription: '', fullDescription: '', imageUrl: '' });
+        setProductForm({ name: '', category: 'PlayStation', price: '', stockStatus: 'In Stock', customTag: '', shortDescription: '', fullDescription: '', imageUrl: '' });
         toast({ title: 'Success', description: `${data.name} saved successfully.` });
       })
       .catch(async (error) => {
@@ -187,9 +184,9 @@ export default function AdminPage() {
   const seedDatabase = async () => {
     setIsSaving(true);
     const sampleProducts = [
-      { name: "PSN $50 Gift Card", categoryId: "PlayStation", price: 6650, stockStatus: "In Stock", shortDescription: "Instant digital code for US accounts.", imageUrl: "https://picsum.photos/seed/psn1/400/600" },
-      { name: "Xbox $25 Card", categoryId: "Xbox", price: 3400, stockStatus: "In Stock", shortDescription: "Global digital code for Xbox Store.", imageUrl: "https://picsum.photos/seed/xbox1/400/600" },
-      { name: "RTX 4090 GPU", categoryId: "GPU", price: 285000, stockStatus: "In Stock", shortDescription: "The ultimate gaming graphics card.", imageUrl: "https://picsum.photos/seed/gpu1/400/600" }
+      { name: "PSN $50 Gift Card", categoryId: "PlayStation", price: 6650, stockStatus: "In Stock", customTag: "POPULAR", shortDescription: "Instant digital code for US accounts.", imageUrl: "https://picsum.photos/seed/psn1/400/600" },
+      { name: "Xbox $25 Card", categoryId: "Xbox", price: 3400, stockStatus: "In Stock", customTag: "HOT", shortDescription: "Global digital code for Xbox Store.", imageUrl: "https://picsum.photos/seed/xbox1/400/600" },
+      { name: "RTX 4090 GPU", categoryId: "GPU", price: 285000, stockStatus: "In Stock", customTag: "NEW", shortDescription: "The ultimate gaming graphics card.", imageUrl: "https://picsum.photos/seed/gpu1/400/600" }
     ];
 
     try {
@@ -357,7 +354,7 @@ export default function AdminPage() {
         <div className="glass-panel border-white/5 rounded-2xl overflow-hidden">
           {activeTab === 'products' && (
             <Table>
-              <TableHeader><TableRow><TableHead>Product</TableHead><TableHead>Category</TableHead><TableHead>Price</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Product</TableHead><TableHead>Category</TableHead><TableHead>Price</TableHead><TableHead>Tag</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
               <TableBody>
                 {products?.map((row: any) => (
                   <TableRow key={row.id}>
@@ -369,6 +366,7 @@ export default function AdminPage() {
                     </TableCell>
                     <TableCell><Badge variant="outline">{row.categoryId}</Badge></TableCell>
                     <TableCell>Rs. {Math.round(row.price).toLocaleString()}</TableCell>
+                    <TableCell>{row.customTag ? <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30">{row.customTag}</Badge> : '-'}</TableCell>
                     <TableCell><Badge className={row.stockStatus === 'In Stock' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}>{row.stockStatus}</Badge></TableCell>
                     <TableCell className="text-right"><Button onClick={() => deleteItem(row.id, 'products')} size="icon" variant="ghost"><Trash2 className="w-4 h-4" /></Button></TableCell>
                   </TableRow>
@@ -377,7 +375,7 @@ export default function AdminPage() {
             </Table>
           )}
 
-          {activeTab === 'orders' && (
+          {activeTab === 'orders' && (activeTab === 'orders' && (
             <Table>
               <TableHeader><TableRow><TableHead>Customer</TableHead><TableHead>Total</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
               <TableBody>
@@ -396,7 +394,7 @@ export default function AdminPage() {
                 ))}
               </TableBody>
             </Table>
-          )}
+          ))}
         </div>
       </main>
 
@@ -420,6 +418,21 @@ export default function AdminPage() {
             <div className="space-y-2">
               <Label>Price (NPR)</Label>
               <Input type="number" value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <Label>Stock Status</Label>
+              <Select value={productForm.stockStatus} onValueChange={(v) => setProductForm({...productForm, stockStatus: v})}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="In Stock">In Stock</SelectItem>
+                  <SelectItem value="Out of Stock">Out of Stock</SelectItem>
+                  <SelectItem value="Limited Stock">Limited Stock</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2"><Tag className="w-3 h-3" /> Custom Tag (e.g. HOT, NEW)</Label>
+              <Input placeholder="Leave empty if none" value={productForm.customTag} onChange={(e) => setProductForm({...productForm, customTag: e.target.value})} />
             </div>
             <div className="col-span-2 space-y-2">
               <Label>Short Description</Label>

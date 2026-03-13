@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -16,6 +17,7 @@ interface ProductCardProps {
     imageUrl: string;
     categoryId?: string;
     stockStatus?: string;
+    customTag?: string;
   };
   className?: string;
 }
@@ -34,14 +36,21 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </Badge>
       )}
 
-      <div className={cn(
-        "absolute top-4 right-4 z-10 flex items-center gap-1 backdrop-blur-md px-2 py-1 rounded-full text-[10px] font-bold uppercase border",
-        product.stockStatus === 'In Stock' 
-          ? "bg-green-500/20 text-green-500 border-green-500/30" 
-          : "bg-red-500/20 text-red-500 border-red-500/30"
-      )}>
-        <Zap className="w-3 h-3 fill-current" />
-        {product.stockStatus || 'Stocked'}
+      <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
+        {product.customTag && (
+          <Badge className="bg-orange-500 text-white border-none px-3 py-1 text-[10px] font-black tracking-widest uppercase shadow-lg">
+            {product.customTag}
+          </Badge>
+        )}
+        <div className={cn(
+          "flex items-center gap-1 backdrop-blur-md px-2 py-1 rounded-full text-[10px] font-bold uppercase border",
+          product.stockStatus === 'In Stock' 
+            ? "bg-green-500/20 text-green-500 border-green-500/30" 
+            : "bg-red-500/20 text-red-500 border-red-500/30"
+        )}>
+          <Zap className="w-3 h-3 fill-current" />
+          {product.stockStatus || 'Stocked'}
+        </div>
       </div>
 
       <div className="relative h-64 w-full overflow-hidden shrink-0">
