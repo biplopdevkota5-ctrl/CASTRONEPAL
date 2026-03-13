@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   Package, 
@@ -51,8 +52,9 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase, useAuth } from '@/firebase';
 import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { signInAnonymously } from 'firebase/auth';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { useToast } from '@/hooks/use-toast';
@@ -65,15 +67,26 @@ export default function AdminPage() {
   const [isAddAnnouncementOpen, setIsAddAnnouncementOpen] = useState(false);
   const { toast } = useToast();
   const db = useFirestore();
+  const auth = useAuth();
 
   // Firestore Collections with properly memoized queries using useMemoFirebase
-  const productsQuery = useMemoFirebase(() => query(collection(db, 'products'), orderBy('createdAt', 'desc')), [db]);
+  // We only run these queries if isAuthenticated is true to avoid permission errors on mount
+  const productsQuery = useMemoFirebase(() => {
+    if (!db || !isAuthenticated) return null;
+    return query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+  }, [db, isAuthenticated]);
   const { data: products, loading: productsLoading } = useCollection<any>(productsQuery);
 
-  const ordersQuery = useMemoFirebase(() => query(collection(db, 'orders'), orderBy('createdAt', 'desc')), [db]);
+  const ordersQuery = useMemoFirebase(() => {
+    if (!db || !isAuthenticated) return null;
+    return query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+  }, [db, isAuthenticated]);
   const { data: orders, loading: ordersLoading } = useCollection<any>(ordersQuery);
 
-  const announcementsQuery = useMemoFirebase(() => query(collection(db, 'announcements'), orderBy('createdAt', 'desc')), [db]);
+  const announcementsQuery = useMemoFirebase(() => {
+    if (!db || !isAuthenticated) return null;
+    return query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
+  }, [db, isAuthenticated]);
   const { data: announcements, loading: announcementsLoading } = useCollection<any>(announcementsQuery);
 
   // Form State
@@ -97,7 +110,13 @@ export default function AdminPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === '901020304050') {
-      setIsAuthenticated(true);
+      // Sign in to Firebase to satisfy security rules (SignedIn check)
+      signInAnonymously(auth).then(() => {
+        setIsAuthenticated(true);
+        toast({ title: 'Authorized', description: 'Admin session started.' });
+      }).catch(() => {
+        toast({ variant: 'destructive', title: 'Auth Error', description: 'Could not establish secure session.' });
+      });
     } else {
       toast({ variant: 'destructive', title: 'Unauthorized', description: 'Invalid Admin Password' });
     }
@@ -117,6 +136,7 @@ export default function AdminPage() {
   };
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    if (!isAuthenticated) return;
     const items = e.clipboardData.items;
     for (let i = 0; i < items.length; i++) {
       if (items[i].type.indexOf('image') !== -1) {
@@ -124,7 +144,7 @@ export default function AdminPage() {
         if (file) handleImageUpload(file);
       }
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const saveProduct = () => {
     if (!productForm.name || !productForm.price) {
@@ -347,7 +367,7 @@ export default function AdminPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="glass-panel border-white/5 p-8 space-y-2">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Active Orders</span>
-              <div className="text-3xl font-headline font-bold text-primary">{orders?.filter(o => o.status !== 'Delivered').length || 0}</div>
+              <div className="text-3xl font-headline font-bold text-primary">{orders?.filter((o: any) => o.status !== 'Delivered').length || 0}</div>
               <div className="text-xs text-muted-foreground">{orders?.length || 0} total orders recorded</div>
             </Card>
             <Card className="glass-panel border-white/5 p-8 space-y-2">
@@ -375,7 +395,7 @@ export default function AdminPage() {
                   <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
                 ) : products?.length === 0 ? (
                   <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No products found. Use "Seed Store" to add some!</TableCell></TableRow>
-                ) : products?.map((row) => (
+                ) : products?.map((row: any) => (
                   <TableRow key={row.id} className="border-white/5 hover:bg-white/5">
                     <TableCell className="font-bold py-6">
                       <div className="flex items-center gap-3">
@@ -420,7 +440,7 @@ export default function AdminPage() {
                   <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
                 ) : orders?.length === 0 ? (
                   <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No orders yet.</TableCell></TableRow>
-                ) : orders?.map((order) => (
+                ) : orders?.map((order: any) => (
                   <TableRow key={order.id} className="border-white/5 hover:bg-white/5">
                     <TableCell className="py-6">
                       <div className="space-y-1">
@@ -478,7 +498,7 @@ export default function AdminPage() {
               <TableBody>
                 {announcementsLoading ? (
                   <TableRow><TableCell colSpan={3} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
-                ) : announcements?.map((row) => (
+                ) : announcements?.map((row: any) => (
                   <TableRow key={row.id} className="border-white/5 hover:bg-white/5">
                     <TableCell className="font-bold py-6">{row.title}</TableCell>
                     <TableCell className="text-muted-foreground text-xs">{row.date}</TableCell>
