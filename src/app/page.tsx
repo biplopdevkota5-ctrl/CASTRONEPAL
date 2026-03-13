@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -51,8 +52,8 @@ export default function Home() {
               </div>
               
               <h1 className="font-headline text-5xl md:text-7xl font-black leading-[1] tracking-tighter uppercase italic text-[#0a0c10]">
-                ELITE GEAR FOR <br />
-                <span className="text-primary">ELITE PLAYERS</span>
+                CASTRO HUB <br />
+                <span className="text-primary">BUY CHEAP SAVE HIGH</span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed font-medium">
