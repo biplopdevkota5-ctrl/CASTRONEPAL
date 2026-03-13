@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'firm-emerald-fvkkb8nt2n.edgeone.app',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

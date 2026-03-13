@@ -36,9 +36,10 @@ export function Footer() {
           <div>
             <h4 className="font-headline text-lg font-bold mb-6 uppercase tracking-wider text-white">The Armory</h4>
             <ul className="space-y-4">
-              <li><Link href="/products?category=PlayStation" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">PlayStation Store</Link></li>
-              <li><Link href="/products?category=Xbox" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Xbox Live</Link></li>
-              <li><Link href="/products?category=Nintendo" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Nintendo eShop</Link></li>
+              <li><Link href="/products?category=Console" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Consoles</Link></li>
+              <li><Link href="/products?category=PlayStation%20Account" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">PlayStation Store</Link></li>
+              <li><Link href="/products?category=Xbox%20Account" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Xbox Live</Link></li>
+              <li><Link href="/products?category=Nintendo%20Account" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Nintendo eShop</Link></li>
               <li><Link href="/dashboard" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">My Account</Link></li>
             </ul>
           </div>

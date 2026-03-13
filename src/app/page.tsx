@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShieldCheck, Zap, ArrowRight, Star, Gamepad2, Disc, Cpu, Monitor, Laptop } from 'lucide-react';
+import { ShieldCheck, Zap, ArrowRight, Star, Gamepad2, Disc, Cpu, Monitor, Laptop, Laptop2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProductCard } from '@/components/ui/ProductCard';
@@ -73,11 +73,12 @@ export default function Home() {
               <div className="relative aspect-square w-full max-w-md mx-auto">
                 <div className="absolute inset-0 bg-[#0a0c10] rounded-[3rem] rotate-3"></div>
                 <div className="absolute inset-0 bg-white border border-border rounded-[3rem] shadow-2xl overflow-hidden">
-                  <img 
-                    src="https://picsum.photos/seed/gpu-hero/800/800" 
-                    className="w-full h-full object-cover" 
-                    alt="High End GPU"
-                    data-ai-hint="graphics card"
+                  <Image 
+                    src="https://firm-emerald-fvkkb8nt2n.edgeone.app/Screenshot%20(6).png" 
+                    fill
+                    className="object-cover" 
+                    alt="Castro Nepal Armory"
+                    priority
                   />
                 </div>
               </div>
@@ -86,15 +87,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories Grid - High Contrast Retail Look */}
+      {/* Categories Grid */}
       <section className="container mx-auto px-4 py-10">
         <div className="text-center mb-12">
           <h3 className="text-4xl font-headline font-bold uppercase italic text-[#0a0c10]">CORE CATEGORIES</h3>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-7xl mx-auto">
           {[
             { name: "Graphic Cards", icon: <Cpu className="w-8 h-8" />, href: "/products?category=GPU" },
             { name: "Monitors", icon: <Monitor className="w-8 h-8" />, href: "/products?category=Monitor" },
+            { name: "Consoles", icon: <Laptop2 className="w-8 h-8" />, href: "/products?category=Console" },
             { name: "PS Accounts", icon: <Gamepad2 className="w-8 h-8" />, href: "/products?category=PlayStation%20Account" },
             { name: "Xbox Accounts", icon: <Disc className="w-8 h-8" />, href: "/products?category=Xbox%20Account" },
             { name: "Nintendo Accounts", icon: <Laptop className="w-8 h-8" />, href: "/products?category=Nintendo%20Account" },

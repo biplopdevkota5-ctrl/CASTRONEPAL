@@ -42,6 +42,7 @@ export function Header() {
             { label: 'Home', href: '/' },
             { label: 'GPU', href: '/products?category=GPU' },
             { label: 'Monitor', href: '/products?category=Monitor' },
+            { label: 'Console', href: '/products?category=Console' },
             { label: 'PS Account', href: '/products?category=PlayStation%20Account' },
             { label: 'Xbox Account', href: '/products?category=Xbox%20Account' },
             { label: 'Nintendo Account', href: '/products?category=Nintendo%20Account' },
@@ -130,7 +131,7 @@ export function Header() {
         isMenuOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="flex flex-col p-8 gap-6">
-          {['Home', 'GPU', 'Monitor', 'PS Account', 'Xbox Account', 'Nintendo Account'].map(label => (
+          {['Home', 'GPU', 'Monitor', 'Console', 'PS Account', 'Xbox Account', 'Nintendo Account'].map(label => (
             <Link 
               key={label} 
               href={label === 'Home' ? '/' : `/products?category=${label === 'PS Account' ? 'PlayStation Account' : label === 'Xbox Account' ? 'Xbox Account' : label === 'Nintendo Account' ? 'Nintendo Account' : label}`} 

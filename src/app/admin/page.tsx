@@ -187,7 +187,7 @@ export default function AdminPage() {
     const sampleProducts = [
       { name: "NVIDIA RTX 4090", categoryId: "GPU", price: 285000, stockStatus: "In Stock", customTag: "TOP TIER", shortDescription: "Ultimate gaming performance.", imageUrl: "https://picsum.photos/seed/gpu1/400/600" },
       { name: "Samsung Odyssey G9", categoryId: "Monitor", price: 185000, stockStatus: "In Stock", customTag: "ULTRAWIDE", shortDescription: "49-inch curved gaming monitor.", imageUrl: "https://picsum.photos/seed/monitor1/400/600" },
-      { name: "PS5 Master Account", categoryId: "PlayStation Account", price: 15000, stockStatus: "In Stock", customTag: "STACKED", shortDescription: "Verified account with 50+ games.", imageUrl: "https://picsum.photos/seed/account1/400/600" }
+      { name: "PS5 Console", categoryId: "Console", price: 75000, stockStatus: "In Stock", customTag: "NEW", shortDescription: "PlayStation 5 Disc Edition.", imageUrl: "https://picsum.photos/seed/console1/400/600" }
     ];
 
     try {
@@ -205,7 +205,7 @@ export default function AdminPage() {
           updatedAt: serverTimestamp() 
         });
       }
-      toast({ title: "Database Seeded", description: "Sample hardware and accounts added." });
+      toast({ title: "Database Seeded", description: "Sample hardware and consoles added." });
     } catch (e) {
       toast({ variant: 'destructive', title: "Error", description: "Failed to seed database." });
     } finally {
@@ -428,7 +428,7 @@ export default function AdminPage() {
               <Select value={productForm.category} onValueChange={(v) => setProductForm({...productForm, category: v})}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {['GPU', 'Monitor', 'PlayStation Account', 'Xbox Account', 'Nintendo Account', 'PC', 'Mobile'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {['GPU', 'Monitor', 'Console', 'PlayStation Account', 'Xbox Account', 'Nintendo Account', 'PC', 'Mobile'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
