@@ -73,7 +73,7 @@
     @apply bg-white border border-border hover:border-primary/40 hover:shadow-xl transition-all duration-300;
   }
 
-  /* Dark Category Cards style */
+  /* Dark Category Cards style - FIXED: Removed group from @apply */
   .category-card-dark {
     @apply bg-[#0a0c10] border border-white/5 rounded-[2rem] flex flex-col items-center justify-center p-8 transition-all duration-300 hover:bg-[#11141a] hover:border-primary/50;
   }
