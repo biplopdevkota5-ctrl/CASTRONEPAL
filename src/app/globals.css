@@ -38,7 +38,6 @@
 }
 
 @layer components {
-  /* Solid Opaque Panel - No Transparency */
   .glass-panel {
     @apply bg-white border border-border shadow-lg;
   }
@@ -48,12 +47,15 @@
   }
 
   .retail-card {
-    @apply bg-white border border-border hover:border-primary/40 hover:shadow-xl transition-all duration-300;
+    @apply bg-white border border-border hover:border-primary/40 hover:shadow-xl transition-all duration-500;
   }
 
-  /* Solid Category Cards */
   .category-card-dark {
-    @apply bg-[#0a0c10] border border-white/5 rounded-[2rem] flex flex-col items-center justify-center p-8 transition-all duration-300 hover:bg-[#11141a] hover:border-primary/50;
+    @apply bg-[#0a0c10] border border-white/5 rounded-[2rem] flex flex-col items-center justify-center p-8 transition-all duration-500 hover:bg-[#11141a] hover:border-primary/50 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/10;
+  }
+
+  .animate-fade-up {
+    @apply animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-forwards;
   }
 }
 
@@ -73,4 +75,14 @@
 
 ::-webkit-scrollbar-thumb {
   @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }

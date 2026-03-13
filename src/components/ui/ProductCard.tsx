@@ -26,7 +26,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
   return (
     <div className={cn(
-      "group relative flex flex-col bg-white border border-border rounded-2xl overflow-hidden transition-all duration-500 hover:border-primary/40 hover:shadow-2xl",
+      "group relative flex flex-col bg-white border border-border rounded-2xl overflow-hidden transition-all duration-500 hover:border-primary/40 hover:shadow-2xl hover:-translate-y-2",
       className
     )}>
       {/* Product Image Area */}
@@ -35,7 +35,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           src={displayImage}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-700 group-hover:scale-110"
+          className="object-cover transition-transform duration-1000 group-hover:scale-110"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           priority={false}
         />
@@ -43,12 +43,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {/* Badges Overlay */}
         <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
           {product.categoryId && (
-            <Badge className="bg-white/90 text-foreground backdrop-blur-md border border-border px-2 py-0.5 text-[9px] font-bold tracking-widest uppercase">
+            <Badge className="bg-white/90 text-foreground backdrop-blur-md border border-border px-2 py-0.5 text-[9px] font-bold tracking-widest uppercase animate-in slide-in-from-left-2 duration-500">
               {product.categoryId}
             </Badge>
           )}
           {product.customTag && (
-            <Badge className="bg-primary text-white border-none px-2 py-0.5 text-[9px] font-black tracking-widest uppercase shadow-lg">
+            <Badge className="bg-primary text-white border-none px-2 py-0.5 text-[9px] font-black tracking-widest uppercase shadow-lg animate-in zoom-in duration-500 delay-200">
               {product.customTag}
             </Badge>
           )}
@@ -57,17 +57,17 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {/* Action Overlay */}
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
           <Link href={`/products/${product.id}`}>
-            <Button size="icon" variant="secondary" className="rounded-full h-12 w-12 bg-white text-foreground hover:bg-primary hover:text-white transition-all duration-300 shadow-xl">
+            <Button size="icon" variant="secondary" className="rounded-full h-12 w-12 bg-white text-foreground hover:bg-primary hover:text-white transition-all duration-300 shadow-xl translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100">
               <Eye className="w-5 h-5" />
             </Button>
           </Link>
-          <Button size="icon" className="rounded-full h-12 w-12 bg-primary text-white hover:bg-primary/90 transition-all duration-300 shadow-xl">
+          <Button size="icon" className="rounded-full h-12 w-12 bg-primary text-white hover:bg-primary/90 transition-all duration-300 shadow-xl translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 delay-75">
             <ShoppingCart className="w-5 h-5" />
           </Button>
         </div>
 
         {/* Status Indicator */}
-        <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center">
+        <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center translate-y-10 group-hover:translate-y-0 transition-transform duration-500">
           <div className={cn(
             "flex items-center gap-1.5 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold uppercase border",
             product.stockStatus === 'In Stock' 
@@ -94,12 +94,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <div className="mt-6 flex items-center justify-between">
           <div className="space-y-0.5">
             <div className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">Pricing</div>
-            <div className="text-xl font-black text-foreground font-headline tracking-tighter">
+            <div className="text-xl font-black text-foreground font-headline tracking-tighter transition-all duration-300 group-hover:text-primary">
               Rs. {Math.round(product.price).toLocaleString()}
             </div>
           </div>
           <Link href={`/products/${product.id}`}>
-            <Button size="sm" className="h-9 px-6 bg-primary text-white hover:bg-primary/90 font-bold rounded-lg transition-all duration-300">
+            <Button size="sm" className="h-9 px-6 bg-primary text-white hover:bg-primary/90 font-bold rounded-lg transition-all duration-300 active:scale-90">
               BUY
             </Button>
           </Link>
