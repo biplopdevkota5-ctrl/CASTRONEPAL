@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Search, Filter, SlidersHorizontal, Grid2X2, List, ChevronDown, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,13 @@ export default function ProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
   const db = useFirestore();
-  const productsRef = useMemo(() => query(collection(db, 'products'), orderBy('createdAt', 'desc')), [db]);
+  
+  // Memoize query to prevent infinite re-renders
+  const productsRef = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+  }, [db]);
+  
   const { data: dbProducts, loading: productsLoading } = useCollection<any>(productsRef);
 
   const displayProducts = searchResults || dbProducts;

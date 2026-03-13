@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { aiProductRecommendations } from '@/ai/flows/ai-product-recommendations';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
@@ -20,7 +19,12 @@ export default function ProductDetailPage() {
   const id = params?.id as string;
   const db = useFirestore();
   
-  const productRef = doc(db, 'products', id);
+  // Memoize document reference to prevent infinite re-renders
+  const productRef = useMemo(() => {
+    if (!db || !id) return null;
+    return doc(db, 'products', id);
+  }, [db, id]);
+  
   const { data: productData, loading: productLoading } = useDoc<any>(productRef);
 
   const [detailedDescription, setDetailedDescription] = useState<string>('');

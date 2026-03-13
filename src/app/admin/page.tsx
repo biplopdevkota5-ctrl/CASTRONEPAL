@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { 
   LayoutDashboard, 
   Package, 
@@ -65,14 +65,14 @@ export default function AdminPage() {
   const { toast } = useToast();
   const db = useFirestore();
 
-  // Firestore Collections
-  const productsQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+  // Firestore Collections with memoized queries
+  const productsQuery = useMemo(() => query(collection(db, 'products'), orderBy('createdAt', 'desc')), [db]);
   const { data: products, loading: productsLoading } = useCollection<any>(productsQuery);
 
-  const ordersQuery = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+  const ordersQuery = useMemo(() => query(collection(db, 'orders'), orderBy('createdAt', 'desc')), [db]);
   const { data: orders, loading: ordersLoading } = useCollection<any>(ordersQuery);
 
-  const announcementsQuery = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
+  const announcementsQuery = useMemo(() => query(collection(db, 'announcements'), orderBy('createdAt', 'desc')), [db]);
   const { data: announcements, loading: announcementsLoading } = useCollection<any>(announcementsQuery);
 
   // Form State
@@ -314,12 +314,12 @@ export default function AdminPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="glass-panel border-white/5 p-8 space-y-2">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Active Orders</span>
-              <div className="text-3xl font-headline font-bold text-primary">{orders.filter(o => o.status !== 'Delivered').length}</div>
-              <div className="text-xs text-muted-foreground">{orders.length} total orders recorded</div>
+              <div className="text-3xl font-headline font-bold text-primary">{orders?.filter(o => o.status !== 'Delivered').length || 0}</div>
+              <div className="text-xs text-muted-foreground">{orders?.length || 0} total orders recorded</div>
             </Card>
             <Card className="glass-panel border-white/5 p-8 space-y-2">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Inventory</span>
-              <div className="text-3xl font-headline font-bold text-secondary">{products.length}</div>
+              <div className="text-3xl font-headline font-bold text-secondary">{products?.length || 0}</div>
               <div className="text-xs text-muted-foreground">Assets listed in database</div>
             </Card>
           </div>

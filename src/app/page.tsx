@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Gamepad2, ShieldCheck, Zap, Sparkles, ArrowRight, Play, Star, Cpu, Monitor, Smartphone, Loader2 } from 'lucide-react';
@@ -14,13 +15,21 @@ import { collection, query, orderBy, limit } from 'firebase/firestore';
 export default function Home() {
   const db = useFirestore();
 
-  // Fetch announcements
-  const announcementsQuery = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(1));
+  // Fetch announcements with memoization to prevent infinite loops
+  const announcementsQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(1));
+  }, [db]);
+  
   const { data: announcements } = useCollection<any>(announcementsQuery);
-  const latestAnnouncement = announcements[0];
+  const latestAnnouncement = announcements?.[0];
 
-  // Fetch trending products
-  const trendingQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(10));
+  // Fetch trending products with memoization
+  const trendingQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(10));
+  }, [db]);
+  
   const { data: products, loading } = useCollection<any>(trendingQuery);
 
   return (
@@ -141,7 +150,7 @@ export default function Home() {
               <div key={i} className="h-96 rounded-3xl glass-panel animate-pulse bg-white/5"></div>
             ))}
           </div>
-        ) : products.length > 0 ? (
+        ) : products && products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
