@@ -27,6 +27,7 @@ export default function Home() {
 
   const trendingQuery = useMemoFirebase(() => {
     if (!db) return null;
+    // Limit to 8 products for ultra-fast initial load
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(8));
   }, [db]);
   
