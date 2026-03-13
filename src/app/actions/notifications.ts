@@ -20,7 +20,7 @@ export async function sendOrderToDiscord(orderData: {
   const embed = {
     title: '🎮 New Order Alert!',
     description: `A new order has been placed for **${orderData.productName}**.`,
-    color: 0x1a80e6, // Castro Blue
+    color: 0xe61a1a, // Castro Red
     fields: [
       { name: 'Order ID', value: `\`${orderData.id}\``, inline: true },
       { name: 'Quantity', value: orderData.quantity, inline: true },
