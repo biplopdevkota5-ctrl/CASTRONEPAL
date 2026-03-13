@@ -1,30 +1,29 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 222 47% 6%;
+    --background: 222 47% 4%;
     --foreground: 210 40% 98%;
-    --card: 222 47% 8%;
+    --card: 222 47% 6%;
     --card-foreground: 210 40% 98%;
-    --popover: 222 47% 6%;
+    --popover: 222 47% 4%;
     --popover-foreground: 210 40% 98%;
     --primary: 210 90% 50%;
     --primary-foreground: 210 40% 98%;
     --secondary: 180 100% 50%;
     --secondary-foreground: 222 47% 6%;
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 217.2 32.6% 12%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 180 100% 50%;
-    --accent-foreground: 222 47% 6%;
+    --accent: 210 90% 50%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 217.2 32.6% 15%;
+    --input: 217.2 32.6% 15%;
     --ring: 224.3 76.3% 48%;
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 }
 
@@ -34,48 +33,47 @@
   }
   body {
     @apply bg-background text-foreground selection:bg-primary/30;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings: "rlig" 1, "alt" 1;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-card/40 backdrop-blur-md border border-white/10 shadow-2xl;
+    @apply bg-card/60 backdrop-blur-xl border border-white/5 shadow-2xl;
   }
   
   .neon-glow {
-    text-shadow: 0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3);
+    text-shadow: 0 0 15px hsl(var(--primary) / 0.6);
   }
 
-  .neon-glow-cyan {
-    text-shadow: 0 0 10px hsl(var(--secondary) / 0.5), 0 0 20px hsl(var(--secondary) / 0.3);
+  .retail-card {
+    @apply bg-[#0d1117] border border-white/5 hover:border-primary/40 transition-all duration-300;
   }
 
-  .neon-border {
-    box-shadow: 0 0 15px hsl(var(--primary) / 0.2);
+  .gaming-gradient {
+    @apply bg-gradient-to-br from-primary/20 via-transparent to-secondary/10;
   }
 }
 
 /* Custom Animations */
-@keyframes float {
+@keyframes soft-float {
   0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-8px); }
   100% { transform: translateY(0px); }
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+.animate-soft-float {
+  animation: soft-float 6s ease-in-out infinite;
 }
 
 .gaming-grid {
   background-image: 
-    linear-gradient(to right, rgba(26, 128, 230, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(26, 128, 230, 0.05) 1px, transparent 1px);
-  background-size: 40px 40px;
+    radial-gradient(circle at 2px 2px, rgba(255,255,255,0.03) 1px, transparent 0);
+  background-size: 32px 32px;
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -83,5 +81,5 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
+  @apply bg-primary/30 rounded-full hover:bg-primary/50 transition-colors;
 }

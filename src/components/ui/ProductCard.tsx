@@ -1,9 +1,8 @@
-
 "use client";
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingCart, ExternalLink, Zap } from 'lucide-react';
+import { ShoppingCart, Eye, Zap, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -23,78 +22,84 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
-  const displayImage = product.imageUrl || 'https://picsum.photos/seed/placeholder/400/600';
+  const displayImage = product.imageUrl || 'https://picsum.photos/seed/hardware/600/800';
 
   return (
     <div className={cn(
-      "group relative glass-panel rounded-3xl overflow-hidden transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(26,128,230,0.2)] flex flex-col h-full",
+      "group relative flex flex-col bg-[#0d1117] border border-white/5 rounded-2xl overflow-hidden transition-all duration-500 hover:border-primary/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
       className
     )}>
-      {product.categoryId && (
-        <Badge className="absolute top-4 left-4 z-10 bg-primary/80 hover:bg-primary text-white backdrop-blur-md border-none px-3 py-1 text-[10px] font-bold tracking-widest uppercase">
-          {product.categoryId}
-        </Badge>
-      )}
-
-      <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
-        {product.customTag && (
-          <Badge className="bg-orange-500 text-white border-none px-3 py-1 text-[10px] font-black tracking-widest uppercase shadow-lg">
-            {product.customTag}
-          </Badge>
-        )}
-        <div className={cn(
-          "flex items-center gap-1 backdrop-blur-md px-2 py-1 rounded-full text-[10px] font-bold uppercase border",
-          product.stockStatus === 'In Stock' 
-            ? "bg-green-500/20 text-green-500 border-green-500/30" 
-            : "bg-red-500/20 text-red-500 border-red-500/30"
-        )}>
-          <Zap className="w-3 h-3 fill-current" />
-          {product.stockStatus || 'Stocked'}
-        </div>
-      </div>
-
-      <div className="relative h-64 w-full overflow-hidden shrink-0 bg-white/5">
+      {/* Product Image Area */}
+      <div className="relative aspect-[4/5] overflow-hidden shrink-0 bg-black/40">
         <Image 
           src={displayImage}
           alt={product.name}
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-110"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 20vw"
-          loading="lazy"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+          priority={false}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60"></div>
         
-        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
+        {/* Badges Overlay */}
+        <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+          {product.categoryId && (
+            <Badge className="bg-black/60 text-white backdrop-blur-md border border-white/10 px-2 py-0.5 text-[9px] font-bold tracking-widest uppercase">
+              {product.categoryId}
+            </Badge>
+          )}
+          {product.customTag && (
+            <Badge className="bg-primary text-white border-none px-2 py-0.5 text-[9px] font-black tracking-widest uppercase shadow-lg">
+              {product.customTag}
+            </Badge>
+          )}
+        </div>
+
+        {/* Action Overlay */}
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[4px]">
           <Link href={`/products/${product.id}`}>
-            <Button size="icon" variant="secondary" className="rounded-full h-12 w-12 shadow-xl hover:scale-110 transition-transform">
-              <ExternalLink className="w-5 h-5" />
+            <Button size="icon" variant="secondary" className="rounded-full h-12 w-12 hover:bg-primary hover:text-white transition-all duration-300">
+              <Eye className="w-5 h-5" />
             </Button>
           </Link>
-          <Button size="icon" className="rounded-full h-12 w-12 bg-primary hover:bg-primary shadow-xl hover:scale-110 transition-transform">
+          <Button size="icon" className="rounded-full h-12 w-12 bg-white text-black hover:bg-primary hover:text-white transition-all duration-300">
             <ShoppingCart className="w-5 h-5" />
           </Button>
         </div>
+
+        {/* Status Indicator */}
+        <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center">
+          <div className={cn(
+            "flex items-center gap-1.5 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold uppercase border",
+            product.stockStatus === 'In Stock' 
+              ? "bg-green-500/10 text-green-400 border-green-500/20" 
+              : "bg-red-500/10 text-red-400 border-red-500/20"
+          )}>
+            <Zap className="w-2.5 h-2.5" />
+            {product.stockStatus || 'Available'}
+          </div>
+        </div>
       </div>
 
-      <div className="p-6 space-y-4 flex flex-col flex-grow">
-        <div className="flex-grow">
-          <h3 className="text-lg font-bold line-clamp-1 group-hover:text-primary transition-colors font-headline uppercase italic">
+      {/* Content Area */}
+      <div className="p-5 flex flex-col flex-grow bg-gradient-to-b from-transparent to-black/20">
+        <div className="flex-grow space-y-2">
+          <h3 className="text-base font-bold line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300 uppercase tracking-tight">
             {product.name}
           </h3>
-          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+          <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
             {product.shortDescription}
           </p>
         </div>
 
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Price</span>
-            <span className="text-xl font-bold text-white font-headline">
+        <div className="mt-6 flex items-center justify-between">
+          <div className="space-y-0.5">
+            <div className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">Pricing</div>
+            <div className="text-xl font-black text-white font-headline tracking-tighter">
               Rs. {Math.round(product.price).toLocaleString()}
-            </span>
+            </div>
           </div>
           <Link href={`/products/${product.id}`}>
-            <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-bold rounded-full px-6 shadow-lg shadow-primary/20">
+            <Button size="sm" className="h-9 px-6 bg-white text-black hover:bg-primary hover:text-white font-bold rounded-lg transition-all duration-300">
               BUY
             </Button>
           </Link>
