@@ -120,7 +120,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[92vh] overflow-y-auto bg-[#050505] text-white border-white/5 p-0 rounded-[2rem] shadow-[0_0_50px_rgba(255,0,0,0.15)] scrollbar-hide">
+      <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden bg-[#050505] text-white border-white/5 p-0 rounded-[2rem] shadow-[0_0_50px_rgba(255,0,0,0.15)] focus:outline-none">
         {isSuccess ? (
           <div className="p-8 md:p-12 flex flex-col items-center text-center space-y-6">
             <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/20 rounded-full flex items-center justify-center mb-2">
@@ -151,7 +151,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6 md:space-y-8">
+          <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6 md:space-y-8 touch-pan-y">
             <DialogHeader>
               <DialogTitle className="text-xl md:text-2xl font-headline font-bold uppercase italic tracking-tighter flex items-center gap-3">
                 <ShoppingBag className="w-6 h-6 text-primary" />
@@ -189,7 +189,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
               </div>
             </div>
 
-            <DialogFooter className="flex-col sm:flex-row gap-6 pt-6 border-t border-white/5">
+            <div className="flex flex-col sm:flex-row gap-6 pt-6 border-t border-white/5 pb-4">
               <div className="flex-grow flex items-center justify-between sm:justify-start gap-4">
                 <div>
                   <div className="text-[10px] font-black uppercase tracking-widest text-white/40">Grand Total</div>
@@ -199,7 +199,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
               <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90 text-white font-black h-14 md:h-16 px-10 rounded-2xl shadow-[0_0_20px_rgba(255,0,0,0.3)] min-w-[180px] text-base md:text-lg italic uppercase tracking-tighter">
                 {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin mr-2" /> : 'CONFIRM ORDER'}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         )}
       </DialogContent>
