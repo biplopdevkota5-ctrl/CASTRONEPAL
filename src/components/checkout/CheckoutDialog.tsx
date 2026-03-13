@@ -17,6 +17,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { ShoppingBag, Loader2, CheckCircle2 } from 'lucide-react';
+import { useFirestore } from '@/firebase';
+import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 interface CheckoutDialogProps {
   product: {
@@ -32,6 +36,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { toast } = useToast();
+  const db = useFirestore();
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -46,37 +51,60 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const webhookUrl = 'https://discord.com/api/webhooks/1481672886216556626/vTvWqGzBaZdlk-t5B71J45LkAZMZiXv4BDdU607Coi9_srkK2ZecWgpPnZ7lSI7C6Lly';
-    
-    const message = {
-      content: `NEW ORDER - CASTRO NEPAL\n\n**Customer Name:** ${formData.fullName}\n**Phone Number:** ${formData.phone}\n**Address:** ${formData.address}\n**Email:** ${formData.email}\n**Product Name:** ${product.name}\n**Price:** Rs. ${Math.round(product.price * 133)}\n**Quantity:** ${formData.quantity}\n**Notes:** ${formData.notes || 'N/A'}\n**Order Time:** ${new Date().toLocaleString()}`
+    const orderId = doc(collection(db, 'orders')).id;
+    const orderRef = doc(db, 'orders', orderId);
+    const totalPrice = product.price * parseInt(formData.quantity || '1');
+
+    const orderData = {
+      id: orderId,
+      customerName: formData.fullName,
+      customerEmail: formData.email,
+      customerPhone: formData.phone,
+      customerAddress: formData.address,
+      productId: product.id,
+      productName: product.name,
+      quantity: parseInt(formData.quantity || '1'),
+      totalPrice: totalPrice,
+      status: 'Pending',
+      notes: formData.notes,
+      createdAt: serverTimestamp()
     };
 
-    try {
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message)
-      });
+    // Save to Firestore
+    setDoc(orderRef, orderData)
+      .then(async () => {
+        // Send Discord Webhook (Keep existing logic as notification)
+        const webhookUrl = 'https://discord.com/api/webhooks/1481672886216556626/vTvWqGzBaZdlk-t5B71J45LkAZMZiXv4BDdU607Coi9_srkK2ZecWgpPnZ7lSI7C6Lly';
+        const message = {
+          content: `NEW ORDER - CASTRO NEPAL\n\n**Order ID:** ${orderId}\n**Customer:** ${formData.fullName}\n**Phone:** ${formData.phone}\n**Product:** ${product.name}\n**Total:** Rs. ${Math.round(totalPrice).toLocaleString()}\n**Time:** ${new Date().toLocaleString()}`
+        };
 
-      if (response.ok) {
+        try {
+          await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(message)
+          });
+        } catch (err) {
+          console.error("Discord notification failed", err);
+        }
+
         setIsSuccess(true);
         toast({
           title: "Order Placed Successfully!",
-          description: "Our team will contact you shortly for payment verification.",
+          description: "Your order is now in our system.",
         });
-      } else {
-        throw new Error('Failed to send order');
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Order Failed",
-        description: "There was an error processing your order. Please try again or contact support.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: orderRef.path,
+          operation: 'create',
+          requestResourceData: orderData
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        toast({ variant: "destructive", title: "Order Failed", description: "Database connection error." });
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   return (
@@ -186,7 +214,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
             <DialogFooter className="flex-col sm:flex-row gap-4">
               <div className="flex-grow flex items-center justify-between text-lg font-bold">
                 <span className="text-muted-foreground font-medium text-sm">TOTAL:</span>
-                <span className="text-primary font-headline italic">Rs. {Math.round(product.price * 133 * parseInt(formData.quantity || '1')).toLocaleString()}</span>
+                <span className="text-primary font-headline italic">Rs. {Math.round(product.price * parseInt(formData.quantity || '1')).toLocaleString()}</span>
               </div>
               <Button 
                 type="submit" 

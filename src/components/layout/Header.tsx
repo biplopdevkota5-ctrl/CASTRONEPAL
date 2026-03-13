@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Search, ShoppingCart, User, Gamepad2, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Search, ShoppingCart, User, Gamepad2, Menu, X, LayoutDashboard, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -13,10 +13,17 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
+import { useUser, useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn] = useState(false); // This would be reactive to your auth state
+  const { user } = useUser();
+  const auth = useAuth();
+
+  const handleLogout = () => {
+    signOut(auth);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur-md">
@@ -50,8 +57,11 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="glass-panel border-white/10 p-2 min-w-[200px] rounded-2xl">
-              {isLoggedIn ? (
+              {user ? (
                 <>
+                  <div className="px-3 py-2 text-[10px] uppercase font-black text-primary/50 tracking-widest border-b border-white/5 mb-1">
+                    PLAYER: {user.displayName || user.email?.split('@')[0]}
+                  </div>
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard" className="cursor-pointer font-bold uppercase tracking-wider text-xs p-3">
                       <User className="w-4 h-4 mr-2" /> My Profile
@@ -63,8 +73,8 @@ export function Header() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuItem className="cursor-pointer font-bold uppercase tracking-wider text-xs p-3 text-red-500 hover:text-red-400">
-                    Logout
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer font-bold uppercase tracking-wider text-xs p-3 text-red-500 hover:text-red-400">
+                    <LogOut className="w-4 h-4 mr-2" /> Logout
                   </DropdownMenuItem>
                 </>
               ) : (
@@ -113,12 +123,23 @@ export function Header() {
           <Link href="/products?category=Xbox" className="text-2xl font-headline font-black uppercase italic tracking-tighter" onClick={() => setIsMenuOpen(false)}>Xbox</Link>
           <hr className="border-white/10" />
           <div className="flex flex-col gap-4">
-            <Link href="/login" onClick={() => setIsMenuOpen(false)} className="w-full">
-              <Button className="w-full h-14 bg-primary font-bold text-lg rounded-xl">Login</Button>
-            </Link>
-            <Link href="/signup" onClick={() => setIsMenuOpen(false)} className="w-full">
-              <Button variant="outline" className="w-full h-14 border-white/10 font-bold text-lg rounded-xl">Sign Up</Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="w-full">
+                  <Button className="w-full h-14 bg-primary font-bold text-lg rounded-xl">My Dashboard</Button>
+                </Link>
+                <Button variant="ghost" onClick={handleLogout} className="w-full h-14 text-red-500 font-bold text-lg rounded-xl">Logout</Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setIsMenuOpen(false)} className="w-full">
+                  <Button className="w-full h-14 bg-primary font-bold text-lg rounded-xl">Login</Button>
+                </Link>
+                <Link href="/signup" onClick={() => setIsMenuOpen(false)} className="w-full">
+                  <Button variant="outline" className="w-full h-14 border-white/10 font-bold text-lg rounded-xl">Sign Up</Button>
+                </Link>
+              </>
+            )}
             <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="w-full">
               <Button variant="ghost" className="w-full h-14 text-primary font-bold text-lg rounded-xl">Admin Panel</Button>
             </Link>

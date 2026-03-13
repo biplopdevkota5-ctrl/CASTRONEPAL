@@ -17,7 +17,9 @@ import {
   Gamepad2,
   X,
   Upload,
-  Loader2
+  Loader2,
+  Clock,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,7 +52,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useFirestore, useCollection } from '@/firebase';
-import { collection, doc, setDoc, deleteDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { useToast } from '@/hooks/use-toast';
@@ -67,6 +69,9 @@ export default function AdminPage() {
   // Firestore Collections
   const productsQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
   const { data: products, loading: productsLoading } = useCollection<any>(productsQuery);
+
+  const ordersQuery = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+  const { data: orders, loading: ordersLoading } = useCollection<any>(ordersQuery);
 
   const announcementsQuery = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
   const { data: announcements, loading: announcementsLoading } = useCollection<any>(announcementsQuery);
@@ -136,7 +141,7 @@ export default function AdminPage() {
       id: productId,
       price: parseFloat(productForm.price),
       createdAt: serverTimestamp(),
-      features: [] // Default empty features
+      features: [] 
     };
 
     setDoc(productRef, data)
@@ -146,44 +151,25 @@ export default function AdminPage() {
         toast({ title: 'Success', description: `${data.name} uploaded to database.` });
       })
       .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: productRef.path,
           operation: 'create',
           requestResourceData: data
-        });
-        errorEmitter.emit('permission-error', permissionError);
+        }));
       })
       .finally(() => setIsSaving(false));
   };
 
-  const saveAnnouncement = () => {
-    if (!announcementForm.title || !announcementForm.content) return;
-    setIsSaving(true);
-    const annId = doc(collection(db, 'announcements')).id;
-    const annRef = doc(db, 'announcements', annId);
-    
-    const data = {
-      ...announcementForm,
-      id: annId,
-      date: new Date().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }),
-      createdAt: serverTimestamp()
-    };
-
-    setDoc(annRef, data)
-      .then(() => {
-        setIsAddAnnouncementOpen(false);
-        setAnnouncementForm({ title: '', content: '' });
-        toast({ title: 'Success', description: 'Update pushed to database.' });
-      })
+  const updateOrderStatus = (orderId: string, newStatus: string) => {
+    const orderRef = doc(db, 'orders', orderId);
+    updateDoc(orderRef, { status: newStatus })
+      .then(() => toast({ title: 'Order Updated', description: `Order status changed to ${newStatus}` }))
       .catch(async () => {
-        const permissionError = new FirestorePermissionError({
-          path: annRef.path,
-          operation: 'create',
-          requestResourceData: data
-        });
-        errorEmitter.emit('permission-error', permissionError);
-      })
-      .finally(() => setIsSaving(false));
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: orderRef.path,
+          operation: 'update'
+        }));
+      });
   };
 
   const deleteItem = (id: string, coll: string) => {
@@ -277,16 +263,10 @@ export default function AdminPage() {
             <p className="text-muted-foreground">Manage your store operations and database assets.</p>
           </div>
           <div className="flex gap-4">
-            {activeTab === 'products' && (activeTab as any) !== 'dashboard' && (
+            {activeTab === 'products' && (
               <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl px-6">
                 <Plus className="w-4 h-4 mr-2" />
                 ADD PRODUCT
-              </Button>
-            )}
-            {activeTab === 'announcements' && (
-              <Button onClick={() => setIsAddAnnouncementOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl px-6">
-                <Plus className="w-4 h-4 mr-2" />
-                POST UPDATE
               </Button>
             )}
           </div>
@@ -295,124 +275,137 @@ export default function AdminPage() {
         {activeTab === 'dashboard' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="glass-panel border-white/5 p-8 space-y-2">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Total Orders</span>
-              <div className="text-3xl font-headline font-bold">142</div>
-              <div className="text-xs text-green-500 font-bold">+5 new today</div>
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Active Orders</span>
+              <div className="text-3xl font-headline font-bold text-primary">{orders.filter(o => o.status !== 'Delivered').length}</div>
+              <div className="text-xs text-muted-foreground">{orders.length} total orders recorded</div>
             </Card>
             <Card className="glass-panel border-white/5 p-8 space-y-2">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Stock Status</span>
-              <div className="text-3xl font-headline font-bold text-secondary">Healthy</div>
-              <div className="text-xs text-muted-foreground">{products.length} products listed in database</div>
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Inventory</span>
+              <div className="text-3xl font-headline font-bold text-secondary">{products.length}</div>
+              <div className="text-xs text-muted-foreground">Assets listed in database</div>
             </Card>
           </div>
         )}
 
         <div className="glass-panel border-white/5 rounded-2xl overflow-hidden">
           {activeTab === 'products' && (
-            <>
-              <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/5">
-                <div className="relative max-w-sm w-full">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input placeholder="Search database products..." className="pl-10 h-10 bg-white/5 border-white/10 rounded-lg" />
-                </div>
-              </div>
-              <Table>
-                <TableHeader className="bg-white/5">
-                  <TableRow className="hover:bg-transparent border-white/5">
-                    <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Product</TableHead>
-                    <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Category</TableHead>
-                    <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Price</TableHead>
-                    <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Status</TableHead>
-                    <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground text-right">Actions</TableHead>
+            <Table>
+              <TableHeader className="bg-white/5">
+                <TableRow className="hover:bg-transparent border-white/5">
+                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Product</TableHead>
+                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Category</TableHead>
+                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Price</TableHead>
+                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Status</TableHead>
+                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {productsLoading ? (
+                  <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
+                ) : products.map((row) => (
+                  <TableRow key={row.id} className="border-white/5 hover:bg-white/5">
+                    <TableCell className="font-bold py-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
+                          {row.imageUrl ? <img src={row.imageUrl} className="w-full h-full object-cover" /> : <Package className="w-5 h-5 text-primary" />}
+                        </div>
+                        <div>
+                          <div className="text-sm">{row.name}</div>
+                          <div className="text-[10px] text-muted-foreground uppercase">ID: {row.id.slice(0, 8)}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell><Badge variant="outline">{row.category}</Badge></TableCell>
+                    <TableCell className="font-bold">Rs. {Math.round(row.price).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge className={row.status === 'In Stock' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}>
+                        {row.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button onClick={() => deleteItem(row.id, 'products')} size="icon" variant="ghost" className="text-red-500/50 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {productsLoading ? (
-                    <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
-                  ) : products.length === 0 ? (
-                    <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No products found in database.</TableCell></TableRow>
-                  ) : products.map((row, i) => (
-                    <TableRow key={row.id} className="border-white/5 hover:bg-white/5 transition-colors">
-                      <TableCell className="font-bold py-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary overflow-hidden">
-                            {row.imageUrl ? <img src={row.imageUrl} className="w-full h-full object-cover" /> : `#${i + 1}`}
-                          </div>
-                          <div>
-                            <div className="text-sm">{row.name}</div>
-                            <div className="text-[10px] text-muted-foreground font-mono uppercase">ID: {row.id.slice(0, 8)}</div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="border-white/10 text-xs font-bold">{row.category}</Badge>
-                      </TableCell>
-                      <TableCell className="font-bold text-white">Rs. {Math.round(row.price).toLocaleString()}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {row.status === 'In Stock' ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <AlertTriangle className="w-4 h-4 text-yellow-500" />}
-                          <span className={cn(
-                            "text-xs font-bold uppercase",
-                            row.status === 'In Stock' ? "text-green-500" : row.status === 'Out of Stock' ? "text-red-500" : "text-yellow-500"
-                          )}>{row.status}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button onClick={() => deleteItem(row.id, 'products')} size="icon" variant="ghost" className="h-8 w-8 text-red-500/50 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </>
+                ))}
+              </TableBody>
+            </Table>
           )}
 
-          {activeTab === 'announcements' && ( activeTab !== 'dashboard' &&
-            <div className="p-8 space-y-6">
-              {announcementsLoading ? (
-                <Loader2 className="animate-spin mx-auto" />
-              ) : announcements.length === 0 ? (
-                <div className="text-center py-12">
-                  <Bell className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                  <p className="text-muted-foreground">No updates posted in database yet.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {announcements.map((ann) => (
-                    <Card key={ann.id} className="bg-white/5 border-white/10 p-6 space-y-4 hover:border-primary/50 transition-colors">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <Badge className="bg-primary/20 text-primary border-primary/20 text-[10px] uppercase">{ann.date}</Badge>
-                          <h4 className="text-xl font-headline font-bold uppercase italic">{ann.title}</h4>
+          {activeTab === 'orders' && (
+            <Table>
+              <TableHeader className="bg-white/5">
+                <TableRow className="hover:bg-transparent border-white/5">
+                  <TableHead className="uppercase font-bold text-xs tracking-widest">Order / Customer</TableHead>
+                  <TableHead className="uppercase font-bold text-xs tracking-widest">Product</TableHead>
+                  <TableHead className="uppercase font-bold text-xs tracking-widest">Total</TableHead>
+                  <TableHead className="uppercase font-bold text-xs tracking-widest">Status</TableHead>
+                  <TableHead className="uppercase font-bold text-xs tracking-widest text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {ordersLoading ? (
+                  <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
+                ) : orders.length === 0 ? (
+                  <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No orders yet.</TableCell></TableRow>
+                ) : orders.map((order) => (
+                  <TableRow key={order.id} className="border-white/5 hover:bg-white/5">
+                    <TableCell className="py-6">
+                      <div className="space-y-1">
+                        <div className="text-sm font-bold">{order.customerName}</div>
+                        <div className="text-[10px] text-muted-foreground uppercase flex items-center gap-2">
+                          <Clock className="w-3 h-3" /> {order.createdAt?.toDate().toLocaleDateString() || 'Just now'}
                         </div>
-                        <Button onClick={() => deleteItem(ann.id, 'announcements')} size="icon" variant="ghost" className="text-red-500/50 hover:text-red-500 -mt-2 -mr-2">
-                          <X className="w-4 h-4" />
-                        </Button>
+                        <div className="text-[10px] text-primary font-mono">{order.customerPhone}</div>
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{ann.content}</p>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm font-bold">{order.productName}</div>
+                      <div className="text-[10px] text-muted-foreground">Qty: {order.quantity}</div>
+                    </TableCell>
+                    <TableCell className="font-bold text-white">Rs. {Math.round(order.totalPrice).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Select 
+                        defaultValue={order.status} 
+                        onValueChange={(v) => updateOrderStatus(order.id, v)}
+                      >
+                        <SelectTrigger className={cn(
+                          "h-8 text-[10px] font-bold uppercase",
+                          order.status === 'Pending' ? "text-yellow-500 border-yellow-500/20 bg-yellow-500/10" :
+                          order.status === 'Delivered' ? "text-green-500 border-green-500/20 bg-green-500/10" :
+                          "text-primary border-primary/20 bg-primary/10"
+                        )}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Pending">Pending</SelectItem>
+                          <SelectItem value="Processing">Processing</SelectItem>
+                          <SelectItem value="Delivered">Delivered</SelectItem>
+                          <SelectItem value="Cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button onClick={() => deleteItem(order.id, 'orders')} size="icon" variant="ghost" className="text-red-500/50 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </div>
       </main>
 
-      {/* Product Modals */}
+      {/* Product Modal */}
       <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
         <DialogContent className="glass-panel border-white/10 sm:max-w-[600px] rounded-[2rem]">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-headline font-bold uppercase italic tracking-tighter">UPLOAD TO <span className="text-primary">DATABASE</span></DialogTitle>
-            <DialogDescription className="text-muted-foreground">Add a new product to the store database. Supporting image files and clipboard paste.</DialogDescription>
+            <DialogTitle className="text-2xl font-headline font-bold uppercase italic">UPLOAD PRODUCT</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-6 py-4">
             <div className="space-y-2 col-span-2">
               <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Product Name</Label>
               <Input 
-                placeholder="e.g. NVIDIA RTX 4090" 
+                placeholder="e.g. RTX 4090" 
                 className="bg-white/5 border-white/10" 
                 value={productForm.name}
                 onChange={(e) => setProductForm({...productForm, name: e.target.value})}
@@ -422,7 +415,7 @@ export default function AdminPage() {
               <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Category</Label>
               <Select value={productForm.category} onValueChange={(v) => setProductForm({...productForm, category: v})}>
                 <SelectTrigger className="bg-white/5 border-white/10">
-                  <SelectValue placeholder="Select Category" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="PlayStation">PlayStation</SelectItem>
@@ -430,7 +423,7 @@ export default function AdminPage() {
                   <SelectItem value="Steam">Steam</SelectItem>
                   <SelectItem value="Nintendo">Nintendo</SelectItem>
                   <SelectItem value="GPU">GPU</SelectItem>
-                  <SelectItem value="PC">Gaming PC</SelectItem>
+                  <SelectItem value="PC">PC</SelectItem>
                   <SelectItem value="Mobile">Mobile</SelectItem>
                 </SelectContent>
               </Select>
@@ -446,99 +439,26 @@ export default function AdminPage() {
               />
             </div>
             <div className="space-y-2 col-span-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Description</Label>
-              <Textarea 
-                placeholder="Detailed product information..." 
-                className="bg-white/5 border-white/10 min-h-[100px]" 
-                value={productForm.description}
-                onChange={(e) => setProductForm({...productForm, description: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2 col-span-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Product Image (File or Paste)</Label>
+              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Image (Paste or Browse)</Label>
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center space-y-4 hover:border-primary/50 transition-colors cursor-pointer group relative min-h-[150px] flex flex-col items-center justify-center"
+                className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center space-y-4 hover:border-primary/50 cursor-pointer"
               >
-                <input 
-                  type="file" 
-                  hidden 
-                  ref={fileInputRef} 
-                  accept="image/*" 
-                  onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} 
-                />
+                <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} />
                 {productForm.imageUrl ? (
-                  <div className="relative group/img">
-                    <img src={productForm.imageUrl} className="max-h-[120px] rounded-lg" />
-                    <Button 
-                      size="icon" 
-                      variant="destructive" 
-                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover/img:opacity-100 transition-opacity"
-                      onClick={(e) => { e.stopPropagation(); setProductForm({...productForm, imageUrl: ''}); }}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
+                  <img src={productForm.imageUrl} className="max-h-[120px] mx-auto rounded-lg" />
                 ) : (
-                  <>
-                    <Upload className="w-10 h-10 mx-auto text-muted-foreground group-hover:text-primary" />
-                    <p className="text-sm text-muted-foreground">Drop image here, click to browse, or <strong>Paste (Ctrl+V)</strong></p>
-                    <p className="text-[10px] text-muted-foreground/50">Supports JPG, PNG (Max 3MB)</p>
-                  </>
+                  <div className="space-y-2">
+                    <Upload className="w-10 h-10 mx-auto text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">Drop here, Browse, or <strong>Paste (Ctrl+V)</strong></p>
+                  </div>
                 )}
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => setIsAddProductOpen(false)} variant="ghost" className="rounded-xl">CANCEL</Button>
-            <Button 
-              className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl px-8" 
-              onClick={saveProduct}
-              disabled={isSaving}
-            >
-              {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              UPLOAD PRODUCT
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Announcement Modal */}
-      <Dialog open={isAddAnnouncementOpen} onOpenChange={setIsAddAnnouncementOpen}>
-        <DialogContent className="glass-panel border-white/10 sm:max-w-[500px] rounded-[2rem]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-headline font-bold uppercase italic tracking-tighter">PUSH <span className="text-primary">UPDATE</span></DialogTitle>
-            <DialogDescription className="text-muted-foreground">Post a new update to the database for all users to see.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-6 py-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Update Title</Label>
-              <Input 
-                placeholder="e.g. New Steam Codes Added" 
-                className="bg-white/5 border-white/10" 
-                value={announcementForm.title}
-                onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Content</Label>
-              <Textarea 
-                placeholder="Write your announcement details here..." 
-                className="bg-white/5 border-white/10 min-h-[150px]" 
-                value={announcementForm.content}
-                onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setIsAddAnnouncementOpen(false)} variant="ghost" className="rounded-xl">CANCEL</Button>
-            <Button 
-              className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl px-8" 
-              onClick={saveAnnouncement}
-              disabled={isSaving}
-            >
-              {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              POST UPDATE
+            <Button onClick={saveProduct} disabled={isSaving} className="bg-primary text-white font-bold w-full rounded-xl h-12">
+              {isSaving ? <Loader2 className="animate-spin mr-2" /> : 'UPLOAD PRODUCT'}
             </Button>
           </DialogFooter>
         </DialogContent>
