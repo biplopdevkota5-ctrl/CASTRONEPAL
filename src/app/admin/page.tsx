@@ -186,28 +186,28 @@ export default function AdminPage() {
 
   const seedDatabase = async () => {
     setIsSaving(true);
-    const sampleProducts = [
-      { name: "NVIDIA RTX 4090", categoryId: "GPU", price: 285000, stockStatus: "In Stock", customTag: "TOP TIER", shortDescription: "Ultimate gaming performance.", imageUrl: "https://picsum.photos/seed/gpu1/400/600" },
-      { name: "Samsung Odyssey G9", categoryId: "Monitor", price: 185000, stockStatus: "In Stock", customTag: "ULTRAWIDE", shortDescription: "49-inch curved gaming monitor.", imageUrl: "https://picsum.photos/seed/monitor1/400/600" },
-      { name: "PS5 Console", categoryId: "Console", price: 75000, stockStatus: "In Stock", customTag: "NEW", shortDescription: "PlayStation 5 Disc Edition.", imageUrl: "https://picsum.photos/seed/console1/400/600" }
-    ];
+    const id = doc(collection(db, 'products')).id;
+    const data = {
+      id,
+      name: "NVIDIA RTX 4090",
+      categoryId: "GPU",
+      price: 285000,
+      stockStatus: "In Stock",
+      customTag: "TOP TIER",
+      shortDescription: "Ultimate gaming performance.",
+      fullDescription: "The ultimate GPU for professional gaming and rendering.",
+      imageUrl: "https://picsum.photos/seed/gpu1/400/600",
+      availability: true,
+      isFeatured: true,
+      viewCount: 0,
+      purchaseCount: 0,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
 
     try {
-      for (const p of sampleProducts) {
-        const id = doc(collection(db, 'products')).id;
-        await setDoc(doc(db, 'products', id), { 
-          ...p, 
-          id, 
-          fullDescription: p.shortDescription,
-          availability: true,
-          isFeatured: true,
-          viewCount: 0,
-          purchaseCount: 0,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp() 
-        });
-      }
-      toast({ title: "Database Seeded", description: "Sample hardware and consoles added." });
+      await setDoc(doc(db, 'products', id), data);
+      toast({ title: "Database Seeded", description: "Sample RTX 4090 added." });
     } catch (e) {
       toast({ variant: 'destructive', title: "Error", description: "Failed to seed database." });
     } finally {
@@ -279,19 +279,19 @@ export default function AdminPage() {
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
               <Lock className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-headline font-black uppercase italic tracking-tighter">ADMIN <span className="text-primary">ACCESS</span></h1>
-            <p className="text-muted-foreground text-sm">Enter master password to access the hub.</p>
+            <h1 className="text-3xl font-headline font-black uppercase italic tracking-tighter text-[#0a0c10]">ADMIN <span className="text-primary">ACCESS</span></h1>
+            <p className="text-muted-foreground text-sm font-medium">Enter master password to access the hub.</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <input 
               type="password" 
               placeholder="••••••••" 
-              className="h-14 w-full text-center text-2xl tracking-[0.5em] bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              className="h-14 w-full text-center text-2xl tracking-[0.5em] bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoFocus
             />
-            <Button type="submit" className="w-full h-14 bg-primary text-white font-bold text-lg rounded-xl shadow-[0_0_20px_rgba(26,128,230,0.3)]">
+            <Button type="submit" className="w-full h-14 bg-primary text-white font-bold text-lg rounded-xl shadow-lg shadow-primary/20">
               AUTHORIZE
             </Button>
           </form>
@@ -308,11 +308,11 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-background overflow-hidden" onPaste={handlePaste}>
+    <div className="min-h-screen flex flex-col md:flex-row bg-white" onPaste={handlePaste}>
       {/* Mobile Top Header */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-card border-b border-white/5 sticky top-0 z-[110]">
+      <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-border sticky top-0 z-[110]">
         <div className="flex flex-col leading-none">
-          <span className="font-headline font-bold uppercase italic text-sm tracking-tighter">CASTRO<span className="text-primary">HUB</span></span>
+          <span className="font-headline font-bold uppercase italic text-sm tracking-tighter text-[#0a0c10]">CASTRO<span className="text-primary">HUB</span></span>
           <span className="text-[6px] font-black uppercase tracking-widest text-muted-foreground">ADMIN CORE</span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -322,11 +322,11 @@ export default function AdminPage() {
 
       {/* Sidebar - Desktop & Mobile Drawer */}
       <aside className={cn(
-        "fixed inset-0 z-[105] bg-card/95 backdrop-blur-md p-6 flex flex-col transition-transform md:relative md:translate-x-0 md:w-72 md:bg-card md:border-r md:border-white/5 md:flex md:z-10",
+        "fixed inset-0 z-[105] bg-white p-6 flex flex-col transition-transform md:relative md:translate-x-0 md:w-72 md:bg-white md:border-r md:border-border md:flex md:z-10",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="hidden md:flex flex-col mb-8 leading-none">
-          <span className="font-headline font-bold uppercase italic text-xl tracking-tighter">
+          <span className="font-headline font-bold uppercase italic text-xl tracking-tighter text-[#0a0c10]">
             CASTRO<span className="text-primary">HUB</span>
           </span>
           <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-1">ADMIN CORE</span>
@@ -343,7 +343,7 @@ export default function AdminPage() {
                 "w-full flex items-center gap-4 px-4 py-4 rounded-xl font-bold uppercase text-xs tracking-widest transition-all",
                 activeTab === item.id 
                   ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                  : "text-muted-foreground hover:bg-white/5 hover:text-white"
+                  : "text-muted-foreground hover:bg-gray-100"
               )}
             >
               {item.icon}
@@ -351,30 +351,30 @@ export default function AdminPage() {
             </button>
           ))}
         </nav>
-        <div className="pt-8 border-t border-white/5 space-y-4">
-          <Button variant="outline" className="w-full border-primary/20 text-primary" onClick={seedDatabase} disabled={isSaving}>
+        <div className="pt-8 border-t border-border space-y-4">
+          <Button variant="outline" className="w-full border-primary/20 text-primary rounded-xl" onClick={seedDatabase} disabled={isSaving}>
             <Database className="w-4 h-4 mr-2" /> SEED ARMORY
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-red-500" onClick={() => setIsAuthenticated(false)}>
+          <Button variant="ghost" className="w-full justify-start text-red-500 rounded-xl" onClick={() => setIsAuthenticated(false)}>
             <LogOut className="w-4 h-4 mr-2" /> LOGOUT
           </Button>
         </div>
       </aside>
 
-      <main className="flex-grow flex flex-col bg-black/5 overflow-hidden">
-        <header className="p-4 md:p-8 border-b border-white/5 bg-white/50 backdrop-blur-sm">
+      <main className="flex-grow flex flex-col bg-gray-50/50">
+        <header className="p-4 md:p-8 border-b border-border bg-white sticky top-0 md:relative z-[100]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 className="text-2xl md:text-3xl font-headline font-black uppercase italic tracking-tighter">
+            <h2 className="text-2xl md:text-3xl font-headline font-black uppercase italic tracking-tighter text-[#0a0c10]">
               {activeTab} <span className="text-primary">Management</span>
             </h2>
             <div className="flex gap-2">
               {activeTab === 'products' && (
-                <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary text-white flex-grow sm:flex-none h-11 px-6 rounded-xl font-bold uppercase text-[10px] tracking-widest">
+                <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary text-white flex-grow sm:flex-none h-11 px-6 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20">
                   <Plus className="w-4 h-4 mr-2" /> ADD ITEM
                 </Button>
               )}
               {activeTab === 'announcements' && (
-                <Button onClick={() => setIsAddAnnouncementOpen(true)} className="bg-primary text-white flex-grow sm:flex-none h-11 px-6 rounded-xl font-bold uppercase text-[10px] tracking-widest">
+                <Button onClick={() => setIsAddAnnouncementOpen(true)} className="bg-primary text-white flex-grow sm:flex-none h-11 px-6 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20">
                   <Plus className="w-4 h-4 mr-2" /> NEW UPDATE
                 </Button>
               )}
@@ -382,24 +382,47 @@ export default function AdminPage() {
           </div>
         </header>
 
-        <div className="flex-grow overflow-y-auto p-4 md:p-12">
-          <div className="glass-panel border-white/5 rounded-2xl overflow-hidden">
+        <div className="flex-grow overflow-y-auto p-4 md:p-8 lg:p-12">
+          <div className="glass-panel border-border bg-white rounded-2xl overflow-hidden shadow-sm">
+            {activeTab === 'dashboard' && (
+              <div className="p-8 text-center space-y-6">
+                <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto">
+                  <LayoutDashboard className="w-10 h-10 text-primary" />
+                </div>
+                <h3 className="text-2xl font-headline font-black uppercase italic tracking-tighter">Command Center</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                  <Card className="p-6 rounded-2xl border-border bg-gray-50">
+                    <div className="text-3xl font-black text-primary">{products?.length || 0}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-2">Active Products</div>
+                  </Card>
+                  <Card className="p-6 rounded-2xl border-border bg-gray-50">
+                    <div className="text-3xl font-black text-primary">{orders?.length || 0}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-2">Total Orders</div>
+                  </Card>
+                  <Card className="p-6 rounded-2xl border-border bg-gray-50">
+                    <div className="text-3xl font-black text-primary">{announcements?.length || 0}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-2">Announcements</div>
+                  </Card>
+                </div>
+              </div>
+            )}
+
             {activeTab === 'products' && (
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader><TableRow><TableHead>Product</TableHead><TableHead className="hidden sm:table-cell">Category</TableHead><TableHead>Price</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow><TableHead className="font-bold uppercase tracking-widest text-[10px]">Product</TableHead><TableHead className="hidden sm:table-cell font-bold uppercase tracking-widest text-[10px]">Category</TableHead><TableHead className="font-bold uppercase tracking-widest text-[10px]">Price</TableHead><TableHead className="text-right font-bold uppercase tracking-widest text-[10px]">Actions</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {products?.map((row: any) => (
                       <TableRow key={row.id}>
-                        <TableCell className="font-bold">
+                        <TableCell className="font-bold py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-primary/10 overflow-hidden shrink-0">{row.imageUrl && <img src={row.imageUrl} className="w-full h-full object-cover" />}</div>
-                            <div className="truncate max-w-[120px] sm:max-w-[200px]">{row.name}</div>
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-border">{row.imageUrl && <img src={row.imageUrl} className="w-full h-full object-cover" />}</div>
+                            <div className="truncate max-w-[120px] sm:max-w-[200px] text-xs uppercase tracking-tight">{row.name}</div>
                           </div>
                         </TableCell>
-                        <TableCell className="hidden sm:table-cell"><Badge variant="outline" className="text-[9px]">{row.categoryId}</Badge></TableCell>
+                        <TableCell className="hidden sm:table-cell"><Badge variant="outline" className="text-[9px] uppercase font-bold">{row.categoryId}</Badge></TableCell>
                         <TableCell className="whitespace-nowrap font-headline font-bold text-xs">Rs. {Math.round(row.price).toLocaleString()}</TableCell>
-                        <TableCell className="text-right"><Button onClick={() => deleteItem(row.id, 'products')} size="icon" variant="ghost" className="text-red-500 hover:bg-red-50"><Trash2 className="w-4 h-4" /></Button></TableCell>
+                        <TableCell className="text-right"><Button onClick={() => deleteItem(row.id, 'products')} size="icon" variant="ghost" className="text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></Button></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -410,22 +433,22 @@ export default function AdminPage() {
             {activeTab === 'orders' && (
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader><TableRow><TableHead>Customer</TableHead><TableHead>Total</TableHead><TableHead className="hidden sm:table-cell">Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow><TableHead className="font-bold uppercase tracking-widest text-[10px]">Customer</TableHead><TableHead className="font-bold uppercase tracking-widest text-[10px]">Total</TableHead><TableHead className="hidden sm:table-cell font-bold uppercase tracking-widest text-[10px]">Status</TableHead><TableHead className="text-right font-bold uppercase tracking-widest text-[10px]">Actions</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {orders?.map((order: any) => (
                       <TableRow key={order.id}>
-                        <TableCell>
-                          <div className="font-bold text-xs truncate max-w-[100px] sm:max-w-none">{order.customerName}</div>
+                        <TableCell className="py-4">
+                          <div className="font-bold text-[11px] uppercase truncate max-w-[100px] sm:max-w-none">{order.customerName}</div>
                           <div className="text-[9px] text-muted-foreground">{order.customerPhoneNumber}</div>
                         </TableCell>
                         <TableCell className="whitespace-nowrap font-headline font-bold text-xs">Rs. {Math.round(order.totalAmount).toLocaleString()}</TableCell>
                         <TableCell className="hidden sm:table-cell">
                           <Select defaultValue={order.status} onValueChange={(v) => updateOrderStatus(order.id, v)}>
-                            <SelectTrigger className="h-8 text-[10px] w-28"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-8 text-[10px] w-28 rounded-lg"><SelectValue /></SelectTrigger>
                             <SelectContent><SelectItem value="Pending">Pending</SelectItem><SelectItem value="Processing">Processing</SelectItem><SelectItem value="Completed">Completed</SelectItem><SelectItem value="Cancelled">Cancelled</SelectItem></SelectContent>
                           </Select>
                         </TableCell>
-                        <TableCell className="text-right"><Button onClick={() => deleteItem(order.id, 'orders')} size="icon" variant="ghost" className="text-red-500 hover:bg-red-50"><Trash2 className="w-4 h-4" /></Button></TableCell>
+                        <TableCell className="text-right"><Button onClick={() => deleteItem(order.id, 'orders')} size="icon" variant="ghost" className="text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></Button></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -436,13 +459,13 @@ export default function AdminPage() {
             {activeTab === 'announcements' && (
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader><TableRow><TableHead>Headline</TableHead><TableHead className="hidden sm:table-cell">Date</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow><TableHead className="font-bold uppercase tracking-widest text-[10px]">Headline</TableHead><TableHead className="hidden sm:table-cell font-bold uppercase tracking-widest text-[10px]">Date</TableHead><TableHead className="text-right font-bold uppercase tracking-widest text-[10px]">Actions</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {announcements?.map((ann: any) => (
                       <TableRow key={ann.id}>
-                        <TableCell className="font-bold truncate max-w-[200px] text-xs">{ann.title}</TableCell>
-                        <TableCell className="hidden sm:table-cell text-xs">{ann.postedAt?.toDate ? ann.postedAt.toDate().toLocaleDateString() : 'Pending'}</TableCell>
-                        <TableCell className="text-right"><Button onClick={() => deleteItem(ann.id, 'announcements')} size="icon" variant="ghost" className="text-red-500 hover:bg-red-50"><Trash2 className="w-4 h-4" /></Button></TableCell>
+                        <TableCell className="font-bold truncate max-w-[200px] text-[11px] py-4 uppercase">{ann.title}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-[10px] uppercase text-muted-foreground">{ann.postedAt?.toDate ? ann.postedAt.toDate().toLocaleDateString() : 'Pending'}</TableCell>
+                        <TableCell className="text-right"><Button onClick={() => deleteItem(ann.id, 'announcements')} size="icon" variant="ghost" className="text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></Button></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -453,20 +476,20 @@ export default function AdminPage() {
         </div>
       </main>
 
-      {/* Add Product Dialog - Fully Scrollable for Mobile */}
+      {/* Add Product Dialog - Fully Scrollable and Mobile Optimized */}
       <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
-        <DialogContent className="glass-panel border-white/10 w-[95vw] sm:max-w-[600px] max-h-[92vh] overflow-y-auto p-0 rounded-2xl focus:outline-none">
+        <DialogContent className="w-[95vw] sm:max-w-[600px] max-h-[92vh] overflow-y-auto p-0 rounded-2xl border-border bg-white focus:outline-none">
           <div className="p-6 md:p-8 space-y-6">
-            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic italic tracking-tighter text-xl">UPLOAD TO ARMORY</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl text-[#0a0c10]">UPLOAD TO ARMORY</DialogTitle></DialogHeader>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 py-2">
               <div className="sm:col-span-2 space-y-1.5">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Product Name</Label>
-                <Input value={productForm.name} onChange={(e) => setProductForm({...productForm, name: e.target.value})} className="bg-white/5 border-white/10 h-11" placeholder="Enter name" />
+                <Input value={productForm.name} onChange={(e) => setProductForm({...productForm, name: e.target.value})} className="bg-gray-50 border-border h-11 rounded-xl" placeholder="Enter product name" />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Category</Label>
                 <Select value={productForm.category} onValueChange={(v) => setProductForm({...productForm, category: v})}>
-                  <SelectTrigger className="bg-white/5 border-white/10 h-11"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-gray-50 border-border h-11 rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {['GPU', 'Monitor', 'Console', 'Computer', 'Game'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
@@ -474,12 +497,12 @@ export default function AdminPage() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Price (NPR)</Label>
-                <Input type="number" value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} className="bg-white/5 border-white/10 h-11" placeholder="0" />
+                <Input type="number" value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} className="bg-gray-50 border-border h-11 rounded-xl" placeholder="0" />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Stock Status</Label>
                 <Select value={productForm.stockStatus} onValueChange={(v) => setProductForm({...productForm, stockStatus: v})}>
-                  <SelectTrigger className="bg-white/5 border-white/10 h-11"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-gray-50 border-border h-11 rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="In Stock">In Stock</SelectItem>
                     <SelectItem value="Out of Stock">Out of Stock</SelectItem>
@@ -489,19 +512,19 @@ export default function AdminPage() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary flex items-center gap-2"><Tag className="w-3 h-3" /> Custom Tag</Label>
-                <Input placeholder="HOT, NEW, etc." value={productForm.customTag} onChange={(e) => setProductForm({...productForm, customTag: e.target.value})} className="bg-white/5 border-white/10 h-11" />
+                <Input placeholder="HOT, NEW, etc." value={productForm.customTag} onChange={(e) => setProductForm({...productForm, customTag: e.target.value})} className="bg-gray-50 border-border h-11 rounded-xl" />
               </div>
               <div className="sm:col-span-2 space-y-1.5">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Short Description</Label>
-                <Textarea value={productForm.shortDescription} onChange={(e) => setProductForm({...productForm, shortDescription: e.target.value})} className="bg-white/5 border-white/10 min-h-[80px]" placeholder="Brief summary..." />
+                <Textarea value={productForm.shortDescription} onChange={(e) => setProductForm({...productForm, shortDescription: e.target.value})} className="bg-gray-50 border-border min-h-[80px] rounded-xl" placeholder="Brief summary for listings..." />
               </div>
               <div className="sm:col-span-2 space-y-1.5">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Image (Paste or Browse)</Label>
-                <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center cursor-pointer hover:border-primary/50 transition-colors bg-white/5">
+                <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-border rounded-xl p-6 text-center cursor-pointer hover:border-primary transition-colors bg-gray-50">
                   <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} />
                   {productForm.imageUrl ? (
                     <div className="relative group mx-auto w-full max-w-[200px]">
-                      <img src={productForm.imageUrl} className="w-full rounded-lg shadow-lg" />
+                      <img src={productForm.imageUrl} className="w-full rounded-lg shadow-lg border border-border" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity"><p className="text-[10px] text-white font-bold">CHANGE IMAGE</p></div>
                     </div>
                   ) : (
@@ -513,7 +536,7 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
-            <DialogFooter className="pt-4 border-t border-white/5">
+            <DialogFooter className="pt-4 border-t border-border">
               <Button onClick={saveProduct} disabled={isSaving} className="w-full h-14 bg-primary text-white font-black uppercase italic tracking-tighter text-lg rounded-xl shadow-lg shadow-primary/20">
                 {isSaving ? <Loader2 className="animate-spin" /> : 'CONFIRM UPLOAD'}
               </Button>
@@ -524,20 +547,20 @@ export default function AdminPage() {
 
       {/* Add Announcement Dialog - Fully Scrollable */}
       <Dialog open={isAddAnnouncementOpen} onOpenChange={setIsAddAnnouncementOpen}>
-        <DialogContent className="glass-panel border-white/10 w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 rounded-2xl focus:outline-none">
+        <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 rounded-2xl border-border bg-white focus:outline-none">
           <div className="p-6 md:p-8 space-y-6">
-            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl">PUBLISH UPDATE</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl text-[#0a0c10]">PUBLISH UPDATE</DialogTitle></DialogHeader>
             <div className="space-y-5 py-2">
               <div className="space-y-1.5">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Headline</Label>
-                <Input value={announcementForm.title} onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})} className="bg-white/5 border-white/10 h-11" placeholder="Enter headline" />
+                <Input value={announcementForm.title} onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})} className="bg-gray-50 border-border h-11 rounded-xl" placeholder="Enter update headline" />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Message</Label>
-                <Textarea value={announcementForm.content} onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})} className="bg-white/5 border-white/10 min-h-[150px]" placeholder="Write your announcement..." />
+                <Textarea value={announcementForm.content} onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})} className="bg-gray-50 border-border min-h-[150px] rounded-xl" placeholder="Write your announcement details..." />
               </div>
             </div>
-            <DialogFooter className="pt-4 border-t border-white/5">
+            <DialogFooter className="pt-4 border-t border-border">
               <Button onClick={saveAnnouncement} disabled={isSaving} className="w-full h-14 bg-primary text-white font-black uppercase italic tracking-tighter text-lg rounded-xl shadow-lg shadow-primary/20">PUBLISH NOW</Button>
             </DialogFooter>
           </div>

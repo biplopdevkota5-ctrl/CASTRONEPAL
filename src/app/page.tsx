@@ -30,7 +30,7 @@ export default function Home() {
               </div>
               
               <h1 className="font-headline text-5xl md:text-8xl font-black leading-[0.9] tracking-tighter uppercase italic text-[#0a0c10]">
-                LEVEL <span className="text-primary">UP</span>
+                CASTRO <span className="text-primary">HUB</span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed font-medium">
