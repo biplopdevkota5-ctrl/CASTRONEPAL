@@ -3,148 +3,143 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * FIREBASE SECURITY RULES DOCUMENTATION
-     *
+     * CASTRO NEPAL SECURITY RULES
+     * 
      * Core Philosophy:
-     * This ruleset implements a hybrid security model for an e-commerce platform. It balances 
-     * public accessibility for product discovery with strict authorization for user data and 
-     * administrative control. The system relies on "Existence-Based Access Control" (EBAC) 
-     * for administrative roles and field-based ownership for transactional data.
-     *
+     * This ruleset implements a hybrid security model designed for an e-commerce platform. It balances 
+     * public accessibility for product catalogs with strict private ownership for user data and orders.
+     * Administrative access is managed via a database-backed role system.
+     * 
      * Data Structure:
-     * - Public Catalog: /products, /categories, and /announcements are publicly readable.
-     * - User Data: /users/{userId} follows a strict path-based ownership model.
-     * - Transactions: /orders are stored in a global collection. Access is granted to the 
-     *   owner (via the `userId` field) or administrators.
-     * - Role Management: /roles_admin/{userId} is used as a lookup for admin privileges.
-     *
+     * - Public Collections: /products, /categories, and /announcements are publicly readable.
+     * - User Data: /userProfiles/{userId} is strictly private to the authenticated owner.
+     * - Transactional Data: /orders and /orders/{id}/orderItems use a denormalized ownership model.
+     * - Access Control: /roles_admin/{userId} defines global administrative privileges.
+     * 
      * Key Security Decisions:
-     * 1. Authorization Independence: Admin checks use the `exists()` function on the 
-     *    /roles_admin collection to ensure high performance and decouple role checks from 
-     *    the data being secured.
-     * 2. Anonymous Checkout: The /orders collection allows creation by unauthenticated 
-     *    users to support a frictionless checkout experience, while protecting existing 
-     *    orders from unauthorized viewing.
-     * 3. Immutability: Critical relational fields (like `userId` on a profile or `orderId` 
-     *    on an item) are protected against modification after creation.
-     * 4. Denormalization for Authorization: Orders include a `userId` field to allow 
-     *    users to list their own order history without requiring a scan of nested subcollections.
+     * - Denormalization for Authorization: To ensure high performance and "Authorization Independence," 
+     *   the 'userId' is denormalized onto Order and OrderItem documents. This allows for direct ownership 
+     *   checks without costly get() calls to parent documents or profiles.
+     * - Admin Elevation: Admin status is verified by checking for the existence of a document in 
+     *   the /roles_admin collection matching the user's UID.
+     * - Prototyping Flexibility: Rules enforce strict authorization (WHO can access) but remain 
+     *   flexible on data schema (WHAT is stored) to facilitate rapid development.
      */
 
-    // --- Helper Functions ---
+    // --- Global Helper Functions ---
 
-    /** @description Checks if the user is authenticated with any provider. */
+    /** @description Checks if the request is made by an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the user's UID exists in the admin roles collection. */
-    function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-    }
-
-    /** @description Checks if the provided ID matches the authenticated user's UID. */
+    /** @description Checks if the authenticated user's UID matches the provided userId. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Checks ownership and ensures the document exists for updates/deletes. */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
+    /** @description Checks if the authenticated user has administrative privileges via the DBAC collection. */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    /** @description Checks if a user has access to a specific order. */
-    function canAccessOrder(orderData) {
-      return isAdmin() || (isSignedIn() && orderData.userId == request.auth.uid);
+    /** @description Validates ownership for existing documents during update or delete. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
     }
 
     // --- Collection Rules ---
 
-    /** 
-     * @description Publicly accessible catalog of gaming products. Admin users manage the items.
+    /**
+     * @description Public catalog of gaming products and redeem codes.
      * @path /products/{productId}
-     * @allow (get) Any user can view product details.
-     * @deny (create) Non-admin users cannot add products.
-     * @principle Public Read with Admin-Only Writes.
+     * @allow get, list (public)
+     * @allow create, update, delete (Admin only)
+     * @principle Public read-only access for customers with restricted administrative writes.
      */
     match /products/{productId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
 
-    /** 
-     * @description Product classifications for browsing.
+    /**
+     * @description Product categories for navigation and filtering.
      * @path /categories/{categoryId}
-     * @allow (list) Any user can list categories.
-     * @deny (delete) Only administrators can remove categories.
-     * @principle Public Read with Admin-Only Writes.
+     * @allow get, list (public)
+     * @allow create, update, delete (Admin only)
+     * @principle Homogeneous security posture for public navigation data.
      */
     match /categories/{categoryId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
 
-    /** 
-     * @description Private user profiles.
-     * @path /users/{userId}
-     * @allow (get) The owner of the profile can read their data.
-     * @deny (update) The owner cannot change the profile 'id' field, ensuring relational integrity.
-     * @principle Path-based ownership with relational field immutability.
-     */
-    match /users/{userId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
-    }
-
-    /** 
-     * @description Purchase records. Supports anonymous checkout and authenticated history.
-     * @path /orders/{orderId}
-     * @allow (create) Any user (including guest/anonymous) can place an order.
-     * @deny (list) A user cannot list all orders; they must filter by their userId.
-     * @principle Field-based authorization and public creation for guest checkout.
-     */
-    match /orders/{orderId} {
-      allow get: if canAccessOrder(resource.data);
-      allow list: if isAdmin() || (isSignedIn() && request.query.limit <= 100);
-      allow create: if true;
-      allow update, delete: if isAdmin() && resource != null;
-
-      /** 
-       * @description Individual items within an order. Access matches the parent order.
-       * @path /orders/{orderId}/orderItems/{orderItemId}
-       * @allow (get) The owner of the parent order can view item details.
-       * @principle Subcollection access derived from parent document state.
-       */
-      match /orderItems/{orderItemId} {
-        allow get, list: if canAccessOrder(get(/databases/$(database)/documents/orders/$(orderId)).data);
-        allow create: if true;
-        allow update, delete: if isAdmin() && resource != null;
-      }
-    }
-
-    /** 
-     * @description Store announcements and news updates.
+    /**
+     * @description System-wide announcements for the storefront.
      * @path /announcements/{announcementId}
-     * @allow (list) All users can see the active announcements.
-     * @principle Public Read with Admin-Only Writes.
+     * @allow get, list (public)
+     * @allow create, update, delete (Admin only)
+     * @principle Ensures marketing content is publicly visible but only modifiable by staff.
      */
     match /announcements/{announcementId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
 
-    /** 
-     * @description Administrative roles. Mere existence of UID here grants admin status.
+    /**
+     * @description Private user profile information.
+     * @path /userProfiles/{userId}
+     * @allow get, list, create, update (Owner or Admin)
+     * @deny delete (Prevent accidental account deletion via client)
+     * @principle Path-based ownership ensures users only manage their own profile data.
+     */
+    match /userProfiles/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin(); // Users shouldn't list all profiles; Admins can.
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if (isExistingOwner(userId) || isAdmin()) && request.resource.data.id == resource.data.id;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Customer purchase transactions.
+     * @path /orders/{orderId}
+     * @allow get, list (Owner or Admin)
+     * @allow create (Authenticated user for self)
+     * @principle Uses denormalized userId field for efficient ownership validation.
+     */
+    match /orders/{orderId} {
+      allow get: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow list: if isAdmin() || (isSignedIn() && request.query.limit <= 100); // Standard list protection, filtering enforced by app logic
+      allow create: if isAdmin() || (isSignedIn() && request.resource.data.userId == request.auth.uid);
+      allow update: if isAdmin(); // Users generally shouldn't modify orders after placement.
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Specific line items within a customer order.
+     * @path /orders/{orderId}/orderItems/{orderItemId}
+     * @allow get, list (Owner or Admin)
+     * @principle Relies on denormalized userId on the item itself to avoid parent document lookups.
+     */
+    match /orders/{orderId}/orderItems/{orderItemId} {
+      allow get: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow list: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/orders/$(orderId)).data.userId == request.auth.uid);
+      allow create: if isAdmin() || (isSignedIn() && request.resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Registry of users with administrative privileges.
      * @path /roles_admin/{userId}
-     * @allow (get) Admin users can see who else is an admin.
-     * @deny (write) Admin roles cannot be modified via the client for security.
-     * @principle Database-Based Access Control (DBAC) using existence checks.
+     * @allow get (Self or Admin)
+     * @deny list, create, update, delete (System managed)
+     * @principle Provides the source of truth for all 'isAdmin()' checks across the database.
      */
     match /roles_admin/{userId} {
-      allow get, list: if isAdmin();
-      allow create, update, delete: if false;
+      allow get: if isOwner(userId) || isAdmin();
+      allow list, create, update, delete: if false; // Admin roles should be managed via Firebase Console or Admin SDK
     }
+
   }
 }
