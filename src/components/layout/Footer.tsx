@@ -17,7 +17,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-gray-400 leading-relaxed">
-              Nepal’s Trusted Store for PlayStation, Xbox, and Nintendo. Get your digital codes delivered instantly.
+              Nepal’s Trusted Store for High-End Gaming Hardware and Professional Computers.
             </p>
             <div className="flex gap-4">
               <Link href="https://www.facebook.com/profile.php?id=61585287878669" target="_blank" className="p-2 bg-white/5 rounded-full hover:bg-primary/20 hover:text-primary transition-all">
@@ -36,10 +36,11 @@ export function Footer() {
           <div>
             <h4 className="font-headline text-lg font-bold mb-6 uppercase tracking-wider text-white">The Armory</h4>
             <ul className="space-y-4">
+              <li><Link href="/products?category=GPU" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Graphic Cards</Link></li>
+              <li><Link href="/products?category=Monitor" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Monitors</Link></li>
               <li><Link href="/products?category=Console" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Consoles</Link></li>
-              <li><Link href="/products?category=PlayStation%20Account" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">PlayStation Store</Link></li>
-              <li><Link href="/products?category=Xbox%20Account" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Xbox Live</Link></li>
-              <li><Link href="/products?category=Nintendo%20Account" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Nintendo eShop</Link></li>
+              <li><Link href="/products?category=Computer" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Computers</Link></li>
+              <li><Link href="/products?category=Game" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">Games</Link></li>
               <li><Link href="/dashboard" className="text-gray-400 hover:text-primary transition-colors uppercase text-xs font-bold">My Account</Link></li>
             </ul>
           </div>
@@ -66,7 +67,7 @@ export function Footer() {
           {/* Newsletter */}
           <div>
             <h4 className="font-headline text-lg font-bold mb-6 uppercase tracking-wider text-white">Alerts</h4>
-            <p className="text-sm text-gray-400 mb-4">Get notified when new codes arrive.</p>
+            <p className="text-sm text-gray-400 mb-4">Get notified when new hardware arrives.</p>
             <div className="flex gap-2">
               <Input placeholder="Enter Email" className="bg-white/5 border-white/10 text-white" />
               <Button size="icon" className="bg-primary hover:bg-primary/90 shrink-0">
@@ -77,7 +78,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-          <p>© 2024 Castro Nepal. Digital Gaming Authority.</p>
+          <p>© 2024 Castro Nepal. Gaming Hardware Authority.</p>
           <div className="flex gap-6 font-bold uppercase text-[10px]">
             <Link href="#" className="hover:text-primary">Privacy</Link>
             <Link href="#" className="hover:text-primary">Terms</Link>

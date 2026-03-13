@@ -428,7 +428,7 @@ export default function AdminPage() {
               <Select value={productForm.category} onValueChange={(v) => setProductForm({...productForm, category: v})}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {['GPU', 'Monitor', 'Console', 'PlayStation Account', 'Xbox Account', 'Nintendo Account', 'PC', 'Mobile'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {['GPU', 'Monitor', 'Console', 'Computer', 'Game'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

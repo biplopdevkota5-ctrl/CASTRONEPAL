@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShieldCheck, Zap, ArrowRight, Star, Gamepad2, Disc, Cpu, Monitor, Laptop, Laptop2 } from 'lucide-react';
+import { ShieldCheck, Zap, ArrowRight, Star, Gamepad2, Cpu, Monitor, Laptop, PcCase, Gamepad } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProductCard } from '@/components/ui/ProductCard';
@@ -42,7 +42,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-16 pb-20 bg-white overflow-hidden">
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center pt-20 overflow-hidden bg-gray-50">
+      <section className="relative min-h-[60vh] flex items-center pt-20 overflow-hidden bg-gray-50">
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 text-center lg:text-left animate-fade-up">
@@ -50,23 +50,13 @@ export default function Home() {
                 <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">Premium Hardware & Digital Assets</span>
               </div>
               
-              <h1 className="font-headline text-5xl md:text-7xl font-black leading-[1] tracking-tighter uppercase italic text-[#0a0c10]">
-                CASTRO HUB <br />
-                <span className="text-primary animate-pulse duration-[3000ms]">BUY CHEAP SAVE HIGH</span>
+              <h1 className="font-headline text-5xl md:text-8xl font-black leading-[1] tracking-tighter uppercase italic text-[#0a0c10]">
+                CASTRO HUB
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed font-medium">
-                The ultimate destination in Nepal for high-end GPUs, Monitors, and verified Gaming Accounts.
+                The ultimate destination in Nepal for high-end GPUs, Monitors, and professional gaming systems.
               </p>
-              
-              <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
-                <Link href="/products">
-                  <Button size="lg" className="h-14 px-10 bg-[#0a0c10] hover:bg-[#1a1d24] text-white font-bold rounded-xl shadow-lg group transition-all duration-300 hover:scale-105 active:scale-95">
-                    ENTER THE ARMORY
-                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
-                  </Button>
-                </Link>
-              </div>
             </div>
 
             <div className="hidden lg:block relative animate-in fade-in slide-in-from-right-10 duration-1000">
@@ -92,14 +82,13 @@ export default function Home() {
         <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <h3 className="text-4xl font-headline font-bold uppercase italic text-[#0a0c10]">CORE CATEGORIES</h3>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-7xl mx-auto">
           {[
             { name: "Graphic Cards", icon: <Cpu className="w-8 h-8" />, href: "/products?category=GPU" },
             { name: "Monitors", icon: <Monitor className="w-8 h-8" />, href: "/products?category=Monitor" },
-            { name: "Consoles", icon: <Laptop2 className="w-8 h-8" />, href: "/products?category=Console" },
-            { name: "PS Accounts", icon: <Gamepad2 className="w-8 h-8" />, href: "/products?category=PlayStation%20Account" },
-            { name: "Xbox Accounts", icon: <Disc className="w-8 h-8" />, href: "/products?category=Xbox%20Account" },
-            { name: "Nintendo Accounts", icon: <Laptop className="w-8 h-8" />, href: "/products?category=Nintendo%20Account" },
+            { name: "Consoles", icon: <Gamepad2 className="w-8 h-8" />, href: "/products?category=Console" },
+            { name: "Computer", icon: <PcCase className="w-8 h-8" />, href: "/products?category=Computer" },
+            { name: "Game", icon: <Gamepad className="w-8 h-8" />, href: "/products?category=Game" },
           ].map((cat, idx) => (
             <Link key={cat.name} href={cat.href} className={`animate-in fade-in slide-in-from-bottom-8 duration-700`} style={{ animationDelay: `${idx * 100}ms` }}>
               <div className="category-card-dark group h-48">
@@ -182,7 +171,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
             { icon: <Zap className="w-5 h-5" />, label: "Logistics", value: "Fast Shipping" },
-            { icon: <ShieldCheck className="w-5 h-5" />, label: "Verification", value: "Verified Accounts" },
+            { icon: <ShieldCheck className="w-5 h-5" />, label: "Verification", value: "Verified Products" },
             { icon: <Gamepad2 className="w-5 h-5" />, label: "Support", value: "Expert Assistance" },
             { icon: <Star className="w-5 h-5" />, label: "Quality", value: "Global Standards" },
           ].map((item, idx) => (
