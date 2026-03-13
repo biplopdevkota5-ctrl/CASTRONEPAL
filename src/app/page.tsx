@@ -15,7 +15,6 @@ import { collection, query, orderBy, limit } from 'firebase/firestore';
 export default function Home() {
   const db = useFirestore();
 
-  // Fetch announcements with memoization to prevent infinite loops
   const announcementsQuery = useMemo(() => {
     if (!db) return null;
     return query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(1));
@@ -24,7 +23,6 @@ export default function Home() {
   const { data: announcements } = useCollection<any>(announcementsQuery);
   const latestAnnouncement = announcements?.[0];
 
-  // Fetch trending products with memoization
   const trendingQuery = useMemo(() => {
     if (!db) return null;
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(10));
@@ -34,11 +32,9 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-20 pb-20">
-      {/* Hero Section */}
       <section className="relative h-[90vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
           <Image 
             src="https://picsum.photos/seed/castro-hero/1920/1080"
             alt="Gaming Hero"
@@ -73,16 +69,11 @@ export default function Home() {
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="h-14 px-8 border-white/10 hover:bg-white/5 rounded-full font-bold">
-                <Play className="mr-2 w-4 h-4 fill-current" />
-                LATEST RELEASES
-              </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trust Stats */}
       <section className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
@@ -105,11 +96,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Announcements */}
       {latestAnnouncement && (
         <section className="container mx-auto px-4">
           <div className="relative rounded-3xl overflow-hidden glass-panel p-8 md:p-12 border-primary/20">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px]"></div>
             <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
               <div className="space-y-4">
                 <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 uppercase tracking-widest font-bold">LATEST UPDATE • {latestAnnouncement.date}</Badge>
@@ -130,7 +119,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* Trending Products */}
       <section className="container mx-auto px-4 space-y-10">
         <div className="flex items-end justify-between">
           <div className="space-y-2">
@@ -158,16 +146,15 @@ export default function Home() {
           </div>
         ) : (
           <div className="text-center py-20 border border-dashed border-white/10 rounded-3xl">
-            <p className="text-muted-foreground">No products found in the database.</p>
+            <p className="text-muted-foreground">No real products found in the database. Add them in the Admin Panel.</p>
           </div>
         )}
       </section>
 
-      {/* Category Navigation */}
       <section className="container mx-auto px-4 py-20 bg-card/30 rounded-[3rem] border border-white/5">
         <div className="text-center mb-16 space-y-4">
-          <h2 className="text-4xl font-headline font-bold uppercase italic">Browse by Hardware & Codes</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">From digital codes to high-end hardware, we've got everything you need.</p>
+          <h2 className="text-4xl font-headline font-bold uppercase italic">Browse by Category</h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">From digital codes to high-end hardware.</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6">
           {[
