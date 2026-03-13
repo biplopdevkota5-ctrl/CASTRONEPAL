@@ -23,7 +23,7 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 0 91% 62%;
-    --radius: 1.25rem;
+    --radius: 1rem;
   }
 }
 
@@ -34,39 +34,40 @@
   body {
     @apply bg-white text-foreground selection:bg-primary/30 font-body;
     font-feature-settings: "rlig" 1, "alt" 1;
+    text-rendering: optimizeLegibility;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-white border border-border shadow-lg;
+    @apply bg-white border border-border;
   }
   
   .neon-glow {
-    text-shadow: 0 0 10px hsl(var(--primary) / 0.1);
+    text-shadow: 0 0 5px hsl(var(--primary) / 0.1);
   }
 
   .retail-card {
-    @apply bg-white border border-border hover:border-primary/40 hover:shadow-xl transition-all duration-500;
+    @apply bg-white border border-border hover:border-primary/40 transition-all duration-300;
   }
 
   .category-card-dark {
-    @apply bg-[#0a0c10] border border-white/5 rounded-[2rem] flex flex-col items-center justify-center p-8 transition-all duration-500 hover:bg-[#11141a] hover:border-primary/50 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/10;
+    @apply bg-[#0a0c10] border border-white/5 rounded-[1.5rem] flex flex-col items-center justify-center p-6 transition-all duration-300 hover:bg-[#11141a] hover:border-primary/50;
   }
 
   .animate-fade-up {
-    @apply animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-forwards;
+    @apply animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-forwards;
   }
 }
 
 .gaming-grid {
   background-image: 
-    radial-gradient(circle at 2px 2px, rgba(0,0,0,0.02) 1px, transparent 0);
-  background-size: 32px 32px;
+    radial-gradient(circle at 1px 1px, rgba(0,0,0,0.01) 1px, transparent 0);
+  background-size: 24px 24px;
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -74,15 +75,5 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
-}
-
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+  @apply bg-primary/20 rounded-full hover:bg-primary/40;
 }
