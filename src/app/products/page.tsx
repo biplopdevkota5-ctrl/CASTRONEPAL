@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Search, Filter, SlidersHorizontal, Grid2X2, List, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Search, Filter, SlidersHorizontal, Grid2X2, List, ChevronDown, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { 
@@ -13,42 +13,45 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { semanticProductSearch } from '@/ai/flows/semantic-product-search';
-import { aiProductRecommendations } from '@/ai/flows/ai-product-recommendations';
+import { useFirestore, useCollection } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
 
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [products, setProducts] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [searchResults, setSearchResults] = useState<any[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  const db = useFirestore();
+  const productsRef = useMemo(() => query(collection(db, 'products'), orderBy('createdAt', 'desc')), [db]);
+  const { data: dbProducts, loading: productsLoading } = useCollection<any>(productsRef);
 
-  useEffect(() => {
-    async function fetchProducts() {
-      setIsLoading(true);
-      // Using trending recommendations as default products
-      const { recommendations } = await aiProductRecommendations({ recommendationType: 'trending' });
-      setProducts(recommendations);
-      setIsLoading(false);
-    }
-    fetchProducts();
-  }, []);
+  const displayProducts = searchResults || dbProducts;
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery) return;
+    if (!searchQuery) {
+      setSearchResults(null);
+      return;
+    }
     
-    setIsLoading(true);
-    const { suggestions } = await semanticProductSearch({ query: searchQuery });
-    // Map suggestions to product card format
-    const searchResults = suggestions.map((s, idx) => ({
-      id: `search-${idx}`,
-      name: s.name,
-      description: s.description,
-      category: s.category,
-      price: 15 + Math.random() * 50, // Mock price
-      imageUrl: `https://picsum.photos/seed/${s.name}/400/600`
-    }));
-    setProducts(searchResults);
-    setIsLoading(false);
+    setIsSearching(true);
+    try {
+      const { suggestions } = await semanticProductSearch({ query: searchQuery });
+      const mappedResults = suggestions.map((s, idx) => ({
+        id: `search-${idx}`,
+        name: s.name,
+        description: s.description,
+        category: s.category,
+        price: 1500, // Placeholder price for search suggestions
+        imageUrl: `https://picsum.photos/seed/${s.name}/400/600`
+      }));
+      setSearchResults(mappedResults);
+    } catch (err) {
+      console.error("Search failed", err);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -71,7 +74,7 @@ export default function ProductsPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <Button type="submit" className="absolute right-2 top-2 bottom-2 bg-primary hover:bg-primary/90 text-white rounded-xl">
-              SEARCH
+              {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'SEARCH'}
             </Button>
           </form>
         </div>
@@ -120,18 +123,18 @@ export default function ProductsPage() {
       </div>
 
       {/* Product Grid */}
-      {isLoading ? (
+      {productsLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {[...Array(10)].map((_, i) => (
             <div key={i} className="h-96 rounded-3xl glass-panel animate-pulse bg-white/5"></div>
           ))}
         </div>
-      ) : products.length > 0 ? (
+      ) : displayProducts && displayProducts.length > 0 ? (
         <div className={viewMode === 'grid' 
           ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6"
           : "flex flex-col gap-6"
         }>
-          {products.map((product) => (
+          {displayProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
@@ -141,8 +144,8 @@ export default function ProductsPage() {
             <Search className="w-12 h-12 text-muted-foreground" />
           </div>
           <h3 className="text-xl font-bold">No products found</h3>
-          <p className="text-muted-foreground">Try adjusting your search or filters.</p>
-          <Button variant="outline" onClick={() => setSearchQuery('')}>Clear All Filters</Button>
+          <p className="text-muted-foreground">Try adjusting your search or check back later.</p>
+          <Button variant="outline" onClick={() => { setSearchQuery(''); setSearchResults(null); }}>Clear All Filters</Button>
         </div>
       )}
     </div>
