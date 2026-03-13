@@ -78,7 +78,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-          <p>© 2024 Castro Nepal. Gaming Hardware Authority.</p>
+          <p>© 2026 Castro Nepal. Gaming Hardware Authority.</p>
           <div className="flex gap-6 font-bold uppercase text-[10px]">
             <Link href="#" className="hover:text-primary">Privacy</Link>
             <Link href="#" className="hover:text-primary">Terms</Link>
