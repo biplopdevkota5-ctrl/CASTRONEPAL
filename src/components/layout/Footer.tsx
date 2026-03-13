@@ -59,7 +59,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-gray-400">
                 <MapPin className="w-5 h-5 text-primary" />
-                <span>Pokhara, Nepal</span>
+                <span>Sitapaila, Kathmandu, Nepal</span>
               </li>
             </ul>
           </div>

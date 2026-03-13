@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShieldCheck, Zap, ArrowRight, Star, Gamepad2, Cpu, Monitor, Laptop, PcCase, Gamepad } from 'lucide-react';
+import { ArrowRight, Cpu, Monitor, Gamepad2, PcCase, Gamepad } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProductCard } from '@/components/ui/ProductCard';
@@ -164,26 +164,6 @@ export default function Home() {
             <p className="text-muted-foreground mb-8 font-medium">Armory currently empty. Restock in progress.</p>
           </div>
         )}
-      </section>
-
-      {/* Trust Stats */}
-      <section className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[
-            { icon: <Zap className="w-5 h-5" />, label: "Logistics", value: "Fast Shipping" },
-            { icon: <ShieldCheck className="w-5 h-5" />, label: "Verification", value: "Verified Products" },
-            { icon: <Gamepad2 className="w-5 h-5" />, label: "Support", value: "Expert Assistance" },
-            { icon: <Star className="w-5 h-5" />, label: "Quality", value: "Global Standards" },
-          ].map((item, idx) => (
-            <div key={idx} className="bg-white p-6 rounded-2xl flex items-center gap-4 border border-border shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${idx * 150}ms` }}>
-              <div className="p-3 bg-primary/5 rounded-xl text-primary">{item.icon}</div>
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{item.label}</div>
-                <div className="font-bold text-[#0a0c10] uppercase text-sm">{item.value}</div>
-              </div>
-            </div>
-          ))}
-        </div>
       </section>
     </div>
   );

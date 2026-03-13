@@ -30,11 +30,9 @@ export function Header() {
   };
 
   const handleLogoClick = (e: React.MouseEvent) => {
-    // Increment clicks
     const newCount = logoClicks + 1;
     setLogoClicks(newCount);
 
-    // Clear existing timer and start a new 30s window on the first click
     if (newCount === 1) {
       if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
       clickTimerRef.current = setTimeout(() => {
@@ -42,7 +40,6 @@ export function Header() {
       }, 30000);
     }
 
-    // Check if 10 clicks reached
     if (newCount >= 10) {
       e.preventDefault();
       if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
@@ -52,7 +49,6 @@ export function Header() {
   };
 
   const startHold = (e: React.MouseEvent | React.TouchEvent) => {
-    // Start a 5 second timer
     holdTimerRef.current = setTimeout(() => {
       router.push('/admin');
     }, 5000);
@@ -65,7 +61,6 @@ export function Header() {
     }
   };
 
-  // Cleanup timers on unmount
   useEffect(() => {
     return () => {
       if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
@@ -80,7 +75,7 @@ export function Header() {
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex gap-6">
             <span className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-primary" /> +977 9702663187</span>
-            <span className="hidden sm:flex items-center gap-1.5"><MapPin className="w-3 h-3 text-primary" /> Pokhara, Nepal</span>
+            <span className="hidden sm:flex items-center gap-1.5"><MapPin className="w-3 h-3 text-primary" /> Sitapaila, Kathmandu, Nepal</span>
           </div>
           <div className="flex gap-4 items-center">
             <span className="opacity-50 hidden md:inline">Authorized Retailer</span>
@@ -192,7 +187,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu - Solid Opaque White */}
+      {/* Mobile Menu */}
       <div className={cn(
         "fixed inset-0 top-[112px] bg-white z-[90] transition-transform duration-500 lg:hidden",
         isMenuOpen ? "translate-x-0" : "translate-x-full"
