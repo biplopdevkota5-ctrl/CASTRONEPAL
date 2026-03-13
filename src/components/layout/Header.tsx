@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Search, ShoppingCart, User, Gamepad2, Menu, X, LayoutDashboard, LogOut, Package, Phone, MapPin } from 'lucide-react';
+import { Search, ShoppingCart, User, Gamepad2, Menu, X, LayoutDashboard, LogOut, Package, Phone, MapPin, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
@@ -83,8 +83,11 @@ export function Header() {
             <span className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-primary" /> +977 9702663187</span>
             <span className="hidden sm:flex items-center gap-1.5"><MapPin className="w-3 h-3 text-primary" /> Pokhara, Nepal</span>
           </div>
-          <div className="flex gap-4">
-            <span className="opacity-50">Authorized Retailer</span>
+          <div className="flex gap-4 items-center">
+            <span className="opacity-50 hidden md:inline">Authorized Retailer</span>
+            <Link href="/admin" className="flex items-center gap-1.5 hover:text-primary transition-colors border-l border-white/20 pl-4">
+              <ShieldCheck className="w-3 h-3" /> Admin Portal
+            </Link>
           </div>
         </div>
       </div>
