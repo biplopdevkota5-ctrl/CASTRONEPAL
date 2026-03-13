@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/toaster';
 import { FloatingCallButton } from '@/components/ui/FloatingCallButton';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
   title: 'Castro Nepal | Nepal’s Trusted Gaming Redeem Code Store',
@@ -24,13 +25,15 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased bg-background text-foreground min-h-screen flex flex-col gaming-grid">
-        <Header />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
-        <FloatingCallButton />
-        <Toaster />
+        <FirebaseClientProvider>
+          <Header />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+          <FloatingCallButton />
+          <Toaster />
+        </FirebaseClientProvider>
       </body>
     </html>
   );

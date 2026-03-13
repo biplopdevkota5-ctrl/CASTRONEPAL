@@ -1,14 +1,13 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { 
   LayoutDashboard, 
   Package, 
   ShoppingBag, 
   Bell, 
   Plus, 
-  Settings, 
   LogOut, 
   Search,
   Edit,
@@ -19,7 +18,7 @@ import {
   Gamepad2,
   X,
   Upload,
-  ArrowRight
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,7 +42,19 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { useFirestore, useCollection } from '@/firebase';
+import { collection, doc, setDoc, deleteDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
@@ -51,34 +62,132 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'announcements'>('dashboard');
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAddAnnouncementOpen, setIsAddAnnouncementOpen] = useState(false);
+  const { toast } = useToast();
+  const db = useFirestore();
 
-  // Mock Global State
-  const [products, setProducts] = useState([
-    { id: '1', name: "PS Plus 12-Month", category: "PlayStation", price: "15958", status: "In Stock" },
-    { id: '2', name: "Xbox Game Pass", category: "Xbox", price: "7978", status: "In Stock" },
-    { id: '3', name: "Steam Wallet $50", category: "Steam", price: "6650", status: "Low Stock" },
-  ]);
+  // Firestore Collections
+  const productsQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+  const { data: products, loading: productsLoading } = useCollection<any>(productsQuery);
 
-  const [announcements, setAnnouncements] = useState([
-    { id: '1', title: "PS Plus Back in Stock!", date: "2024-02-24", content: "The most awaited subscription cards are back." },
-    { id: '2', title: "New Year Sale Ends Soon", date: "2024-02-20", content: "Last chance to grab 20% off on all gift cards." },
-  ]);
+  const announcementsQuery = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
+  const { data: announcements, loading: announcementsLoading } = useCollection<any>(announcementsQuery);
+
+  // Form State
+  const [productForm, setProductForm] = useState({
+    name: '',
+    category: 'PlayStation',
+    price: '',
+    status: 'In Stock',
+    description: '',
+    imageUrl: ''
+  });
+
+  const [announcementForm, setAnnouncementForm] = useState({
+    title: '',
+    content: ''
+  });
+
+  const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === '901020304050') {
       setIsAuthenticated(true);
     } else {
-      alert("Invalid Admin Password");
+      toast({ variant: 'destructive', title: 'Unauthorized', description: 'Invalid Admin Password' });
     }
   };
 
-  const deleteProduct = (id: string) => {
-    setProducts(products.filter(p => p.id !== id));
+  const handleImageUpload = (file: File) => {
+    if (file.size > 3 * 1024 * 1024) {
+      toast({ variant: 'destructive', title: 'File too large', description: 'Maximum image size is 3MB.' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProductForm(prev => ({ ...prev, imageUrl: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
   };
 
-  const deleteAnnouncement = (id: string) => {
-    setAnnouncements(announcements.filter(a => a.id !== id));
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) handleImageUpload(file);
+      }
+    }
+  }, []);
+
+  const saveProduct = () => {
+    if (!productForm.name || !productForm.price) return;
+    setIsSaving(true);
+    const productId = doc(collection(db, 'products')).id;
+    const productRef = doc(db, 'products', productId);
+    
+    const data = {
+      ...productForm,
+      id: productId,
+      price: parseFloat(productForm.price),
+      createdAt: serverTimestamp()
+    };
+
+    setDoc(productRef, data)
+      .then(() => {
+        setIsAddProductOpen(false);
+        setProductForm({ name: '', category: 'PlayStation', price: '', status: 'In Stock', description: '', imageUrl: '' });
+        toast({ title: 'Product Added', description: `${data.name} is now live.` });
+      })
+      .catch(async (error) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: productRef.path,
+          operation: 'create',
+          requestResourceData: data
+        }));
+      })
+      .finally(() => setIsSaving(false));
+  };
+
+  const saveAnnouncement = () => {
+    if (!announcementForm.title || !announcementForm.content) return;
+    setIsSaving(true);
+    const annId = doc(collection(db, 'announcements')).id;
+    const annRef = doc(db, 'announcements', annId);
+    
+    const data = {
+      ...announcementForm,
+      id: annId,
+      date: new Date().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }),
+      createdAt: serverTimestamp()
+    };
+
+    setDoc(annRef, data)
+      .then(() => {
+        setIsAddAnnouncementOpen(false);
+        setAnnouncementForm({ title: '', content: '' });
+        toast({ title: 'Update Posted', description: 'The announcement is now visible.' });
+      })
+      .catch(async () => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: annRef.path,
+          operation: 'create',
+          requestResourceData: data
+        }));
+      })
+      .finally(() => setIsSaving(false));
+  };
+
+  const deleteItem = (id: string, coll: string) => {
+    const itemRef = doc(db, coll, id);
+    deleteDoc(itemRef).catch(async () => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: itemRef.path,
+        operation: 'delete'
+      }));
+    });
   };
 
   if (!isAuthenticated) {
@@ -111,7 +220,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-background">
+    <div className="min-h-screen flex flex-col md:flex-row bg-background" onPaste={handlePaste}>
       {/* Sidebar */}
       <aside className="w-full md:w-72 bg-card border-r border-white/5 p-6 space-y-8 flex flex-col">
         <div className="flex items-center gap-2 mb-8">
@@ -197,7 +306,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Dynamic Section Based on Tab */}
         <div className="glass-panel border-white/5 rounded-2xl overflow-hidden">
           {activeTab === 'products' && (
             <>
@@ -218,21 +326,25 @@ export default function AdminPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {products.map((row, i) => (
+                  {productsLoading ? (
+                    <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
+                  ) : products.map((row, i) => (
                     <TableRow key={row.id} className="border-white/5 hover:bg-white/5 transition-colors">
                       <TableCell className="font-bold py-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary">#{i + 1}</div>
+                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary overflow-hidden">
+                            {row.imageUrl ? <img src={row.imageUrl} className="w-full h-full object-cover" /> : `#${i + 1}`}
+                          </div>
                           <div>
                             <div className="text-sm">{row.name}</div>
-                            <div className="text-[10px] text-muted-foreground font-mono uppercase">SKU: CST-{row.id}</div>
+                            <div className="text-[10px] text-muted-foreground font-mono uppercase">SKU: CST-{row.id.slice(0, 5)}</div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="border-white/10 text-xs font-bold">{row.category}</Badge>
                       </TableCell>
-                      <TableCell className="font-bold text-white">Rs. {parseInt(row.price).toLocaleString()}</TableCell>
+                      <TableCell className="font-bold text-white">Rs. {Math.round(row.price).toLocaleString()}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {row.status === 'In Stock' ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <AlertTriangle className="w-4 h-4 text-yellow-500" />}
@@ -244,8 +356,7 @@ export default function AdminPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-white"><Edit className="w-4 h-4" /></Button>
-                          <Button onClick={() => deleteProduct(row.id)} size="icon" variant="ghost" className="h-8 w-8 text-red-500/50 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                          <Button onClick={() => deleteItem(row.id, 'products')} size="icon" variant="ghost" className="h-8 w-8 text-red-500/50 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -257,7 +368,9 @@ export default function AdminPage() {
 
           {activeTab === 'announcements' && (
             <div className="p-8 space-y-6">
-              {announcements.length === 0 ? (
+              {announcementsLoading ? (
+                <Loader2 className="animate-spin mx-auto" />
+              ) : announcements.length === 0 ? (
                 <div className="text-center py-12">
                   <Bell className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
                   <p className="text-muted-foreground">No updates posted yet.</p>
@@ -271,55 +384,16 @@ export default function AdminPage() {
                           <Badge className="bg-primary/20 text-primary border-primary/20 text-[10px] uppercase">{ann.date}</Badge>
                           <h4 className="text-xl font-headline font-bold uppercase italic">{ann.title}</h4>
                         </div>
-                        <Button onClick={() => deleteAnnouncement(ann.id)} size="icon" variant="ghost" className="text-red-500/50 hover:text-red-500 -mt-2 -mr-2">
+                        <Button onClick={() => deleteItem(ann.id, 'announcements')} size="icon" variant="ghost" className="text-red-500/50 hover:text-red-500 -mt-2 -mr-2">
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-2">{ann.content}</p>
-                      <div className="pt-2 flex gap-2">
-                        <Button variant="outline" size="sm" className="rounded-lg h-8 px-4 text-xs font-bold">EDIT</Button>
-                      </div>
                     </Card>
                   ))}
                 </div>
               )}
             </div>
-          )}
-
-          {activeTab === 'orders' && (
-            <Table>
-              <TableHeader className="bg-white/5">
-                <TableRow className="hover:bg-transparent border-white/5">
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Order ID</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Customer</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Product</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Status</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {[
-                  { id: "ORD-9920", customer: "Rahul Sharma", product: "PS Plus 12-Month", status: "New" },
-                  { id: "ORD-9919", customer: "Suman Giri", product: "Steam Wallet $50", status: "Processing" },
-                  { id: "ORD-9918", customer: "Anjali KC", product: "Xbox Pass", status: "Completed" },
-                ].map((order, i) => (
-                  <TableRow key={i} className="border-white/5 hover:bg-white/5">
-                    <TableCell className="font-mono text-xs">{order.id}</TableCell>
-                    <TableCell className="font-bold">{order.customer}</TableCell>
-                    <TableCell>{order.product}</TableCell>
-                    <TableCell>
-                      <Badge className={cn(
-                        "text-[10px] uppercase",
-                        order.status === 'New' ? "bg-red-500/10 text-red-500" : order.status === 'Completed' ? "bg-green-500/10 text-green-500" : "bg-blue-500/10 text-blue-500"
-                      )}>{order.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" className="text-xs font-bold">VIEW</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
           )}
         </div>
       </main>
@@ -329,37 +403,89 @@ export default function AdminPage() {
         <DialogContent className="glass-panel border-white/10 sm:max-w-[600px] rounded-[2rem]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-headline font-bold uppercase italic tracking-tighter">ADD NEW <span className="text-primary">PRODUCT</span></DialogTitle>
-            <DialogDescription className="text-muted-foreground">Add a new digital asset to your store inventory.</DialogDescription>
+            <DialogDescription className="text-muted-foreground">Add a new asset to your store. You can paste an image (Ctrl+V) here.</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-6 py-4">
             <div className="space-y-2 col-span-2">
               <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Product Name</Label>
-              <Input placeholder="e.g. PlayStation Store $50" className="bg-white/5 border-white/10" />
+              <Input 
+                placeholder="e.g. NVIDIA RTX 4090" 
+                className="bg-white/5 border-white/10" 
+                value={productForm.name}
+                onChange={(e) => setProductForm({...productForm, name: e.target.value})}
+              />
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Category</Label>
-              <Input placeholder="e.g. PlayStation" className="bg-white/5 border-white/10" />
+              <Select value={productForm.category} onValueChange={(v) => setProductForm({...productForm, category: v})}>
+                <SelectTrigger className="bg-white/5 border-white/10">
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PlayStation">PlayStation</SelectItem>
+                  <SelectItem value="Xbox">Xbox</SelectItem>
+                  <SelectItem value="Steam">Steam</SelectItem>
+                  <SelectItem value="Nintendo">Nintendo</SelectItem>
+                  <SelectItem value="GPU">GPU</SelectItem>
+                  <SelectItem value="PC">Gaming PC</SelectItem>
+                  <SelectItem value="Mobile">Mobile</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Price (NPR)</Label>
-              <Input type="number" placeholder="6650" className="bg-white/5 border-white/10" />
+              <Input 
+                type="number" 
+                placeholder="6650" 
+                className="bg-white/5 border-white/10" 
+                value={productForm.price}
+                onChange={(e) => setProductForm({...productForm, price: e.target.value})}
+              />
             </div>
             <div className="space-y-2 col-span-2">
               <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Description</Label>
-              <Textarea placeholder="Detailed product information..." className="bg-white/5 border-white/10 min-h-[100px]" />
+              <Textarea 
+                placeholder="Detailed product information..." 
+                className="bg-white/5 border-white/10 min-h-[100px]" 
+                value={productForm.description}
+                onChange={(e) => setProductForm({...productForm, description: e.target.value})}
+              />
             </div>
             <div className="space-y-2 col-span-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Product Image</Label>
-              <div className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center space-y-4 hover:border-primary/50 transition-colors cursor-pointer group">
-                <Upload className="w-10 h-10 mx-auto text-muted-foreground group-hover:text-primary" />
-                <p className="text-sm text-muted-foreground">Drop image here or click to browse</p>
-                <p className="text-[10px] text-muted-foreground/50">Supports JPG, PNG (Max 5MB)</p>
+              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Product Image (File or Paste)</Label>
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center space-y-4 hover:border-primary/50 transition-colors cursor-pointer group relative min-h-[150px] flex flex-col items-center justify-center"
+              >
+                <input 
+                  type="file" 
+                  hidden 
+                  ref={fileInputRef} 
+                  accept="image/*" 
+                  onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} 
+                />
+                {productForm.imageUrl ? (
+                  <img src={productForm.imageUrl} className="max-h-[120px] rounded-lg" />
+                ) : (
+                  <>
+                    <Upload className="w-10 h-10 mx-auto text-muted-foreground group-hover:text-primary" />
+                    <p className="text-sm text-muted-foreground">Drop image here, click to browse, or <strong>Paste (Ctrl+V)</strong></p>
+                    <p className="text-[10px] text-muted-foreground/50">Supports JPG, PNG (Max 3MB)</p>
+                  </>
+                )}
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button onClick={() => setIsAddProductOpen(false)} variant="ghost" className="rounded-xl">CANCEL</Button>
-            <Button className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl px-8" onClick={() => setIsAddProductOpen(false)}>SAVE PRODUCT</Button>
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl px-8" 
+              onClick={saveProduct}
+              disabled={isSaving}
+            >
+              {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              SAVE PRODUCT
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -374,16 +500,33 @@ export default function AdminPage() {
           <div className="space-y-6 py-4">
             <div className="space-y-2">
               <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Update Title</Label>
-              <Input placeholder="e.g. New Steam Codes Added" className="bg-white/5 border-white/10" />
+              <Input 
+                placeholder="e.g. New Steam Codes Added" 
+                className="bg-white/5 border-white/10" 
+                value={announcementForm.title}
+                onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})}
+              />
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Content</Label>
-              <Textarea placeholder="Write your announcement details here..." className="bg-white/5 border-white/10 min-h-[150px]" />
+              <Textarea 
+                placeholder="Write your announcement details here..." 
+                className="bg-white/5 border-white/10 min-h-[150px]" 
+                value={announcementForm.content}
+                onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})}
+              />
             </div>
           </div>
           <DialogFooter>
             <Button onClick={() => setIsAddAnnouncementOpen(false)} variant="ghost" className="rounded-xl">CANCEL</Button>
-            <Button className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl px-8" onClick={() => setIsAddAnnouncementOpen(false)}>POST UPDATE</Button>
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl px-8" 
+              onClick={saveAnnouncement}
+              disabled={isSaving}
+            >
+              {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              POST UPDATE
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -16,14 +16,18 @@ interface ProductCardProps {
     description: string;
     imageUrl: string;
     category?: string;
+    status?: string;
   };
   className?: string;
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
+  // Use placeholder if imageUrl is missing or invalid
+  const displayImage = product.imageUrl || 'https://picsum.photos/seed/placeholder/400/600';
+
   return (
     <div className={cn(
-      "group relative glass-panel rounded-3xl overflow-hidden transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(26,128,230,0.2)]",
+      "group relative glass-panel rounded-3xl overflow-hidden transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(26,128,230,0.2)] flex flex-col h-full",
       className
     )}>
       {/* Category Badge */}
@@ -33,20 +37,23 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </Badge>
       )}
 
-      {/* Stock status badge (mocked) */}
-      <div className="absolute top-4 right-4 z-10 flex items-center gap-1 bg-green-500/20 text-green-500 border border-green-500/30 backdrop-blur-md px-2 py-1 rounded-full text-[10px] font-bold uppercase">
+      {/* Stock status badge */}
+      <div className={cn(
+        "absolute top-4 right-4 z-10 flex items-center gap-1 backdrop-blur-md px-2 py-1 rounded-full text-[10px] font-bold uppercase border",
+        product.status === 'In Stock' 
+          ? "bg-green-500/20 text-green-500 border-green-500/30" 
+          : "bg-red-500/20 text-red-500 border-red-500/30"
+      )}>
         <Zap className="w-3 h-3 fill-current" />
-        Instant
+        {product.status || 'Stocked'}
       </div>
 
       {/* Product Image */}
-      <div className="relative h-64 w-full overflow-hidden">
-        <Image 
-          src={product.imageUrl || 'https://picsum.photos/seed/placeholder/400/600'}
+      <div className="relative h-64 w-full overflow-hidden shrink-0">
+        <img 
+          src={displayImage}
           alt={product.name}
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-110"
-          data-ai-hint="gaming product"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60"></div>
         
@@ -64,12 +71,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </div>
 
       {/* Product Details */}
-      <div className="p-6 space-y-4">
-        <div>
+      <div className="p-6 space-y-4 flex flex-col flex-grow">
+        <div className="flex-grow">
           <h3 className="text-lg font-bold line-clamp-1 group-hover:text-primary transition-colors font-headline uppercase italic">
             {product.name}
           </h3>
-          <p className="text-xs text-muted-foreground line-clamp-2 mt-1 min-h-[2.5rem]">
+          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
             {product.description}
           </p>
         </div>
@@ -78,12 +85,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Price</span>
             <span className="text-xl font-bold text-white font-headline">
-              Rs. {Math.round(product.price * 133).toLocaleString()}
+              Rs. {Math.round(product.price).toLocaleString()}
             </span>
           </div>
           <Link href={`/products/${product.id}`}>
             <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-bold rounded-full px-6 shadow-lg shadow-primary/20">
-              BUY NOW
+              BUY
             </Button>
           </Link>
         </div>

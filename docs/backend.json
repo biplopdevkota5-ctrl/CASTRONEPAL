@@ -1,0 +1,48 @@
+
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A gaming product or digital code available in the store.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string", "enum": ["PlayStation", "Xbox", "Steam", "Nintendo", "GPU", "PC", "Mobile"] },
+        "price": { "type": "number" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string", "description": "Base64 encoded image or URL" },
+        "status": { "type": "string", "enum": ["In Stock", "Out of Stock", "Low Stock"] },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "category", "price", "status"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Store updates and news displayed on the home page.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "date": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "date"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "password"]
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Collection of store products."
+    },
+    "/announcements/{announcementId}": {
+      "schema": { "$ref": "#/entities/Announcement" },
+      "description": "Collection of store announcements."
+    }
+  }
+}
