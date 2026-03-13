@@ -10,14 +10,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { cn } from '@/lib/utils';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 
 export default function Home() {
   const db = useFirestore();
 
+  // Updated query to use 'postedAt' and filter for active announcements
   const announcementsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(1));
+    return query(
+      collection(db, 'announcements'), 
+      where('isActive', '==', true),
+      orderBy('postedAt', 'desc'), 
+      limit(1)
+    );
   }, [db]);
   
   const { data: announcements } = useCollection<any>(announcementsQuery);
@@ -101,7 +107,9 @@ export default function Home() {
           <div className="relative rounded-3xl overflow-hidden glass-panel p-8 md:p-12 border-primary/20">
             <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
               <div className="space-y-4">
-                <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 uppercase tracking-widest font-bold">LATEST UPDATE • {latestAnnouncement.date}</Badge>
+                <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 uppercase tracking-widest font-bold">
+                  LATEST UPDATE • {latestAnnouncement.postedAt?.toDate ? latestAnnouncement.postedAt.toDate().toLocaleDateString() : 'JUST NOW'}
+                </Badge>
                 <h2 className="text-3xl md:text-4xl font-headline font-bold uppercase italic">
                   {latestAnnouncement.title}
                 </h2>
