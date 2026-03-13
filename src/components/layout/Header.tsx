@@ -1,9 +1,10 @@
+
 "use client";
 
 import Link from 'next/link';
 import { Search, ShoppingCart, User, Gamepad2, Menu, X, LayoutDashboard, LogOut, Package, Phone, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { 
   DropdownMenu, 
@@ -14,15 +15,48 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useUser, useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logoClicks, setLogoClicks] = useState(0);
+  const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useUser();
   const auth = useAuth();
+  const router = useRouter();
 
   const handleLogout = () => {
     signOut(auth);
   };
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    // Increment clicks
+    const newCount = logoClicks + 1;
+    setLogoClicks(newCount);
+
+    // Clear existing timer and start a new 30s window on the first click
+    if (newCount === 1) {
+      if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = setTimeout(() => {
+        setLogoClicks(0);
+      }, 30000);
+    }
+
+    // Check if 10 clicks reached
+    if (newCount >= 10) {
+      e.preventDefault();
+      if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+      setLogoClicks(0);
+      router.push('/admin');
+    }
+  };
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+    };
+  }, []);
 
   return (
     <header className="fixed top-0 z-[100] w-full border-b border-border bg-white">
@@ -34,17 +68,22 @@ export function Header() {
             <span className="hidden sm:flex items-center gap-1.5"><MapPin className="w-3 h-3 text-primary" /> Pokhara, Nepal</span>
           </div>
           <div className="flex gap-4">
-            <Link href="/admin" className="hover:text-primary transition-colors">Admin Portal</Link>
+            {/* Admin Portal link removed for secret access */}
+            <span className="opacity-50">Authorized Retailer</span>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link 
+          href="/" 
+          className="flex items-center gap-3 group"
+          onClick={handleLogoClick}
+        >
           <div className="relative w-10 h-10 flex items-center justify-center bg-[#0a0c10] rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-500">
             <Gamepad2 className="w-6 h-6 text-white" />
           </div>
-          <span className="font-headline text-2xl font-black tracking-tighter text-[#0a0c10] uppercase italic">
+          <span className="font-headline text-2xl font-black tracking-tighter text-[#0a0c10] uppercase italic select-none">
             CASTRO<span className="text-primary">NEPAL</span>
           </span>
         </Link>
