@@ -16,7 +16,7 @@ const GenerateProductDescriptionInputSchema = z.object({
   category: z.string().describe('The category the product belongs to (e.g., "PlayStation Redeem Codes", "Xbox Gift Cards").'),
   shortDescription: z.string().describe('A brief, concise description of the product.'),
   price: z.number().describe('The price of the product.'),
-  features: z.array(z.string()).describe('A list of key features or benefits of the product (e.g., "Instant Delivery", "Digital Code").'),
+  features: z.array(z.string()).optional().describe('A list of key features or benefits of the product (e.g., "Instant Delivery", "Digital Code").'),
 });
 export type GenerateProductDescriptionInput = z.infer<typeof GenerateProductDescriptionInputSchema>;
 
@@ -40,7 +40,7 @@ Your task is to create an engaging, detailed, and persuasive product description
 Product Name: {{{productName}}}
 Category: {{{category}}}
 Short Description: {{{shortDescription}}}
-Price: ${{{price}}}
+Price: \${{{price}}}
 
 {{#if features}}
 Key Features:

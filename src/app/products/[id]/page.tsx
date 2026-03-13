@@ -1,52 +1,85 @@
 
+"use client";
+
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { aiProductRecommendations } from '@/ai/flows/ai-product-recommendations';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ShoppingCart, Zap, ShieldCheck, Gamepad2, Share2, Info, Star, ChevronLeft } from 'lucide-react';
-import Image from 'next/image';
+import { ShoppingCart, Zap, ShieldCheck, Gamepad2, Share2, Info, Star, ChevronLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { CheckoutDialog } from '@/components/checkout/CheckoutDialog';
+import { useFirestore, useDoc } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
-export default async function ProductDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function ProductDetailPage() {
+  const params = useParams();
+  const id = params?.id as string;
+  const db = useFirestore();
+  
+  const productRef = doc(db, 'products', id);
+  const { data: productData, loading: productLoading } = useDoc<any>(productRef);
 
-  // Mock fetching product data based on ID
-  // In a real app, this would be a Firestore fetch
-  const productData = {
-    id: id,
-    name: "PlayStation Plus Premium 12-Month Membership",
-    category: "PlayStation",
-    price: 119.99,
-    imageUrl: "https://picsum.photos/seed/ps-detail/800/1000",
-    features: [
-      "Online Multiplayer access",
-      "Monthly free games",
-      "Exclusive discounts",
-      "Cloud storage",
-      "Game Catalog (hundreds of titles)",
-      "Ubisoft+ Classics",
-      "Classics Catalog"
-    ]
-  };
+  const [detailedDescription, setDetailedDescription] = useState<string>('');
+  const [similarProducts, setSimilarProducts] = useState<any[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
 
-  // Generate detailed description using AI
-  const { detailedDescription } = await generateProductDescription({
-    productName: productData.name,
-    category: productData.category,
-    shortDescription: "Unlock the full potential of your PlayStation console with the Premium membership tier.",
-    price: productData.price,
-    features: productData.features
-  });
+  useEffect(() => {
+    async function fetchAiData() {
+      if (!productData) return;
+      setAiLoading(true);
+      try {
+        // Generate detailed description using AI
+        const { detailedDescription: desc } = await generateProductDescription({
+          productName: productData.name,
+          category: productData.category,
+          shortDescription: productData.description || "Premium gaming asset.",
+          price: productData.price,
+          features: productData.features || []
+        });
+        setDetailedDescription(desc);
 
-  // Fetch similar products using AI
-  const { recommendations: similarProducts } = await aiProductRecommendations({
-    recommendationType: 'similarProducts',
-    productId: id,
-    productCategory: productData.category
-  });
+        // Fetch similar products using AI
+        const { recommendations } = await aiProductRecommendations({
+          recommendationType: 'similarProducts',
+          productId: id,
+          productCategory: productData.category
+        });
+        setSimilarProducts(recommendations);
+      } catch (err) {
+        console.error("AI Fetch failed", err);
+      } finally {
+        setAiLoading(false);
+      }
+    }
+
+    if (productData) {
+      fetchAiData();
+    }
+  }, [productData, id]);
+
+  if (productLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!productData) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center space-y-6">
+        <h1 className="text-4xl font-headline font-bold">PRODUCT NOT FOUND</h1>
+        <p className="text-muted-foreground">The asset you're looking for doesn't exist in the armory.</p>
+        <Link href="/products">
+          <Button variant="outline" className="rounded-full">BACK TO SHOP</Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-20">
@@ -63,16 +96,20 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
           {/* Product Image Gallery */}
           <div className="space-y-6">
             <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden glass-panel border-primary/20 shadow-[0_0_50px_rgba(26,128,230,0.1)]">
-              <Image 
-                src={productData.imageUrl}
-                alt={productData.name}
-                fill
-                className="object-cover"
-                priority
-              />
+              {productData.imageUrl ? (
+                <img 
+                  src={productData.imageUrl}
+                  alt={productData.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                  <Gamepad2 className="w-20 h-20 text-white/10" />
+                </div>
+              )}
               <div className="absolute top-6 left-6 flex flex-col gap-2">
                 <Badge className="bg-primary hover:bg-primary text-white text-xs px-4 py-1.5 rounded-full font-bold tracking-widest uppercase">
-                  Best Seller
+                  Featured
                 </Badge>
                 <div className="flex items-center gap-1 bg-background/80 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold uppercase italic text-primary">
                   <Star className="w-3 h-3 fill-current" />
@@ -89,23 +126,23 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                 <Badge variant="outline" className="border-primary/30 text-primary uppercase font-bold tracking-widest bg-primary/5">
                   {productData.category}
                 </Badge>
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">ID: {id}</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">SKU: {id.slice(0, 8)}</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-headline font-black uppercase italic tracking-tighter leading-none">
                 {productData.name}
               </h1>
               <div className="flex items-center gap-4">
                 <span className="text-4xl font-bold text-white font-headline">
-                  Rs. {Math.round(productData.price * 133).toLocaleString()}
+                  Rs. {Math.round(productData.price).toLocaleString()}
                 </span>
-                <Badge className="bg-green-500/20 text-green-500 border-green-500/30 font-bold px-3 py-1">
-                  IN STOCK
+                <Badge className={productData.status === 'In Stock' ? 'bg-green-500/20 text-green-500 border-green-500/30 font-bold px-3 py-1' : 'bg-red-500/20 text-red-500 border-red-500/30 font-bold px-3 py-1'}>
+                  {productData.status?.toUpperCase() || 'IN STOCK'}
                 </Badge>
               </div>
             </div>
 
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Unlock hundreds of games, from the latest hits to timeless classics. Get the ultimate PlayStation experience with instant digital delivery.
+              {productData.description || "Experience top-tier gaming performance with our high-quality gaming products. Secured, fast, and built for champions."}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -114,8 +151,8 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                   <Zap className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm">Instant Access</h4>
-                  <p className="text-xs text-muted-foreground">Delivered via Email/Dashboard</p>
+                  <h4 className="font-bold text-sm">Secure Asset</h4>
+                  <p className="text-xs text-muted-foreground">Verified by Castro Nepal</p>
                 </div>
               </div>
               <div className="flex items-center gap-4 p-4 glass-panel rounded-2xl border-white/5">
@@ -123,8 +160,8 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                   <ShieldCheck className="w-5 h-5 text-secondary" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm">Official Codes</h4>
-                  <p className="text-xs text-muted-foreground">100% Genuine and Valid</p>
+                  <h4 className="font-bold text-sm">Official Warranty</h4>
+                  <p className="text-xs text-muted-foreground">100% Genuine Products</p>
                 </div>
               </div>
             </div>
@@ -145,7 +182,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
               <div className="flex items-start gap-3">
                 <Info className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground">
-                  By purchasing, you agree to our digital content policy. Digital codes are non-refundable once delivered.
+                  By purchasing, you agree to our store policy. Hardware items include standard manufacturer warranty.
                 </p>
               </div>
             </div>
@@ -160,35 +197,48 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                 value="description" 
                 className="px-0 py-4 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-headline font-bold text-lg uppercase italic tracking-wider transition-all"
               >
-                Detailed Description
+                AI Insights
               </TabsTrigger>
               <TabsTrigger 
                 value="how-to-use" 
                 className="px-0 py-4 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-headline font-bold text-lg uppercase italic tracking-wider transition-all"
               >
-                How to Redeem
+                How to Order
               </TabsTrigger>
               <TabsTrigger 
                 value="reviews" 
                 className="px-0 py-4 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none font-headline font-bold text-lg uppercase italic tracking-wider transition-all"
               >
-                Customer Reviews
+                Reviews
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="description" className="pt-10">
               <div className="max-w-4xl mx-auto glass-panel p-8 md:p-12 rounded-[2rem] border-white/5 prose prose-invert">
-                <div dangerouslySetInnerHTML={{ __html: detailedDescription.replace(/\n/g, '<br />') }} />
-                
-                <h3 className="text-2xl font-bold mt-12 mb-6 font-headline uppercase">Key Features</h3>
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 list-none p-0">
-                  {productData.features.map((feature, i) => (
-                    <li key={i} className="flex items-center gap-3 bg-white/5 p-4 rounded-xl border border-white/5">
-                      <Gamepad2 className="w-5 h-5 text-primary shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                {aiLoading ? (
+                  <div className="flex flex-col items-center py-12 gap-4">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    <p className="text-sm font-bold uppercase tracking-widest text-primary animate-pulse">Consulting the AI Oracles...</p>
+                  </div>
+                ) : (
+                  <>
+                    <div dangerouslySetInnerHTML={{ __html: detailedDescription.replace(/\n/g, '<br />') }} />
+                    
+                    {productData.features && productData.features.length > 0 && (
+                      <>
+                        <h3 className="text-2xl font-bold mt-12 mb-6 font-headline uppercase">Key Features</h3>
+                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 list-none p-0">
+                          {productData.features.map((feature: string, i: number) => (
+                            <li key={i} className="flex items-center gap-3 bg-white/5 p-4 rounded-xl border border-white/5">
+                              <Gamepad2 className="w-5 h-5 text-primary shrink-0" />
+                              <span className="text-sm">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </>
+                )}
               </div>
             </TabsContent>
 
@@ -197,22 +247,22 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                 <div className="flex gap-6 items-start">
                   <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center font-bold text-xl shrink-0">1</div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2 uppercase font-headline">Open the Store</h3>
-                    <p className="text-muted-foreground">Log in to your PlayStation Network account on your console or web browser.</p>
+                    <h3 className="text-xl font-bold mb-2 uppercase font-headline">Place Your Order</h3>
+                    <p className="text-muted-foreground">Click 'Buy Now' and fill in your contact details and delivery address.</p>
                   </div>
                 </div>
                 <div className="flex gap-6 items-start">
                   <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center font-bold text-xl shrink-0">2</div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2 uppercase font-headline">Enter the Code</h3>
-                    <p className="text-muted-foreground">Select 'Redeem Codes' from the PlayStation Store menu and enter your 12-digit digital code.</p>
+                    <h3 className="text-xl font-bold mb-2 uppercase font-headline">Payment Verification</h3>
+                    <p className="text-muted-foreground">Our team will contact you for payment verification via your phone number.</p>
                   </div>
                 </div>
                 <div className="flex gap-6 items-start">
                   <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center font-bold text-xl shrink-0">3</div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2 uppercase font-headline">Confirm & Enjoy</h3>
-                    <p className="text-muted-foreground">Confirm your redemption and your balance or subscription will be added immediately.</p>
+                    <h3 className="text-xl font-bold mb-2 uppercase font-headline">Fast Delivery</h3>
+                    <p className="text-muted-foreground">Once payment is confirmed, your gaming asset will be delivered instantly or within the scheduled time.</p>
                   </div>
                 </div>
               </div>
@@ -221,7 +271,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             <TabsContent value="reviews" className="pt-10">
               <div className="text-center py-20 bg-white/5 rounded-[2rem] border border-white/5 border-dashed">
                 <Star className="w-12 h-12 text-primary mx-auto mb-4 opacity-50" />
-                <h3 className="text-xl font-bold font-headline uppercase italic">Verified Customer Reviews Coming Soon</h3>
+                <h3 className="text-xl font-bold font-headline uppercase italic">Player Feedback Coming Soon</h3>
                 <p className="text-muted-foreground">We are currently migrating our review system.</p>
               </div>
             </TabsContent>
