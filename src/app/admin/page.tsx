@@ -18,7 +18,8 @@ import {
   Upload,
   Loader2,
   Clock,
-  ExternalLink
+  Database,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,7 +51,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { useFirestore, useCollection } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -65,14 +66,14 @@ export default function AdminPage() {
   const { toast } = useToast();
   const db = useFirestore();
 
-  // Firestore Collections with memoized queries
-  const productsQuery = useMemo(() => query(collection(db, 'products'), orderBy('createdAt', 'desc')), [db]);
+  // Firestore Collections with properly memoized queries using useMemoFirebase
+  const productsQuery = useMemoFirebase(() => query(collection(db, 'products'), orderBy('createdAt', 'desc')), [db]);
   const { data: products, loading: productsLoading } = useCollection<any>(productsQuery);
 
-  const ordersQuery = useMemo(() => query(collection(db, 'orders'), orderBy('createdAt', 'desc')), [db]);
+  const ordersQuery = useMemoFirebase(() => query(collection(db, 'orders'), orderBy('createdAt', 'desc')), [db]);
   const { data: orders, loading: ordersLoading } = useCollection<any>(ordersQuery);
 
-  const announcementsQuery = useMemo(() => query(collection(db, 'announcements'), orderBy('createdAt', 'desc')), [db]);
+  const announcementsQuery = useMemoFirebase(() => query(collection(db, 'announcements'), orderBy('createdAt', 'desc')), [db]);
   const { data: announcements, loading: announcementsLoading } = useCollection<any>(announcementsQuery);
 
   // Form State
@@ -157,6 +158,29 @@ export default function AdminPage() {
         }));
       })
       .finally(() => setIsSaving(false));
+  };
+
+  const seedDatabase = async () => {
+    setIsSaving(true);
+    const sampleProducts = [
+      { name: "PSN $50 Gift Card", category: "PlayStation", price: 6650, status: "In Stock", description: "Instant digital code for US accounts.", imageUrl: "https://picsum.photos/seed/psn1/400/600" },
+      { name: "Xbox $25 Card", category: "Xbox", price: 3400, status: "In Stock", description: "Global digital code for Xbox Store.", imageUrl: "https://picsum.photos/seed/xbox1/400/600" },
+      { name: "RTX 4090 GPU", category: "GPU", price: 285000, status: "In Stock", description: "The ultimate gaming graphics card.", imageUrl: "https://picsum.photos/seed/gpu1/400/600" },
+      { name: "Nintendo $20 Card", category: "Nintendo", price: 2750, status: "In Stock", description: "eShop digital redeem code.", imageUrl: "https://picsum.photos/seed/nintendo1/400/600" },
+      { name: "Steam $10 Wallet", category: "Steam", price: 1450, status: "In Stock", description: "Steam Wallet code for global users.", imageUrl: "https://picsum.photos/seed/steam1/400/600" }
+    ];
+
+    try {
+      for (const p of sampleProducts) {
+        const id = doc(collection(db, 'products')).id;
+        await setDoc(doc(db, 'products', id), { ...p, id, createdAt: serverTimestamp() });
+      }
+      toast({ title: "Database Seeded", description: "Real products have been added to your store." });
+    } catch (e) {
+      toast({ variant: 'destructive', title: "Error", description: "Failed to seed database." });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const saveAnnouncement = () => {
@@ -277,7 +301,16 @@ export default function AdminPage() {
           ))}
         </nav>
 
-        <div className="pt-8 border-t border-white/5">
+        <div className="pt-8 border-t border-white/5 space-y-4">
+          <Button 
+            variant="outline" 
+            className="w-full border-primary/20 text-primary hover:bg-primary/10" 
+            onClick={seedDatabase}
+            disabled={isSaving}
+          >
+            <Database className="w-4 h-4 mr-2" />
+            SEED STORE
+          </Button>
           <Button variant="ghost" className="w-full justify-start text-red-500 hover:bg-red-500/10 hover:text-red-400" onClick={() => setIsAuthenticated(false)}>
             <LogOut className="w-4 h-4 mr-2" />
             LOGOUT
@@ -340,7 +373,9 @@ export default function AdminPage() {
               <TableBody>
                 {productsLoading ? (
                   <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
-                ) : products.map((row) => (
+                ) : products?.length === 0 ? (
+                  <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No products found. Use "Seed Store" to add some!</TableCell></TableRow>
+                ) : products?.map((row) => (
                   <TableRow key={row.id} className="border-white/5 hover:bg-white/5">
                     <TableCell className="font-bold py-6">
                       <div className="flex items-center gap-3">
@@ -383,9 +418,9 @@ export default function AdminPage() {
               <TableBody>
                 {ordersLoading ? (
                   <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
-                ) : orders.length === 0 ? (
+                ) : orders?.length === 0 ? (
                   <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No orders yet.</TableCell></TableRow>
-                ) : orders.map((order) => (
+                ) : orders?.map((order) => (
                   <TableRow key={order.id} className="border-white/5 hover:bg-white/5">
                     <TableCell className="py-6">
                       <div className="space-y-1">
@@ -443,7 +478,7 @@ export default function AdminPage() {
               <TableBody>
                 {announcementsLoading ? (
                   <TableRow><TableCell colSpan={3} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
-                ) : announcements.map((row) => (
+                ) : announcements?.map((row) => (
                   <TableRow key={row.id} className="border-white/5 hover:bg-white/5">
                     <TableCell className="font-bold py-6">{row.title}</TableCell>
                     <TableCell className="text-muted-foreground text-xs">{row.date}</TableCell>

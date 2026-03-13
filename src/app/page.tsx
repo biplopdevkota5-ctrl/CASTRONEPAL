@@ -9,13 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { cn } from '@/lib/utils';
-import { useFirestore, useCollection } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 
 export default function Home() {
   const db = useFirestore();
 
-  const announcementsQuery = useMemo(() => {
+  const announcementsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(1));
   }, [db]);
@@ -23,7 +23,7 @@ export default function Home() {
   const { data: announcements } = useCollection<any>(announcementsQuery);
   const latestAnnouncement = announcements?.[0];
 
-  const trendingQuery = useMemo(() => {
+  const trendingQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(10));
   }, [db]);
@@ -146,7 +146,10 @@ export default function Home() {
           </div>
         ) : (
           <div className="text-center py-20 border border-dashed border-white/10 rounded-3xl">
-            <p className="text-muted-foreground">No real products found in the database. Add them in the Admin Panel.</p>
+            <p className="text-muted-foreground mb-6">No products found in the database.</p>
+            <Link href="/admin">
+              <Button variant="outline" className="rounded-full">GO TO ADMIN PANEL TO ADD DATA</Button>
+            </Link>
           </div>
         )}
       </section>
