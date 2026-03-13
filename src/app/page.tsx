@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from 'next/image';
@@ -15,12 +14,12 @@ import { collection, query, orderBy, limit } from 'firebase/firestore';
 export default function Home() {
   const db = useFirestore();
 
-  // Fetch announcements from Firestore
+  // Fetch announcements
   const announcementsQuery = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(1));
   const { data: announcements } = useCollection<any>(announcementsQuery);
   const latestAnnouncement = announcements[0];
 
-  // Fetch real products from Firestore
+  // Fetch trending products
   const trendingQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(10));
   const { data: products, loading } = useCollection<any>(trendingQuery);
 
@@ -44,21 +43,21 @@ export default function Home() {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm animate-in fade-in slide-in-from-top-4 duration-1000">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
               <Sparkles className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold tracking-widest uppercase text-primary">New Gear & Codes Available</span>
             </div>
             
-            <h1 className="font-headline text-5xl md:text-8xl font-black leading-[1.1] tracking-tighter uppercase italic animate-in fade-in slide-in-from-top-4 duration-1000">
+            <h1 className="font-headline text-5xl md:text-8xl font-black leading-[1.1] tracking-tighter uppercase italic">
               LEVEL UP YOUR <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary neon-glow">GAMING EXPERIENCE</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed animate-in fade-in slide-in-from-left-6 duration-1000 delay-200">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
               Nepal’s Trusted Store. Get instant delivery on PlayStation, Xbox, Steam, and Nintendo codes, plus premium GPUs, PCs, and Mobile devices.
             </p>
             
-            <div className="flex flex-wrap gap-4 animate-in fade-in slide-in-from-left-8 duration-1000 delay-300">
+            <div className="flex flex-wrap gap-4">
               <Link href="/products">
                 <Button size="lg" className="h-14 px-8 bg-primary hover:bg-primary/90 text-white font-bold rounded-full neon-border group">
                   SHOP THE ARMORY
@@ -74,7 +73,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Stats / Trust */}
+      {/* Trust Stats */}
       <section className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
@@ -97,7 +96,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Announcements Banner */}
+      {/* Announcements */}
       {latestAnnouncement && (
         <section className="container mx-auto px-4">
           <div className="relative rounded-3xl overflow-hidden glass-panel p-8 md:p-12 border-primary/20">
@@ -137,7 +136,11 @@ export default function Home() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 animate-spin text-primary" /></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-96 rounded-3xl glass-panel animate-pulse bg-white/5"></div>
+            ))}
+          </div>
         ) : products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {products.map((product) => (
@@ -146,7 +149,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="text-center py-20 border border-dashed border-white/10 rounded-3xl">
-            <p className="text-muted-foreground">No products found. Admin hasn't added any yet.</p>
+            <p className="text-muted-foreground">No products found in the database.</p>
           </div>
         )}
       </section>
@@ -179,30 +182,6 @@ export default function Home() {
               </div>
             </Link>
           ))}
-        </div>
-      </section>
-
-      {/* Newsletter */}
-      <section className="container mx-auto px-4">
-        <div className="relative rounded-[3rem] overflow-hidden bg-gradient-to-br from-primary/20 via-background to-secondary/20 border border-white/10 p-12 md:p-20">
-          <div className="max-w-2xl mx-auto text-center space-y-8">
-            <h2 className="text-3xl md:text-5xl font-headline font-bold uppercase italic tracking-tight">
-              JOIN THE ELITE <br /> GAMING COMMUNITY
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Get exclusive early access to hardware drops and new code releases.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <input 
-                type="email" 
-                placeholder="Enter your gaming email" 
-                className="flex-grow h-14 bg-white/5 border border-white/10 rounded-full px-8 focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-              <Button size="lg" className="h-14 px-10 bg-primary hover:bg-primary/90 text-white font-bold rounded-full neon-border">
-                SUBSCRIBE
-              </Button>
-            </div>
-          </div>
         </div>
       </section>
     </div>

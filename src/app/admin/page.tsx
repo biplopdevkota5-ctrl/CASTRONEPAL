@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useCallback } from 'react';
@@ -160,6 +159,39 @@ export default function AdminPage() {
       .finally(() => setIsSaving(false));
   };
 
+  const saveAnnouncement = () => {
+    if (!announcementForm.title || !announcementForm.content) {
+      toast({ variant: 'destructive', title: 'Missing Info', description: 'Please fill title and content.' });
+      return;
+    }
+
+    setIsSaving(true);
+    const announcementId = doc(collection(db, 'announcements')).id;
+    const announcementRef = doc(db, 'announcements', announcementId);
+    
+    const data = {
+      ...announcementForm,
+      id: announcementId,
+      date: new Date().toLocaleDateString(),
+      createdAt: serverTimestamp()
+    };
+
+    setDoc(announcementRef, data)
+      .then(() => {
+        setIsAddAnnouncementOpen(false);
+        setAnnouncementForm({ title: '', content: '' });
+        toast({ title: 'Update Published', description: 'New store announcement is live.' });
+      })
+      .catch(async () => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: announcementRef.path,
+          operation: 'create',
+          requestResourceData: data
+        }));
+      })
+      .finally(() => setIsSaving(false));
+  };
+
   const updateOrderStatus = (orderId: string, newStatus: string) => {
     const orderRef = doc(db, 'orders', orderId);
     updateDoc(orderRef, { status: newStatus })
@@ -267,6 +299,12 @@ export default function AdminPage() {
               <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl px-6">
                 <Plus className="w-4 h-4 mr-2" />
                 ADD PRODUCT
+              </Button>
+            )}
+            {activeTab === 'announcements' && (
+              <Button onClick={() => setIsAddAnnouncementOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl px-6">
+                <Plus className="w-4 h-4 mr-2" />
+                NEW UPDATE
               </Button>
             )}
           </div>
@@ -392,6 +430,31 @@ export default function AdminPage() {
               </TableBody>
             </Table>
           )}
+
+          {activeTab === 'announcements' && (
+            <Table>
+              <TableHeader className="bg-white/5">
+                <TableRow className="hover:bg-transparent border-white/5">
+                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Title</TableHead>
+                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Date</TableHead>
+                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {announcementsLoading ? (
+                  <TableRow><TableCell colSpan={3} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
+                ) : announcements.map((row) => (
+                  <TableRow key={row.id} className="border-white/5 hover:bg-white/5">
+                    <TableCell className="font-bold py-6">{row.title}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs">{row.date}</TableCell>
+                    <TableCell className="text-right">
+                      <Button onClick={() => deleteItem(row.id, 'announcements')} size="icon" variant="ghost" className="text-red-500/50 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </main>
 
@@ -459,6 +522,40 @@ export default function AdminPage() {
           <DialogFooter>
             <Button onClick={saveProduct} disabled={isSaving} className="bg-primary text-white font-bold w-full rounded-xl h-12">
               {isSaving ? <Loader2 className="animate-spin mr-2" /> : 'UPLOAD PRODUCT'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Announcement Modal */}
+      <Dialog open={isAddAnnouncementOpen} onOpenChange={setIsAddAnnouncementOpen}>
+        <DialogContent className="glass-panel border-white/10 sm:max-w-[500px] rounded-[2rem]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-headline font-bold uppercase italic">PUBLISH UPDATE</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Headline</Label>
+              <Input 
+                placeholder="e.g. New RTX 50-Series Stock Arrived" 
+                className="bg-white/5 border-white/10" 
+                value={announcementForm.title}
+                onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Message</Label>
+              <Textarea 
+                placeholder="Provide details for your customers..." 
+                className="bg-white/5 border-white/10 min-h-[150px]" 
+                value={announcementForm.content}
+                onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={saveAnnouncement} disabled={isSaving} className="bg-primary text-white font-bold w-full rounded-xl h-12">
+              {isSaving ? <Loader2 className="animate-spin mr-2" /> : 'PUBLISH NOW'}
             </Button>
           </DialogFooter>
         </DialogContent>

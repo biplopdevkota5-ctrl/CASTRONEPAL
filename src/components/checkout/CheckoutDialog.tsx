@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -70,29 +69,12 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
       createdAt: serverTimestamp()
     };
 
-    // Save to Firestore
     setDoc(orderRef, orderData)
       .then(async () => {
-        // Send Discord Webhook (Keep existing logic as notification)
-        const webhookUrl = 'https://discord.com/api/webhooks/1481672886216556626/vTvWqGzBaZdlk-t5B71J45LkAZMZiXv4BDdU607Coi9_srkK2ZecWgpPnZ7lSI7C6Lly';
-        const message = {
-          content: `NEW ORDER - CASTRO NEPAL\n\n**Order ID:** ${orderId}\n**Customer:** ${formData.fullName}\n**Phone:** ${formData.phone}\n**Product:** ${product.name}\n**Total:** Rs. ${Math.round(totalPrice).toLocaleString()}\n**Time:** ${new Date().toLocaleString()}`
-        };
-
-        try {
-          await fetch(webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(message)
-          });
-        } catch (err) {
-          console.error("Discord notification failed", err);
-        }
-
         setIsSuccess(true);
         toast({
           title: "Order Placed Successfully!",
-          description: "Your order is now in our system.",
+          description: "Our armory has received your request.",
         });
       })
       .catch(async (error) => {
@@ -102,7 +84,6 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
           requestResourceData: orderData
         });
         errorEmitter.emit('permission-error', permissionError);
-        toast({ variant: "destructive", title: "Order Failed", description: "Database connection error." });
       })
       .finally(() => setIsSubmitting(false));
   };
@@ -120,7 +101,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
             </div>
             <h2 className="text-3xl font-headline font-bold uppercase italic tracking-tighter">ORDER CONFIRMED!</h2>
             <p className="text-muted-foreground max-w-sm">
-              Thank you for choosing Castro Nepal. Your order has been registered. We'll contact you at <strong>{formData.phone}</strong> for payment and delivery within 30 minutes.
+              Thank you for choosing Castro Nepal. We'll contact you at <strong>{formData.phone}</strong> for payment and delivery within 30 minutes.
             </p>
             <Button 
               className="bg-primary hover:bg-primary/90 text-white font-bold w-full h-12 rounded-xl"
