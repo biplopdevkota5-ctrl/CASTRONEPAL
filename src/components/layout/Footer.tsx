@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { Facebook, Instagram, Twitter, Gamepad2, Send, Phone, Mail, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2 group">
               <Gamepad2 className="w-8 h-8 text-primary" />
               <span className="font-headline text-2xl font-bold tracking-tighter uppercase italic">
                 Castro<span className="text-primary">Nepal</span>
@@ -55,11 +54,11 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="w-5 h-5 text-primary" />
-                <span>info@castronepal.com</span>
+                <span>castrohub009@gmail.com</span>
               </li>
               <li className="flex items-center gap-3 text-muted-foreground">
                 <MapPin className="w-5 h-5 text-primary" />
-                <span>Kathmandu, Nepal</span>
+                <span>Pokhara, Nepal</span>
               </li>
             </ul>
           </div>
