@@ -1,3 +1,46 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Futuristic gaming background",
+      "imageUrl": "https://picsum.photos/seed/castro1/1920/1080",
+      "imageHint": "gaming background"
+    },
+    {
+      "id": "psn-card",
+      "description": "PlayStation Store Gift Card",
+      "imageUrl": "https://picsum.photos/seed/psn/400/600",
+      "imageHint": "playstation card"
+    },
+    {
+      "id": "xbox-card",
+      "description": "Xbox Gift Card",
+      "imageUrl": "https://picsum.photos/seed/xbox/400/600",
+      "imageHint": "xbox card"
+    },
+    {
+      "id": "steam-card",
+      "description": "Steam Wallet Card",
+      "imageUrl": "https://picsum.photos/seed/steam/400/600",
+      "imageHint": "steam card"
+    },
+    {
+      "id": "nintendo-card",
+      "description": "Nintendo eShop Card",
+      "imageUrl": "https://picsum.photos/seed/nintendo/400/600",
+      "imageHint": "nintendo card"
+    },
+    {
+      "id": "valorant-card",
+      "description": "Valorant Points Card",
+      "imageUrl": "https://picsum.photos/seed/valorant/400/600",
+      "imageHint": "valorant points"
+    },
+    {
+      "id": "roblox-card",
+      "description": "Roblox Gift Card",
+      "imageUrl": "https://picsum.photos/seed/roblox/400/600",
+      "imageHint": "roblox gift"
+    }
+  ]
 }
