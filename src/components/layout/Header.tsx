@@ -21,6 +21,7 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useUser();
   const auth = useAuth();
   const router = useRouter();
@@ -51,10 +52,25 @@ export function Header() {
     }
   };
 
-  // Cleanup timer on unmount
+  const startHold = (e: React.MouseEvent | React.TouchEvent) => {
+    // Start a 5 second timer
+    holdTimerRef.current = setTimeout(() => {
+      router.push('/admin');
+    }, 5000);
+  };
+
+  const endHold = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+  };
+
+  // Cleanup timers on unmount
   useEffect(() => {
     return () => {
       if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
     };
   }, []);
 
@@ -68,7 +84,6 @@ export function Header() {
             <span className="hidden sm:flex items-center gap-1.5"><MapPin className="w-3 h-3 text-primary" /> Pokhara, Nepal</span>
           </div>
           <div className="flex gap-4">
-            {/* Admin Portal link removed for secret access */}
             <span className="opacity-50">Authorized Retailer</span>
           </div>
         </div>
@@ -79,6 +94,11 @@ export function Header() {
           href="/" 
           className="flex items-center gap-3 group"
           onClick={handleLogoClick}
+          onMouseDown={startHold}
+          onMouseUp={endHold}
+          onMouseLeave={endHold}
+          onTouchStart={startHold}
+          onTouchEnd={endHold}
         >
           <div className="relative w-10 h-10 flex items-center justify-center bg-[#0a0c10] rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-500">
             <Gamepad2 className="w-6 h-6 text-white" />
