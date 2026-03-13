@@ -264,8 +264,8 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="glass-panel w-full max-w-md p-8 space-y-8 rounded-[2rem]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+        <Card className="glass-panel w-full max-w-md p-8 space-y-8 rounded-[2rem] border-border shadow-xl">
           <div className="text-center space-y-4">
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
               <Lock className="w-8 h-8 text-primary" />
@@ -467,56 +467,72 @@ export default function AdminPage() {
         </div>
       </main>
 
-      {/* Add Product Dialog - Fully Optimized for Keyboard and Scrolling */}
+      {/* Add Product Dialog - Re-Architected for Perfect Mobile Scrolling */}
       <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
-        <DialogContent className="w-[96vw] sm:max-w-[600px] max-h-[95vh] overflow-y-auto p-0 rounded-2xl border-border bg-white focus:outline-none !translate-y-0 !top-4 sm:!top-[50%] sm:!translate-y-[-50%]">
-          <div className="p-6 md:p-8 space-y-6">
-            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl text-[#0a0c10]">ADD NEW PRODUCT</DialogTitle></DialogHeader>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 py-2">
-              <div className="sm:col-span-2 space-y-2">
+        <DialogContent className="w-[96vw] sm:max-w-[600px] max-h-[92vh] overflow-hidden flex flex-col p-0 rounded-2xl border-border bg-white shadow-2xl focus:outline-none">
+          <div className="p-6 md:p-8 border-b border-border bg-white shrink-0">
+            <DialogHeader>
+              <DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl text-[#0a0c10]">
+                ADD NEW PRODUCT
+              </DialogTitle>
+            </DialogHeader>
+          </div>
+          
+          <div className="flex-grow overflow-y-auto p-6 md:p-8 space-y-6 scrollbar-thin">
+            <div className="space-y-5">
+              <div className="space-y-2">
                 <Label htmlFor="product-name-input" className="text-[10px] uppercase font-black tracking-widest text-primary">Official Product Name</Label>
                 <Input 
                   id="product-name-input" 
                   autoComplete="off"
+                  autoFocus
                   value={productForm.name} 
                   onChange={(e) => setProductForm({...productForm, name: e.target.value})} 
-                  className="bg-gray-50 border-border h-12 rounded-xl text-base" 
+                  className="bg-gray-50 border-border h-12 rounded-xl text-base focus:ring-2 focus:ring-primary/20" 
                   placeholder="e.g. NVIDIA RTX 4090 OC" 
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Category</Label>
-                <Select value={productForm.category} onValueChange={(v) => setProductForm({...productForm, category: v})}>
-                  <SelectTrigger className="bg-gray-50 border-border h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {['GPU', 'Monitor', 'Console', 'Computer', 'Game'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Category</Label>
+                  <Select value={productForm.category} onValueChange={(v) => setProductForm({...productForm, category: v})}>
+                    <SelectTrigger className="bg-gray-50 border-border h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {['GPU', 'Monitor', 'Console', 'Computer', 'Game'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Price (NPR)</Label>
+                  <Input type="number" value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} className="bg-gray-50 border-border h-12 rounded-xl text-base" placeholder="0" />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Price (NPR)</Label>
-                <Input type="number" value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} className="bg-gray-50 border-border h-12 rounded-xl text-base" placeholder="0" />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Stock Status</Label>
+                  <Select value={productForm.stockStatus} onValueChange={(v) => setProductForm({...productForm, stockStatus: v})}>
+                    <SelectTrigger className="bg-gray-50 border-border h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="In Stock">In Stock</SelectItem>
+                      <SelectItem value="Out of Stock">Out of Stock</SelectItem>
+                      <SelectItem value="Limited Stock">Limited Stock</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] uppercase font-black tracking-widest text-primary flex items-center gap-2"><Tag className="w-3 h-3" /> Badge Tag</Label>
+                  <Input placeholder="HOT, NEW, etc." value={productForm.customTag} onChange={(e) => setProductForm({...productForm, customTag: e.target.value})} className="bg-gray-50 border-border h-12 rounded-xl text-base" />
+                </div>
               </div>
+
               <div className="space-y-2">
-                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Stock Status</Label>
-                <Select value={productForm.stockStatus} onValueChange={(v) => setProductForm({...productForm, stockStatus: v})}>
-                  <SelectTrigger className="bg-gray-50 border-border h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="In Stock">In Stock</SelectItem>
-                    <SelectItem value="Out of Stock">Out of Stock</SelectItem>
-                    <SelectItem value="Limited Stock">Limited Stock</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] uppercase font-black tracking-widest text-primary flex items-center gap-2"><Tag className="w-3 h-3" /> Badge Tag</Label>
-                <Input placeholder="HOT, NEW, etc." value={productForm.customTag} onChange={(e) => setProductForm({...productForm, customTag: e.target.value})} className="bg-gray-50 border-border h-12 rounded-xl text-base" />
-              </div>
-              <div className="sm:col-span-2 space-y-2">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Short Description</Label>
                 <Textarea value={productForm.shortDescription} onChange={(e) => setProductForm({...productForm, shortDescription: e.target.value})} className="bg-gray-50 border-border min-h-[100px] rounded-xl text-base" placeholder="Brief summary for display..." />
               </div>
-              <div className="sm:col-span-2 space-y-2">
+
+              <div className="space-y-2">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Product Image</Label>
                 <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary transition-colors bg-gray-50">
                   <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} />
@@ -534,7 +550,10 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
-            <DialogFooter className="pt-4 border-t border-border">
+          </div>
+
+          <div className="p-6 md:p-8 border-t border-border bg-white shrink-0">
+            <DialogFooter>
               <Button onClick={saveProduct} disabled={isSaving} className="w-full h-14 bg-primary text-white font-black uppercase italic tracking-tighter text-lg rounded-xl shadow-lg shadow-primary/20">
                 {isSaving ? <Loader2 className="animate-spin" /> : 'SAVE TO DATABASE'}
               </Button>
@@ -545,7 +564,7 @@ export default function AdminPage() {
 
       {/* Add Announcement Dialog */}
       <Dialog open={isAddAnnouncementOpen} onOpenChange={setIsAddAnnouncementOpen}>
-        <DialogContent className="w-[96vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 rounded-2xl border-border bg-white focus:outline-none !translate-y-0 !top-4 sm:!top-[50%] sm:!translate-y-[-50%]">
+        <DialogContent className="w-[96vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 rounded-2xl border-border bg-white focus:outline-none">
           <div className="p-6 md:p-8 space-y-6">
             <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl text-[#0a0c10]">NEW UPDATE</DialogTitle></DialogHeader>
             <div className="space-y-5 py-2">
@@ -567,4 +586,3 @@ export default function AdminPage() {
     </div>
   );
 }
-

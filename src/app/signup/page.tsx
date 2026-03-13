@@ -50,7 +50,7 @@ export default function SignupPage() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      toast({ title: "Account Created", description: "Successfully joined via Google." });
+      toast({ title: "Account Created", description: "Successfully joined Castro Hub via Google." });
       router.push('/dashboard');
     } catch (error: any) {
       toast({ variant: "destructive", title: "Google Signup Failed", description: error.message });
