@@ -283,10 +283,10 @@ export default function AdminPage() {
             <p className="text-muted-foreground text-sm">Enter master password to access the hub.</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
-            <Input 
+            <input 
               type="password" 
               placeholder="••••••••" 
-              className="h-14 text-center text-2xl tracking-[0.5em] bg-white/5 border-white/10 rounded-xl"
+              className="h-14 w-full text-center text-2xl tracking-[0.5em] bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoFocus
@@ -308,11 +308,12 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-background overflow-x-hidden" onPaste={handlePaste}>
+    <div className="min-h-screen flex flex-col md:flex-row bg-background overflow-hidden" onPaste={handlePaste}>
       {/* Mobile Top Header */}
       <div className="md:hidden flex items-center justify-between p-4 bg-card border-b border-white/5 sticky top-0 z-[110]">
-        <div className="flex items-center gap-2">
-          <span className="font-headline font-bold uppercase italic text-sm tracking-tighter">ADMIN<span className="text-primary">CORE</span></span>
+        <div className="flex flex-col leading-none">
+          <span className="font-headline font-bold uppercase italic text-sm tracking-tighter">CASTRO<span className="text-primary">HUB</span></span>
+          <span className="text-[6px] font-black uppercase tracking-widest text-muted-foreground">ADMIN CORE</span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X /> : <Menu />}
@@ -324,12 +325,13 @@ export default function AdminPage() {
         "fixed inset-0 z-[105] bg-card/95 backdrop-blur-md p-6 flex flex-col transition-transform md:relative md:translate-x-0 md:w-72 md:bg-card md:border-r md:border-white/5 md:flex md:z-10",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="hidden md:flex items-center gap-2 mb-8">
+        <div className="hidden md:flex flex-col mb-8 leading-none">
           <span className="font-headline font-bold uppercase italic text-xl tracking-tighter">
-            ADMIN<span className="text-primary">CORE</span>
+            CASTRO<span className="text-primary">HUB</span>
           </span>
+          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-1">ADMIN CORE</span>
         </div>
-        <nav className="space-y-2 flex-grow mt-12 md:mt-0">
+        <nav className="space-y-2 flex-grow mt-12 md:mt-0 overflow-y-auto pr-2">
           {NavItems.map((item) => (
             <button
               key={item.id}
@@ -359,20 +361,20 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      <main className="flex-grow p-4 md:p-12 space-y-8 bg-black/5 overflow-y-auto">
-        <header className="flex flex-col gap-4">
+      <main className="flex-grow flex flex-col bg-black/5 overflow-hidden">
+        <header className="p-4 md:p-8 border-b border-white/5 bg-white/50 backdrop-blur-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className="text-2xl md:text-3xl font-headline font-black uppercase italic tracking-tighter">
               {activeTab} <span className="text-primary">Management</span>
             </h2>
             <div className="flex gap-2">
               {activeTab === 'products' && (
-                <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary text-white flex-grow sm:flex-none">
+                <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary text-white flex-grow sm:flex-none h-11 px-6 rounded-xl font-bold uppercase text-[10px] tracking-widest">
                   <Plus className="w-4 h-4 mr-2" /> ADD ITEM
                 </Button>
               )}
               {activeTab === 'announcements' && (
-                <Button onClick={() => setIsAddAnnouncementOpen(true)} className="bg-primary text-white flex-grow sm:flex-none">
+                <Button onClick={() => setIsAddAnnouncementOpen(true)} className="bg-primary text-white flex-grow sm:flex-none h-11 px-6 rounded-xl font-bold uppercase text-[10px] tracking-widest">
                   <Plus className="w-4 h-4 mr-2" /> NEW UPDATE
                 </Button>
               )}
@@ -380,96 +382,104 @@ export default function AdminPage() {
           </div>
         </header>
 
-        <div className="glass-panel border-white/5 rounded-2xl overflow-x-auto">
-          {activeTab === 'products' && (
-            <Table>
-              <TableHeader><TableRow><TableHead>Product</TableHead><TableHead className="hidden sm:table-cell">Category</TableHead><TableHead>Price</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
-              <TableBody>
-                {products?.map((row: any) => (
-                  <TableRow key={row.id}>
-                    <TableCell className="font-bold">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 overflow-hidden shrink-0">{row.imageUrl && <img src={row.imageUrl} className="w-full h-full object-cover" />}</div>
-                        <div className="truncate max-w-[150px]">{row.name}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell"><Badge variant="outline">{row.categoryId}</Badge></TableCell>
-                    <TableCell className="whitespace-nowrap">Rs. {Math.round(row.price).toLocaleString()}</TableCell>
-                    <TableCell className="text-right"><Button onClick={() => deleteItem(row.id, 'products')} size="icon" variant="ghost" className="text-red-500"><Trash2 className="w-4 h-4" /></Button></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+        <div className="flex-grow overflow-y-auto p-4 md:p-12">
+          <div className="glass-panel border-white/5 rounded-2xl overflow-hidden">
+            {activeTab === 'products' && (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader><TableRow><TableHead>Product</TableHead><TableHead className="hidden sm:table-cell">Category</TableHead><TableHead>Price</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {products?.map((row: any) => (
+                      <TableRow key={row.id}>
+                        <TableCell className="font-bold">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 overflow-hidden shrink-0">{row.imageUrl && <img src={row.imageUrl} className="w-full h-full object-cover" />}</div>
+                            <div className="truncate max-w-[120px] sm:max-w-[200px]">{row.name}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell"><Badge variant="outline" className="text-[9px]">{row.categoryId}</Badge></TableCell>
+                        <TableCell className="whitespace-nowrap font-headline font-bold text-xs">Rs. {Math.round(row.price).toLocaleString()}</TableCell>
+                        <TableCell className="text-right"><Button onClick={() => deleteItem(row.id, 'products')} size="icon" variant="ghost" className="text-red-500 hover:bg-red-50"><Trash2 className="w-4 h-4" /></Button></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
 
-          {activeTab === 'orders' && (
-            <Table>
-              <TableHeader><TableRow><TableHead>Customer</TableHead><TableHead>Total</TableHead><TableHead className="hidden sm:table-cell">Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
-              <TableBody>
-                {orders?.map((order: any) => (
-                  <TableRow key={order.id}>
-                    <TableCell>
-                      <div className="font-bold">{order.customerName}</div>
-                      <div className="text-[10px] text-muted-foreground">{order.customerPhoneNumber}</div>
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">Rs. {Math.round(order.totalAmount).toLocaleString()}</TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <Select defaultValue={order.status} onValueChange={(v) => updateOrderStatus(order.id, v)}>
-                        <SelectTrigger className="h-8 text-[10px] w-28"><SelectValue /></SelectTrigger>
-                        <SelectContent><SelectItem value="Pending">Pending</SelectItem><SelectItem value="Processing">Processing</SelectItem><SelectItem value="Completed">Completed</SelectItem><SelectItem value="Cancelled">Cancelled</SelectItem></SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="text-right"><Button onClick={() => deleteItem(order.id, 'orders')} size="icon" variant="ghost" className="text-red-500"><Trash2 className="w-4 h-4" /></Button></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+            {activeTab === 'orders' && (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader><TableRow><TableHead>Customer</TableHead><TableHead>Total</TableHead><TableHead className="hidden sm:table-cell">Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {orders?.map((order: any) => (
+                      <TableRow key={order.id}>
+                        <TableCell>
+                          <div className="font-bold text-xs truncate max-w-[100px] sm:max-w-none">{order.customerName}</div>
+                          <div className="text-[9px] text-muted-foreground">{order.customerPhoneNumber}</div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap font-headline font-bold text-xs">Rs. {Math.round(order.totalAmount).toLocaleString()}</TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          <Select defaultValue={order.status} onValueChange={(v) => updateOrderStatus(order.id, v)}>
+                            <SelectTrigger className="h-8 text-[10px] w-28"><SelectValue /></SelectTrigger>
+                            <SelectContent><SelectItem value="Pending">Pending</SelectItem><SelectItem value="Processing">Processing</SelectItem><SelectItem value="Completed">Completed</SelectItem><SelectItem value="Cancelled">Cancelled</SelectItem></SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-right"><Button onClick={() => deleteItem(order.id, 'orders')} size="icon" variant="ghost" className="text-red-500 hover:bg-red-50"><Trash2 className="w-4 h-4" /></Button></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
 
-          {activeTab === 'announcements' && (
-            <Table>
-              <TableHeader><TableRow><TableHead>Headline</TableHead><TableHead className="hidden sm:table-cell">Date</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
-              <TableBody>
-                {announcements?.map((ann: any) => (
-                  <TableRow key={ann.id}>
-                    <TableCell className="font-bold truncate max-w-[200px]">{ann.title}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{ann.postedAt?.toDate ? ann.postedAt.toDate().toLocaleDateString() : 'Pending'}</TableCell>
-                    <TableCell className="text-right"><Button onClick={() => deleteItem(ann.id, 'announcements')} size="icon" variant="ghost" className="text-red-500"><Trash2 className="w-4 h-4" /></Button></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+            {activeTab === 'announcements' && (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader><TableRow><TableHead>Headline</TableHead><TableHead className="hidden sm:table-cell">Date</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {announcements?.map((ann: any) => (
+                      <TableRow key={ann.id}>
+                        <TableCell className="font-bold truncate max-w-[200px] text-xs">{ann.title}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-xs">{ann.postedAt?.toDate ? ann.postedAt.toDate().toLocaleDateString() : 'Pending'}</TableCell>
+                        <TableCell className="text-right"><Button onClick={() => deleteItem(ann.id, 'announcements')} size="icon" variant="ghost" className="text-red-500 hover:bg-red-50"><Trash2 className="w-4 h-4" /></Button></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
         </div>
       </main>
 
-      {/* Add Product Dialog */}
+      {/* Add Product Dialog - Fully Scrollable for Mobile */}
       <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
-        <DialogContent className="glass-panel border-white/10 w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-0 rounded-2xl">
+        <DialogContent className="glass-panel border-white/10 w-[95vw] sm:max-w-[600px] max-h-[92vh] overflow-y-auto p-0 rounded-2xl focus:outline-none">
           <div className="p-6 md:p-8 space-y-6">
-            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic italic tracking-tighter">UPLOAD TO ARMORY</DialogTitle></DialogHeader>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-4">
-              <div className="sm:col-span-2 space-y-2">
-                <Label>Product Name</Label>
-                <Input value={productForm.name} onChange={(e) => setProductForm({...productForm, name: e.target.value})} className="bg-white/5 border-white/10" />
+            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic italic tracking-tighter text-xl">UPLOAD TO ARMORY</DialogTitle></DialogHeader>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 py-2">
+              <div className="sm:col-span-2 space-y-1.5">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Product Name</Label>
+                <Input value={productForm.name} onChange={(e) => setProductForm({...productForm, name: e.target.value})} className="bg-white/5 border-white/10 h-11" placeholder="Enter name" />
               </div>
-              <div className="space-y-2">
-                <Label>Category</Label>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Category</Label>
                 <Select value={productForm.category} onValueChange={(v) => setProductForm({...productForm, category: v})}>
-                  <SelectTrigger className="bg-white/5 border-white/10"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-white/5 border-white/10 h-11"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {['GPU', 'Monitor', 'Console', 'Computer', 'Game'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Price (NPR)</Label>
-                <Input type="number" value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} className="bg-white/5 border-white/10" />
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Price (NPR)</Label>
+                <Input type="number" value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} className="bg-white/5 border-white/10 h-11" placeholder="0" />
               </div>
-              <div className="space-y-2">
-                <Label>Stock Status</Label>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Stock Status</Label>
                 <Select value={productForm.stockStatus} onValueChange={(v) => setProductForm({...productForm, stockStatus: v})}>
-                  <SelectTrigger className="bg-white/5 border-white/10"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-white/5 border-white/10 h-11"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="In Stock">In Stock</SelectItem>
                     <SelectItem value="Out of Stock">Out of Stock</SelectItem>
@@ -477,25 +487,34 @@ export default function AdminPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2"><Tag className="w-3 h-3" /> Custom Tag (HOT, NEW)</Label>
-                <Input placeholder="Leave empty if none" value={productForm.customTag} onChange={(e) => setProductForm({...productForm, customTag: e.target.value})} className="bg-white/5 border-white/10" />
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary flex items-center gap-2"><Tag className="w-3 h-3" /> Custom Tag</Label>
+                <Input placeholder="HOT, NEW, etc." value={productForm.customTag} onChange={(e) => setProductForm({...productForm, customTag: e.target.value})} className="bg-white/5 border-white/10 h-11" />
               </div>
-              <div className="sm:col-span-2 space-y-2">
-                <Label>Short Description</Label>
-                <Textarea value={productForm.shortDescription} onChange={(e) => setProductForm({...productForm, shortDescription: e.target.value})} className="bg-white/5 border-white/10" />
+              <div className="sm:col-span-2 space-y-1.5">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Short Description</Label>
+                <Textarea value={productForm.shortDescription} onChange={(e) => setProductForm({...productForm, shortDescription: e.target.value})} className="bg-white/5 border-white/10 min-h-[80px]" placeholder="Brief summary..." />
               </div>
-              <div className="sm:col-span-2 space-y-2">
-                <Label>Image (Paste or Browse)</Label>
-                <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition-colors">
+              <div className="sm:col-span-2 space-y-1.5">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Image (Paste or Browse)</Label>
+                <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center cursor-pointer hover:border-primary/50 transition-colors bg-white/5">
                   <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} />
-                  {productForm.imageUrl ? <img src={productForm.imageUrl} className="max-h-[160px] mx-auto rounded-lg" /> : <Upload className="w-10 h-10 mx-auto text-muted-foreground" />}
-                  <p className="text-xs text-muted-foreground mt-2">Tap to browse or paste image</p>
+                  {productForm.imageUrl ? (
+                    <div className="relative group mx-auto w-full max-w-[200px]">
+                      <img src={productForm.imageUrl} className="w-full rounded-lg shadow-lg" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity"><p className="text-[10px] text-white font-bold">CHANGE IMAGE</p></div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <Upload className="w-8 h-8 text-muted-foreground" />
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Tap to upload or paste</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button onClick={saveProduct} disabled={isSaving} className="w-full h-14 bg-primary text-white font-black uppercase italic tracking-tighter text-lg rounded-xl">
+            <DialogFooter className="pt-4 border-t border-white/5">
+              <Button onClick={saveProduct} disabled={isSaving} className="w-full h-14 bg-primary text-white font-black uppercase italic tracking-tighter text-lg rounded-xl shadow-lg shadow-primary/20">
                 {isSaving ? <Loader2 className="animate-spin" /> : 'CONFIRM UPLOAD'}
               </Button>
             </DialogFooter>
@@ -503,16 +522,24 @@ export default function AdminPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Announcement Dialog */}
+      {/* Add Announcement Dialog - Fully Scrollable */}
       <Dialog open={isAddAnnouncementOpen} onOpenChange={setIsAddAnnouncementOpen}>
-        <DialogContent className="glass-panel border-white/10 w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 rounded-2xl">
+        <DialogContent className="glass-panel border-white/10 w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 rounded-2xl focus:outline-none">
           <div className="p-6 md:p-8 space-y-6">
-            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter">PUBLISH UPDATE</DialogTitle></DialogHeader>
-            <div className="space-y-6 py-4">
-              <div className="space-y-2"><Label>Headline</Label><Input value={announcementForm.title} onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})} className="bg-white/5 border-white/10" /></div>
-              <div className="space-y-2"><Label>Message</Label><Textarea value={announcementForm.content} onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})} className="bg-white/5 border-white/10 min-h-[120px]" /></div>
+            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl">PUBLISH UPDATE</DialogTitle></DialogHeader>
+            <div className="space-y-5 py-2">
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Headline</Label>
+                <Input value={announcementForm.title} onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})} className="bg-white/5 border-white/10 h-11" placeholder="Enter headline" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Message</Label>
+                <Textarea value={announcementForm.content} onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})} className="bg-white/5 border-white/10 min-h-[150px]" placeholder="Write your announcement..." />
+              </div>
             </div>
-            <DialogFooter><Button onClick={saveAnnouncement} disabled={isSaving} className="w-full h-14 bg-primary text-white font-black uppercase italic tracking-tighter text-lg rounded-xl">PUBLISH NOW</Button></DialogFooter>
+            <DialogFooter className="pt-4 border-t border-white/5">
+              <Button onClick={saveAnnouncement} disabled={isSaving} className="w-full h-14 bg-primary text-white font-black uppercase italic tracking-tighter text-lg rounded-xl shadow-lg shadow-primary/20">PUBLISH NOW</Button>
+            </DialogFooter>
           </div>
         </DialogContent>
       </Dialog>

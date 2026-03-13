@@ -43,10 +43,10 @@ export default function Home() {
                 <div className="absolute inset-0 bg-[#0a0c10] rounded-[2rem] rotate-1 shadow-lg transition-transform duration-700 hover:rotate-0"></div>
                 <div className="absolute inset-0 bg-white border border-border rounded-[2rem] shadow-xl overflow-hidden transition-transform duration-700 hover:-translate-y-2">
                   <Image 
-                    src="https://firm-emerald-fvkkb8nt2n.edgeone.app/Screenshot%20(6).png" 
+                    src="https://picsum.photos/seed/hardware1/600/600" 
                     fill
                     className="object-cover" 
-                    alt="Hardware Armory"
+                    alt="High Performance Hardware"
                     sizes="(max-width: 768px) 100vw, 500px"
                     priority
                     fetchPriority="high"

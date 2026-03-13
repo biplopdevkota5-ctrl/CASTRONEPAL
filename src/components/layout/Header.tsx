@@ -78,7 +78,7 @@ export function Header() {
             <span className="hidden sm:flex items-center gap-1.5"><MapPin className="w-3 h-3 text-primary" /> Sitapaila, Kathmandu</span>
           </div>
           <div className="flex gap-4 items-center">
-            <span className="opacity-50 hidden md:inline">Authorized Retailer</span>
+            <span className="opacity-50 hidden md:inline tracking-[0.2em]">Authorized Retailer</span>
             <Link href="/admin" className="flex items-center gap-1.5 hover:text-primary transition-colors border-l border-white/20 pl-4">
               <ShieldCheck className="w-3 h-3" /> Admin
             </Link>
@@ -89,7 +89,7 @@ export function Header() {
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link 
           href="/" 
-          className="flex items-center gap-3 group"
+          className="flex flex-col group leading-tight"
           onClick={handleLogoClick}
           onMouseDown={startHold}
           onMouseUp={endHold}
@@ -98,8 +98,9 @@ export function Header() {
           onTouchEnd={endHold}
         >
           <span className="font-headline text-2xl font-black tracking-tighter text-[#0a0c10] uppercase italic select-none">
-            ARMORY<span className="text-primary">PRO</span>
+            CASTRO<span className="text-primary">HUB</span>
           </span>
+          <span className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground italic">BUY CHEAP SAVE HIGH</span>
         </Link>
 
         {/* Desktop Nav */}
