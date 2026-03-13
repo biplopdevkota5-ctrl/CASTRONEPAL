@@ -34,7 +34,7 @@ export default function Home() {
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(10));
   }, [db]);
   
-  const { data: products, loading } = useCollection<any>(trendingQuery);
+  const { data: products, isLoading: loading } = useCollection<any>(trendingQuery);
 
   return (
     <div className="flex flex-col gap-20 pb-20">

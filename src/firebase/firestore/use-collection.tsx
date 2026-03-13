@@ -97,7 +97,7 @@ export function useCollection<T = any>(
 
   // Softened check: warn instead of throw to prevent full app crash
   if(memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
-    console.error('Warning: Firestore Query was not properly memoized using useMemoFirebase. This can cause performance issues.');
+    console.warn('Warning: Firestore Query was not properly memoized using useMemoFirebase. This can cause performance issues.');
   }
 
   return { data, isLoading, error };

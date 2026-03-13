@@ -78,7 +78,7 @@ export function useDoc<T = any>(
 
   // Softened check: warn instead of throw to prevent full app crash
   if(memoizedDocRef && !memoizedDocRef.__memo) {
-    console.error('Warning: DocumentReference was not properly memoized using useMemoFirebase.');
+    console.warn('Warning: DocumentReference was not properly memoized using useMemoFirebase.');
   }
 
   return { data, isLoading, error };
