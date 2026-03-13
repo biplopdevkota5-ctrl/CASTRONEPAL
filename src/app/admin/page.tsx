@@ -484,8 +484,8 @@ export default function AdminPage() {
             <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl text-[#0a0c10]">UPLOAD TO ARMORY</DialogTitle></DialogHeader>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 py-2">
               <div className="sm:col-span-2 space-y-1.5">
-                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Product Name</Label>
-                <Input value={productForm.name} onChange={(e) => setProductForm({...productForm, name: e.target.value})} className="bg-gray-50 border-border h-11 rounded-xl" placeholder="Enter product name" />
+                <Label htmlFor="product-name" className="text-[10px] uppercase font-black tracking-widest text-primary">Product Name</Label>
+                <Input id="product-name" value={productForm.name} onChange={(e) => setProductForm({...productForm, name: e.target.value})} className="bg-gray-50 border-border h-11 rounded-xl" placeholder="Enter product name" />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Category</Label>
