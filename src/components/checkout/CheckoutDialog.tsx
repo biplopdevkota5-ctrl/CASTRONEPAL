@@ -17,9 +17,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { ShoppingBag, Loader2, CheckCircle2 } from 'lucide-react';
 import { useFirestore, useUser } from '@/firebase';
-import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { sendOrderToDiscord } from '@/app/actions/notifications';
 
 interface CheckoutDialogProps {
   product: {
@@ -71,6 +72,24 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
 
     setDoc(orderRef, orderData)
       .then(async () => {
+        // Send notification to Discord via Server Action
+        const discordSuccess = await sendOrderToDiscord({
+          id: orderId,
+          productName: product.name,
+          quantity: formData.quantity,
+          totalAmount: totalPrice,
+          customerName: formData.fullName,
+          customerPhoneNumber: formData.phone,
+          customerEmail: formData.email,
+          customerAddress: formData.address,
+          notes: formData.notes
+        });
+
+        // Update flag in database if webhook sent successfully
+        if (discordSuccess) {
+          updateDoc(orderRef, { discordWebhookSent: true }).catch(() => {});
+        }
+
         setIsSuccess(true);
         toast({
           title: "Order Placed Successfully!",
