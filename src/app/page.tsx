@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from 'react';
@@ -15,7 +16,6 @@ import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 export default function Home() {
   const db = useFirestore();
 
-  // Updated query to use 'postedAt' and filter for active announcements
   const announcementsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(

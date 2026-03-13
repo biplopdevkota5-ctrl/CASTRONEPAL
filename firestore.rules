@@ -60,7 +60,7 @@ service cloud.firestore {
 
     match /announcements/{announcementId} {
       // Explicitly allow public read for the homepage display
-      allow read: if true;
+      allow get, list: if true;
       allow write: if isAdmin();
     }
   }

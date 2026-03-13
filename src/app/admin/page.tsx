@@ -64,7 +64,7 @@ export default function AdminPage() {
   const auth = useAuth();
   const { user } = useUser();
 
-  // Queries now wait for both password auth AND firebase auth user object to be ready
+  // Queries wait for both password auth AND firebase auth user object to be ready
   const productsQuery = useMemoFirebase(() => {
     if (!db || !isAuthenticated || !user) return null;
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'));
