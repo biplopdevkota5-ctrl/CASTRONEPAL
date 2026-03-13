@@ -74,7 +74,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
     try {
       await setDoc(orderRef, orderData);
       
-      // 1. Send Discord Notice
+      // 1. Send Discord Notice (Automated Admin Alert)
       const discordSuccess = await sendOrderToDiscord({
         id: orderId,
         productName: product.name,
@@ -91,7 +91,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
         await updateDoc(orderRef, { discordWebhookSent: true });
       }
 
-      // 2. Generate WhatsApp Link for user
+      // 2. Generate WhatsApp Link for user confirmation (to 9702663187)
       const link = await getWhatsAppOrderLink({
         productName: product.name,
         quantity: formData.quantity,
@@ -104,7 +104,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
       setIsSuccess(true);
       toast({
         title: "Order Placed!",
-        description: "Admin notified via Discord.",
+        description: "Admin notified via Discord and WhatsApp portal ready.",
       });
     } catch (error: any) {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -130,7 +130,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
             </div>
             <h2 className="text-3xl font-headline font-bold uppercase italic tracking-tighter">ORDER PLACED!</h2>
             <p className="text-white/60 max-w-sm">
-              We have received your order. For <strong>Instant Verification</strong> and payment details, please click the WhatsApp button below.
+              We have received your order. To complete your purchase and get payment details, click the button below to message our admin on WhatsApp.
             </p>
             <div className="flex flex-col gap-4 w-full">
               <a href={waLink} target="_blank" rel="noopener noreferrer" className="w-full">
@@ -148,7 +148,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
                   setFormData({ fullName: '', phone: '', email: '', address: '', quantity: '1', notes: '' });
                 }}
               >
-                CLOSE WINDOW
+                BACK TO SHOP
               </Button>
             </div>
           </div>

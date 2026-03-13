@@ -56,7 +56,7 @@ export async function sendOrderToDiscord(orderData: {
 
 /**
  * Generates a WhatsApp Click-to-Chat link with a pre-filled order summary.
- * Targeted to provided admin numbers: 9805602394, 9702663187
+ * Targeted to provided admin number: 9702663187
  */
 export async function getWhatsAppOrderLink(orderData: {
   productName: string;
@@ -65,8 +65,8 @@ export async function getWhatsAppOrderLink(orderData: {
   customerName: string;
   customerPhoneNumber: string;
 }) {
-  // Using 9805602394 as primary contact
-  const adminPhone = '9779805602394'; 
+  // Primary Admin Number updated to 9702663187
+  const adminPhone = '9779702663187'; 
   const message = `*🎮 NEW ORDER FROM CASTRO HUB*\n\n*Product:* ${orderData.productName}\n*Qty:* ${orderData.quantity}\n*Total:* Rs. ${Math.round(orderData.totalAmount).toLocaleString()}\n\n*Customer Details:*\n*Name:* ${orderData.customerName}\n*Phone:* ${orderData.customerPhoneNumber}\n\n_Please confirm my order and send payment details._`;
   
   return `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
