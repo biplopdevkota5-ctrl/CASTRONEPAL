@@ -25,13 +25,13 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 z-[100] w-full border-b border-white/5 bg-background/60 backdrop-blur-xl">
+    <header className="fixed top-0 z-[100] w-full border-b border-border bg-white/90 backdrop-blur-xl">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-10 h-10 flex items-center justify-center bg-primary rounded-xl overflow-hidden shadow-lg shadow-primary/20 group-hover:rotate-12 transition-transform duration-500">
+          <div className="relative w-10 h-10 flex items-center justify-center bg-primary rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-500">
             <Gamepad2 className="w-6 h-6 text-white" />
           </div>
-          <span className="font-headline text-2xl font-black tracking-tighter text-white uppercase italic">
+          <span className="font-headline text-2xl font-black tracking-tighter text-foreground uppercase italic">
             CASTRO<span className="text-primary">NEPAL</span>
           </span>
         </Link>
@@ -47,7 +47,7 @@ export function Header() {
             <Link 
               key={link.label} 
               href={link.href} 
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-primary transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors relative group"
             >
               {link.label}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
@@ -56,49 +56,49 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="text-white/60 hover:text-primary hover:bg-primary/5 rounded-full">
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-full">
             <Search className="w-5 h-5" />
           </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-white/60 hover:text-primary hover:bg-primary/5 rounded-full">
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-full">
                 <User className="w-5 h-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="glass-panel border-white/10 p-2 min-w-[220px] rounded-2xl">
+            <DropdownMenuContent align="end" className="bg-white border-border p-2 min-w-[220px] rounded-2xl shadow-xl">
               {user ? (
                 <>
-                  <div className="px-4 py-3 border-b border-white/5 mb-2">
+                  <div className="px-4 py-3 border-b border-border mb-2">
                     <div className="text-[10px] uppercase font-black text-primary tracking-widest mb-1">Authenticated Player</div>
-                    <div className="text-xs font-bold text-white truncate">{user.displayName || user.email}</div>
+                    <div className="text-xs font-bold text-foreground truncate">{user.displayName || user.email}</div>
                   </div>
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl hover:bg-primary/10">
+                    <Link href="/dashboard" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl hover:bg-primary/5">
                       <LayoutDashboard className="w-4 h-4 mr-3 text-primary" /> Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl hover:bg-primary/10">
+                    <Link href="/dashboard" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl hover:bg-primary/5">
                       <Package className="w-4 h-4 mr-3 text-primary" /> My Orders
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/5" />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl text-red-500 hover:bg-red-500/10">
+                  <DropdownMenuSeparator className="bg-border" />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl text-red-500 hover:bg-red-50">
                     <LogOut className="w-4 h-4 mr-3" /> Logout
                   </DropdownMenuItem>
                 </>
               ) : (
                 <>
                   <DropdownMenuItem asChild>
-                    <Link href="/login" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl hover:bg-primary/10">Login</Link>
+                    <Link href="/login" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl hover:bg-primary/5">Login</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/signup" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl hover:bg-primary/10">Register</Link>
+                    <Link href="/signup" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl hover:bg-primary/5">Register</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/5" />
+                  <DropdownMenuSeparator className="bg-border" />
                   <DropdownMenuItem asChild>
-                    <Link href="/admin" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl text-primary hover:bg-primary/10">
+                    <Link href="/admin" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl text-primary hover:bg-primary/5">
                       Admin Access
                     </Link>
                   </DropdownMenuItem>
@@ -107,7 +107,7 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button className="ml-4 h-11 px-6 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg shadow-primary/20">
+          <Button className="ml-4 h-11 px-6 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md">
             <ShoppingCart className="w-4 h-4 mr-2" />
             Cart (0)
           </Button>
@@ -124,7 +124,7 @@ export function Header() {
 
       {/* Mobile Menu */}
       <div className={cn(
-        "fixed inset-0 top-20 bg-background z-[90] transition-transform duration-500 lg:hidden",
+        "fixed inset-0 top-20 bg-white z-[90] transition-transform duration-500 lg:hidden",
         isMenuOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="flex flex-col p-8 gap-6">
@@ -132,13 +132,13 @@ export function Header() {
             <Link 
               key={label} 
               href={label === 'Home' ? '/' : `/products?category=${label}`} 
-              className="text-3xl font-headline font-black uppercase italic tracking-tighter" 
+              className="text-3xl font-headline font-black uppercase italic tracking-tighter text-foreground" 
               onClick={() => setIsMenuOpen(false)}
             >
               {label}
             </Link>
           ))}
-          <hr className="border-white/5 my-4" />
+          <hr className="border-border my-4" />
           <div className="flex flex-col gap-4">
             {user ? (
               <>
@@ -153,7 +153,7 @@ export function Header() {
                   <Button className="w-full h-14 bg-primary font-bold text-lg rounded-2xl">Login</Button>
                 </Link>
                 <Link href="/signup" onClick={() => setIsMenuOpen(false)} className="w-full">
-                  <Button variant="outline" className="w-full h-14 border-white/10 font-bold text-lg rounded-2xl">Sign Up</Button>
+                  <Button variant="outline" className="w-full h-14 border-border font-bold text-lg rounded-2xl">Sign Up</Button>
                 </Link>
               </>
             )}
