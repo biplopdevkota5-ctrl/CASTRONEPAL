@@ -165,15 +165,15 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
               <div className="space-y-1.5">
                 <Label htmlFor="fullName" className="text-[9px] uppercase font-black tracking-[0.15em] text-primary">Full Name</Label>
-                <Input id="fullName" required className="bg-white/5 border-white/10 rounded-lg h-10 md:h-12 text-white text-xs md:text-sm placeholder:text-white/20 focus:ring-primary/50" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
+                <Input id="fullName" required placeholder="Enter your full name" className="bg-white/5 border-white/10 rounded-lg h-10 md:h-12 text-white text-xs md:text-sm placeholder:text-white/20 focus:ring-primary/50" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="phone" className="text-[9px] uppercase font-black tracking-[0.15em] text-primary">Phone Number</Label>
-                <Input id="phone" required type="tel" className="bg-white/5 border-white/10 rounded-lg h-10 md:h-12 text-white text-xs md:text-sm placeholder:text-white/20 focus:ring-primary/50" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+                <Input id="phone" required type="tel" placeholder="Enter phone number" className="bg-white/5 border-white/10 rounded-lg h-10 md:h-12 text-white text-xs md:text-sm placeholder:text-white/20 focus:ring-primary/50" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="email" className="text-[9px] uppercase font-black tracking-[0.15em] text-primary">Email Address</Label>
-                <Input id="email" required type="email" className="bg-white/5 border-white/10 rounded-lg h-10 md:h-12 text-white text-xs md:text-sm placeholder:text-white/20 focus:ring-primary/50" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
+                <Input id="email" required type="email" placeholder="Enter email address" className="bg-white/5 border-white/10 rounded-lg h-10 md:h-12 text-white text-xs md:text-sm placeholder:text-white/20 focus:ring-primary/50" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="quantity" className="text-[9px] uppercase font-black tracking-[0.15em] text-primary">Quantity</Label>
@@ -181,11 +181,11 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
               </div>
               <div className="space-y-1.5 md:col-span-2">
                 <Label htmlFor="address" className="text-[9px] uppercase font-black tracking-[0.15em] text-primary">Full Address</Label>
-                <Input id="address" required placeholder="Sitapaila, Kathmandu..." className="bg-white/5 border-white/10 rounded-lg h-10 md:h-12 text-white text-xs md:text-sm placeholder:text-white/20 focus:ring-primary/50" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} />
+                <Input id="address" required placeholder="Enter your delivery address..." className="bg-white/5 border-white/10 rounded-lg h-10 md:h-12 text-white text-xs md:text-sm placeholder:text-white/20 focus:ring-primary/50" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} />
               </div>
               <div className="space-y-1.5 md:col-span-2">
                 <Label htmlFor="notes" className="text-[9px] uppercase font-black tracking-[0.15em] text-primary">Order Notes (Optional)</Label>
-                <Textarea id="notes" className="bg-white/5 border-white/10 rounded-lg min-h-[60px] md:min-h-[80px] text-white text-xs md:text-sm placeholder:text-white/20 focus:ring-primary/50" value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} />
+                <Textarea id="notes" placeholder="Any special instructions..." className="bg-white/5 border-white/10 rounded-lg min-h-[60px] md:min-h-[80px] text-white text-xs md:text-sm placeholder:text-white/20 focus:ring-primary/50" value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} />
               </div>
             </div>
 
