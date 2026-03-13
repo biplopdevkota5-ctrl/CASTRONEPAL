@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Search, ShoppingCart, User, Gamepad2, Menu, X, LayoutDashboard, LogOut, Package } from 'lucide-react';
+import { Search, ShoppingCart, User, Gamepad2, Menu, X, LayoutDashboard, LogOut, Package, Phone, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -25,7 +25,20 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 z-[100] w-full border-b border-border bg-white shadow-sm">
+    <header className="fixed top-0 z-[100] w-full border-b border-border bg-white">
+      {/* Top Bar for Retail Look */}
+      <div className="bg-[#0a0c10] text-white py-2 text-[10px] font-bold uppercase tracking-widest">
+        <div className="container mx-auto px-4 flex justify-between items-center">
+          <div className="flex gap-6">
+            <span className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-primary" /> +977 9702663187</span>
+            <span className="hidden sm:flex items-center gap-1.5"><MapPin className="w-3 h-3 text-primary" /> Pokhara, Nepal</span>
+          </div>
+          <div className="flex gap-4">
+            <Link href="/admin" className="hover:text-primary transition-colors">Admin Portal</Link>
+          </div>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
           <div className="relative w-10 h-10 flex items-center justify-center bg-[#0a0c10] rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-500">
@@ -37,7 +50,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-6">
           {[
             { label: 'Home', href: '/' },
             { label: 'GPU', href: '/products?category=GPU' },
@@ -50,7 +63,7 @@ export function Header() {
             <Link 
               key={link.label} 
               href={link.href} 
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0a0c10]/70 hover:text-primary transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.15em] text-[#0a0c10] hover:text-primary transition-colors relative group"
             >
               {link.label}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
@@ -58,8 +71,8 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="hidden lg:flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-full">
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="hidden sm:flex text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-full">
             <Search className="w-5 h-5" />
           </Button>
           
@@ -69,7 +82,7 @@ export function Header() {
                 <User className="w-5 h-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border-border p-2 min-w-[220px] rounded-2xl shadow-xl">
+            <DropdownMenuContent align="end" className="bg-white border-border p-2 min-w-[220px] rounded-2xl shadow-xl z-[110]">
               {user ? (
                 <>
                   <div className="px-4 py-3 border-b border-border mb-2">
@@ -99,38 +112,32 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/signup" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl hover:bg-primary/5">Register</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-border" />
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin" className="cursor-pointer font-bold uppercase tracking-wider text-[10px] p-3 rounded-xl text-primary hover:bg-primary/5">
-                      Admin Access
-                    </Link>
-                  </DropdownMenuItem>
                 </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button className="ml-4 h-11 px-6 bg-[#0a0c10] hover:bg-[#1a1d24] text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md">
+          <Button className="hidden sm:flex ml-2 h-11 px-6 bg-[#0a0c10] hover:bg-[#1a1d24] text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md">
             <ShoppingCart className="w-4 h-4 mr-2" />
             Cart (0)
           </Button>
-        </div>
 
-        {/* Mobile Toggle */}
-        <button 
-          className="lg:hidden p-2 text-foreground"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          {isMenuOpen ? <X /> : <Menu />}
-        </button>
+          {/* Mobile Toggle */}
+          <button 
+            className="lg:hidden p-2 text-[#0a0c10] ml-2"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Solid Opaque White */}
       <div className={cn(
-        "fixed inset-0 top-20 bg-white z-[90] transition-transform duration-500 lg:hidden opacity-100",
+        "fixed inset-0 top-[112px] bg-white z-[90] transition-transform duration-500 lg:hidden",
         isMenuOpen ? "translate-x-0" : "translate-x-full"
       )}>
-        <nav className="flex flex-col p-8 gap-6 bg-white h-full">
+        <nav className="flex flex-col p-8 gap-6 h-full">
           {['Home', 'GPU', 'Monitor', 'Console', 'PS Account', 'Xbox Account', 'Nintendo Account'].map(label => (
             <Link 
               key={label} 
