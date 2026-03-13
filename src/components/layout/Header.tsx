@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -75,12 +76,12 @@ export function Header() {
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex gap-6">
             <span className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-primary" /> +977 9702663187</span>
-            <span className="hidden sm:flex items-center gap-1.5"><MapPin className="w-3 h-3 text-primary" /> Sitapaila, Kathmandu, Nepal</span>
+            <span className="hidden sm:flex items-center gap-1.5"><MapPin className="w-3 h-3 text-primary" /> Sitapaila, Kathmandu</span>
           </div>
           <div className="flex gap-4 items-center">
             <span className="opacity-50 hidden md:inline">Authorized Retailer</span>
             <Link href="/admin" className="flex items-center gap-1.5 hover:text-primary transition-colors border-l border-white/20 pl-4">
-              <ShieldCheck className="w-3 h-3" /> Admin Portal
+              <ShieldCheck className="w-3 h-3" /> Admin
             </Link>
           </div>
         </div>
@@ -100,9 +101,12 @@ export function Header() {
           <div className="relative w-10 h-10 flex items-center justify-center bg-[#0a0c10] rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-500">
             <Gamepad2 className="w-6 h-6 text-white" />
           </div>
-          <span className="font-headline text-2xl font-black tracking-tighter text-[#0a0c10] uppercase italic select-none">
-            CASTRO<span className="text-primary">NEPAL</span>
-          </span>
+          <div className="flex flex-col">
+            <span className="font-headline text-2xl font-black tracking-tighter text-[#0a0c10] uppercase italic select-none leading-none">
+              CASTRO<span className="text-primary">HUB</span>
+            </span>
+            <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-muted-foreground mt-1">BUY CHEAP SAVE HIGH</span>
+          </div>
         </Link>
 
         {/* Desktop Nav */}
@@ -192,7 +196,7 @@ export function Header() {
         "fixed inset-0 top-[112px] bg-white z-[90] transition-transform duration-500 lg:hidden",
         isMenuOpen ? "translate-x-0" : "translate-x-full"
       )}>
-        <nav className="flex flex-col p-8 gap-6 h-full">
+        <nav className="flex flex-col p-8 gap-6 h-full overflow-y-auto">
           {['Home', 'GPU', 'Monitor', 'Console', 'Computer', 'Game'].map(label => (
             <Link 
               key={label} 
