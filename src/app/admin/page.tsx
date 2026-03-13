@@ -10,7 +10,6 @@ import {
   Plus, 
   LogOut, 
   Search,
-  Edit,
   Trash2,
   CheckCircle2,
   AlertTriangle,
@@ -123,7 +122,11 @@ export default function AdminPage() {
   }, []);
 
   const saveProduct = () => {
-    if (!productForm.name || !productForm.price) return;
+    if (!productForm.name || !productForm.price) {
+      toast({ variant: 'destructive', title: 'Missing Info', description: 'Please fill name and price.' });
+      return;
+    }
+    
     setIsSaving(true);
     const productId = doc(collection(db, 'products')).id;
     const productRef = doc(db, 'products', productId);
@@ -132,21 +135,23 @@ export default function AdminPage() {
       ...productForm,
       id: productId,
       price: parseFloat(productForm.price),
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      features: [] // Default empty features
     };
 
     setDoc(productRef, data)
       .then(() => {
         setIsAddProductOpen(false);
         setProductForm({ name: '', category: 'PlayStation', price: '', status: 'In Stock', description: '', imageUrl: '' });
-        toast({ title: 'Product Added', description: `${data.name} is now live.` });
+        toast({ title: 'Success', description: `${data.name} uploaded to database.` });
       })
       .catch(async (error) => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
+        const permissionError = new FirestorePermissionError({
           path: productRef.path,
           operation: 'create',
           requestResourceData: data
-        }));
+        });
+        errorEmitter.emit('permission-error', permissionError);
       })
       .finally(() => setIsSaving(false));
   };
@@ -168,14 +173,15 @@ export default function AdminPage() {
       .then(() => {
         setIsAddAnnouncementOpen(false);
         setAnnouncementForm({ title: '', content: '' });
-        toast({ title: 'Update Posted', description: 'The announcement is now visible.' });
+        toast({ title: 'Success', description: 'Update pushed to database.' });
       })
       .catch(async () => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
+        const permissionError = new FirestorePermissionError({
           path: annRef.path,
           operation: 'create',
           requestResourceData: data
-        }));
+        });
+        errorEmitter.emit('permission-error', permissionError);
       })
       .finally(() => setIsSaving(false));
   };
@@ -268,10 +274,10 @@ export default function AdminPage() {
             <h2 className="text-3xl font-headline font-black uppercase italic tracking-tighter">
               {activeTab} <span className="text-primary">Management</span>
             </h2>
-            <p className="text-muted-foreground">Manage your store operations and inventory.</p>
+            <p className="text-muted-foreground">Manage your store operations and database assets.</p>
           </div>
           <div className="flex gap-4">
-            {activeTab === 'products' && (
+            {activeTab === 'products' && (activeTab as any) !== 'dashboard' && (
               <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl px-6">
                 <Plus className="w-4 h-4 mr-2" />
                 ADD PRODUCT
@@ -287,12 +293,7 @@ export default function AdminPage() {
         </header>
 
         {activeTab === 'dashboard' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="glass-panel border-white/5 p-8 space-y-2">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Total Revenue</span>
-              <div className="text-3xl font-headline font-bold text-primary">Rs. 248,500</div>
-              <div className="text-xs text-green-500 font-bold">+12% from last month</div>
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="glass-panel border-white/5 p-8 space-y-2">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Total Orders</span>
               <div className="text-3xl font-headline font-bold">142</div>
@@ -301,7 +302,7 @@ export default function AdminPage() {
             <Card className="glass-panel border-white/5 p-8 space-y-2">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Stock Status</span>
               <div className="text-3xl font-headline font-bold text-secondary">Healthy</div>
-              <div className="text-xs text-muted-foreground">{products.length} products listed</div>
+              <div className="text-xs text-muted-foreground">{products.length} products listed in database</div>
             </Card>
           </div>
         )}
@@ -312,7 +313,7 @@ export default function AdminPage() {
               <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/5">
                 <div className="relative max-w-sm w-full">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input placeholder="Search products..." className="pl-10 h-10 bg-white/5 border-white/10 rounded-lg" />
+                  <Input placeholder="Search database products..." className="pl-10 h-10 bg-white/5 border-white/10 rounded-lg" />
                 </div>
               </div>
               <Table>
@@ -328,6 +329,8 @@ export default function AdminPage() {
                 <TableBody>
                   {productsLoading ? (
                     <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
+                  ) : products.length === 0 ? (
+                    <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No products found in database.</TableCell></TableRow>
                   ) : products.map((row, i) => (
                     <TableRow key={row.id} className="border-white/5 hover:bg-white/5 transition-colors">
                       <TableCell className="font-bold py-6">
@@ -337,7 +340,7 @@ export default function AdminPage() {
                           </div>
                           <div>
                             <div className="text-sm">{row.name}</div>
-                            <div className="text-[10px] text-muted-foreground font-mono uppercase">SKU: CST-{row.id.slice(0, 5)}</div>
+                            <div className="text-[10px] text-muted-foreground font-mono uppercase">ID: {row.id.slice(0, 8)}</div>
                           </div>
                         </div>
                       </TableCell>
@@ -366,14 +369,14 @@ export default function AdminPage() {
             </>
           )}
 
-          {activeTab === 'announcements' && (
+          {activeTab === 'announcements' && ( activeTab !== 'dashboard' &&
             <div className="p-8 space-y-6">
               {announcementsLoading ? (
                 <Loader2 className="animate-spin mx-auto" />
               ) : announcements.length === 0 ? (
                 <div className="text-center py-12">
                   <Bell className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                  <p className="text-muted-foreground">No updates posted yet.</p>
+                  <p className="text-muted-foreground">No updates posted in database yet.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -402,8 +405,8 @@ export default function AdminPage() {
       <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
         <DialogContent className="glass-panel border-white/10 sm:max-w-[600px] rounded-[2rem]">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-headline font-bold uppercase italic tracking-tighter">ADD NEW <span className="text-primary">PRODUCT</span></DialogTitle>
-            <DialogDescription className="text-muted-foreground">Add a new asset to your store. You can paste an image (Ctrl+V) here.</DialogDescription>
+            <DialogTitle className="text-2xl font-headline font-bold uppercase italic tracking-tighter">UPLOAD TO <span className="text-primary">DATABASE</span></DialogTitle>
+            <DialogDescription className="text-muted-foreground">Add a new product to the store database. Supporting image files and clipboard paste.</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-6 py-4">
             <div className="space-y-2 col-span-2">
@@ -465,7 +468,17 @@ export default function AdminPage() {
                   onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} 
                 />
                 {productForm.imageUrl ? (
-                  <img src={productForm.imageUrl} className="max-h-[120px] rounded-lg" />
+                  <div className="relative group/img">
+                    <img src={productForm.imageUrl} className="max-h-[120px] rounded-lg" />
+                    <Button 
+                      size="icon" 
+                      variant="destructive" 
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover/img:opacity-100 transition-opacity"
+                      onClick={(e) => { e.stopPropagation(); setProductForm({...productForm, imageUrl: ''}); }}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
                 ) : (
                   <>
                     <Upload className="w-10 h-10 mx-auto text-muted-foreground group-hover:text-primary" />
@@ -484,7 +497,7 @@ export default function AdminPage() {
               disabled={isSaving}
             >
               {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              SAVE PRODUCT
+              UPLOAD PRODUCT
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -494,8 +507,8 @@ export default function AdminPage() {
       <Dialog open={isAddAnnouncementOpen} onOpenChange={setIsAddAnnouncementOpen}>
         <DialogContent className="glass-panel border-white/10 sm:max-w-[500px] rounded-[2rem]">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-headline font-bold uppercase italic tracking-tighter">POST <span className="text-primary">UPDATE</span></DialogTitle>
-            <DialogDescription className="text-muted-foreground">This will be visible on the store's homepage for all users.</DialogDescription>
+            <DialogTitle className="text-2xl font-headline font-bold uppercase italic tracking-tighter">PUSH <span className="text-primary">UPDATE</span></DialogTitle>
+            <DialogDescription className="text-muted-foreground">Post a new update to the database for all users to see.</DialogDescription>
           </DialogHeader>
           <div className="space-y-6 py-4">
             <div className="space-y-2">
