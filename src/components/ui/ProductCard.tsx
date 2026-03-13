@@ -27,7 +27,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
 
   return (
     <div className={cn(
-      "group relative flex flex-col bg-white border border-border rounded-xl overflow-hidden transition-colors duration-150 hover:border-primary/40",
+      "group relative flex flex-col bg-white border border-border rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/40 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-primary/5",
       className
     )}>
       {/* Product Image Area */}
@@ -36,7 +36,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
           src={displayImage}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 300px"
           priority={priority}
           loading={priority ? "eager" : "lazy"}
@@ -44,9 +44,9 @@ export function ProductCard({ product, className, priority = false }: ProductCar
         />
         
         {/* Badges Overlay */}
-        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 transition-transform duration-300 group-hover:translate-x-1">
           {product.categoryId && (
-            <Badge className="bg-white/95 text-foreground border border-border px-1.5 py-0 text-[8px] font-bold tracking-widest uppercase">
+            <Badge className="bg-white/95 text-foreground border border-border px-1.5 py-0 text-[8px] font-bold tracking-widest uppercase shadow-sm">
               {product.categoryId}
             </Badge>
           )}
@@ -58,26 +58,26 @@ export function ProductCard({ product, className, priority = false }: ProductCar
         </div>
 
         {/* Action Overlay - Optimized for fast hover */}
-        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center justify-center gap-2">
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
           <Link href={`/products/${product.id}`}>
-            <Button size="icon" variant="secondary" className="rounded-full h-9 w-9 bg-white text-foreground hover:bg-primary hover:text-white transition-all shadow-md">
+            <Button size="icon" variant="secondary" className="rounded-full h-10 w-10 bg-white text-foreground hover:bg-primary hover:text-white transition-all shadow-lg scale-90 group-hover:scale-100 duration-300">
               <Eye className="w-4 h-4" />
             </Button>
           </Link>
-          <Button size="icon" className="rounded-full h-9 w-9 bg-primary text-white hover:bg-primary/90 transition-all shadow-md">
+          <Button size="icon" className="rounded-full h-10 w-10 bg-primary text-white hover:bg-primary/90 transition-all shadow-lg scale-90 group-hover:scale-100 duration-300 delay-75">
             <ShoppingCart className="w-4 h-4" />
           </Button>
         </div>
 
         {/* Status Indicator */}
-        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
           <div className={cn(
-            "flex items-center gap-1 backdrop-blur-sm px-2 py-0.5 rounded-full text-[8px] font-bold uppercase border",
+            "flex items-center gap-1 backdrop-blur-md px-2 py-0.5 rounded-full text-[8px] font-bold uppercase border shadow-sm",
             product.stockStatus === 'In Stock' 
-              ? "bg-green-500/10 text-green-600 border-green-200" 
-              : "bg-red-500/10 text-red-600 border-red-200"
+              ? "bg-green-500/20 text-green-700 border-green-200" 
+              : "bg-red-500/20 text-red-700 border-red-200"
           )}>
-            <Zap className="w-2 h-2" />
+            <Zap className="w-2 h-2 animate-pulse" />
             {product.stockStatus || 'Available'}
           </div>
         </div>
@@ -94,7 +94,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
           </p>
         </div>
 
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-3 flex items-center justify-between pt-2 border-t border-gray-50">
           <div className="space-y-0">
             <div className="text-[8px] text-muted-foreground uppercase font-black tracking-widest">Pricing</div>
             <div className="text-sm font-black text-foreground font-headline tracking-tighter">
@@ -102,7 +102,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
             </div>
           </div>
           <Link href={`/products/${product.id}`}>
-            <Button size="sm" className="h-7 px-3 bg-primary text-white hover:bg-primary/90 font-bold rounded-lg text-[9px]">
+            <Button size="sm" className="h-7 px-3 bg-primary text-white hover:bg-primary/90 font-bold rounded-lg text-[9px] transition-transform active:scale-95">
               BUY
             </Button>
           </Link>
