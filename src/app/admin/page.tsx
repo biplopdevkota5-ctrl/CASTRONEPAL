@@ -16,7 +16,8 @@ import {
   Database,
   Tag,
   Menu,
-  X
+  X,
+  PlusCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -129,17 +130,6 @@ export default function AdminPage() {
     };
     reader.readAsDataURL(file);
   };
-
-  const handlePaste = useCallback((e: React.ClipboardEvent) => {
-    if (!isAuthenticated) return;
-    const items = e.clipboardData.items;
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf('image') !== -1) {
-        const file = items[i].getAsFile();
-        if (file) handleImageUpload(file);
-      }
-    }
-  }, [isAuthenticated]);
 
   const saveProduct = () => {
     if (!productForm.name || !productForm.price) {
@@ -309,12 +299,12 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-white" onPaste={handlePaste}>
+    <div className="min-h-screen flex flex-col md:flex-row bg-white">
       {/* Mobile Top Header */}
       <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-border sticky top-0 z-[110]">
         <div className="flex flex-col leading-none">
           <span className="font-headline font-bold uppercase italic text-sm tracking-tighter text-[#0a0c10]">CASTRO<span className="text-primary">HUB</span></span>
-          <span className="text-[6px] font-black uppercase tracking-widest text-muted-foreground">ADMIN CORE</span>
+          <span className="text-[6px] font-black uppercase tracking-widest text-muted-foreground">ADMIN HUB</span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X /> : <Menu />}
@@ -330,7 +320,7 @@ export default function AdminPage() {
           <span className="font-headline font-bold uppercase italic text-xl tracking-tighter text-[#0a0c10]">
             CASTRO<span className="text-primary">HUB</span>
           </span>
-          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-1">ADMIN CORE</span>
+          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-1">ADMIN HUB</span>
         </div>
         <nav className="space-y-2 flex-grow mt-12 md:mt-0 overflow-y-auto pr-2">
           {NavItems.map((item) => (
@@ -362,7 +352,7 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      <main className="flex-grow flex flex-col bg-gray-50/50">
+      <main className="flex-grow flex flex-col bg-gray-50/50 min-h-screen overflow-y-auto">
         <header className="p-4 md:p-8 border-b border-border bg-white sticky top-0 md:relative z-[100]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className="text-2xl md:text-3xl font-headline font-black uppercase italic tracking-tighter text-[#0a0c10]">
@@ -371,19 +361,19 @@ export default function AdminPage() {
             <div className="flex gap-2">
               {activeTab === 'products' && (
                 <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary text-white flex-grow sm:flex-none h-11 px-6 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20">
-                  <Plus className="w-4 h-4 mr-2" /> ADD ITEM
+                  <PlusCircle className="w-4 h-4 mr-2" /> ADD ITEM
                 </Button>
               )}
               {activeTab === 'announcements' && (
                 <Button onClick={() => setIsAddAnnouncementOpen(true)} className="bg-primary text-white flex-grow sm:flex-none h-11 px-6 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20">
-                  <Plus className="w-4 h-4 mr-2" /> NEW UPDATE
+                  <Bell className="w-4 h-4 mr-2" /> NEW UPDATE
                 </Button>
               )}
             </div>
           </div>
         </header>
 
-        <div className="flex-grow overflow-y-auto p-4 md:p-8 lg:p-12">
+        <div className="p-4 md:p-8 lg:p-12">
           <div className="glass-panel border-border bg-white rounded-2xl overflow-hidden shadow-sm">
             {activeTab === 'dashboard' && (
               <div className="p-8 text-center space-y-6">
@@ -477,33 +467,40 @@ export default function AdminPage() {
         </div>
       </main>
 
-      {/* Add Product Dialog - Fully Scrollable and Mobile Optimized */}
+      {/* Add Product Dialog - Fully Optimized for Keyboard and Scrolling */}
       <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
-        <DialogContent className="w-[95vw] sm:max-w-[600px] max-h-[92vh] overflow-y-auto p-0 rounded-2xl border-border bg-white focus:outline-none">
+        <DialogContent className="w-[96vw] sm:max-w-[600px] max-h-[95vh] overflow-y-auto p-0 rounded-2xl border-border bg-white focus:outline-none !translate-y-0 !top-4 sm:!top-[50%] sm:!translate-y-[-50%]">
           <div className="p-6 md:p-8 space-y-6">
-            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl text-[#0a0c10]">UPLOAD TO ARMORY</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl text-[#0a0c10]">ADD NEW PRODUCT</DialogTitle></DialogHeader>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 py-2">
-              <div className="sm:col-span-2 space-y-1.5">
-                <Label htmlFor="product-name" className="text-[10px] uppercase font-black tracking-widest text-primary">Product Name</Label>
-                <Input id="product-name" value={productForm.name} onChange={(e) => setProductForm({...productForm, name: e.target.value})} className="bg-gray-50 border-border h-11 rounded-xl" placeholder="Enter product name" />
+              <div className="sm:col-span-2 space-y-2">
+                <Label htmlFor="product-name-input" className="text-[10px] uppercase font-black tracking-widest text-primary">Official Product Name</Label>
+                <Input 
+                  id="product-name-input" 
+                  autoComplete="off"
+                  value={productForm.name} 
+                  onChange={(e) => setProductForm({...productForm, name: e.target.value})} 
+                  className="bg-gray-50 border-border h-12 rounded-xl text-base" 
+                  placeholder="e.g. NVIDIA RTX 4090 OC" 
+                />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Category</Label>
                 <Select value={productForm.category} onValueChange={(v) => setProductForm({...productForm, category: v})}>
-                  <SelectTrigger className="bg-gray-50 border-border h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-gray-50 border-border h-12 rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {['GPU', 'Monitor', 'Console', 'Computer', 'Game'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Price (NPR)</Label>
-                <Input type="number" value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} className="bg-gray-50 border-border h-11 rounded-xl" placeholder="0" />
+                <Input type="number" value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} className="bg-gray-50 border-border h-12 rounded-xl text-base" placeholder="0" />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Stock Status</Label>
                 <Select value={productForm.stockStatus} onValueChange={(v) => setProductForm({...productForm, stockStatus: v})}>
-                  <SelectTrigger className="bg-gray-50 border-border h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-gray-50 border-border h-12 rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="In Stock">In Stock</SelectItem>
                     <SelectItem value="Out of Stock">Out of Stock</SelectItem>
@@ -511,27 +508,27 @@ export default function AdminPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-[10px] uppercase font-black tracking-widest text-primary flex items-center gap-2"><Tag className="w-3 h-3" /> Custom Tag</Label>
-                <Input placeholder="HOT, NEW, etc." value={productForm.customTag} onChange={(e) => setProductForm({...productForm, customTag: e.target.value})} className="bg-gray-50 border-border h-11 rounded-xl" />
+              <div className="space-y-2">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary flex items-center gap-2"><Tag className="w-3 h-3" /> Badge Tag</Label>
+                <Input placeholder="HOT, NEW, etc." value={productForm.customTag} onChange={(e) => setProductForm({...productForm, customTag: e.target.value})} className="bg-gray-50 border-border h-12 rounded-xl text-base" />
               </div>
-              <div className="sm:col-span-2 space-y-1.5">
+              <div className="sm:col-span-2 space-y-2">
                 <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Short Description</Label>
-                <Textarea value={productForm.shortDescription} onChange={(e) => setProductForm({...productForm, shortDescription: e.target.value})} className="bg-gray-50 border-border min-h-[80px] rounded-xl" placeholder="Brief summary for listings..." />
+                <Textarea value={productForm.shortDescription} onChange={(e) => setProductForm({...productForm, shortDescription: e.target.value})} className="bg-gray-50 border-border min-h-[100px] rounded-xl text-base" placeholder="Brief summary for display..." />
               </div>
-              <div className="sm:col-span-2 space-y-1.5">
-                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Image (Paste or Browse)</Label>
-                <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-border rounded-xl p-6 text-center cursor-pointer hover:border-primary transition-colors bg-gray-50">
+              <div className="sm:col-span-2 space-y-2">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Product Image</Label>
+                <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary transition-colors bg-gray-50">
                   <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} />
                   {productForm.imageUrl ? (
-                    <div className="relative group mx-auto w-full max-w-[200px]">
+                    <div className="relative group mx-auto w-full max-w-[240px]">
                       <img src={productForm.imageUrl} className="w-full rounded-lg shadow-lg border border-border" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity"><p className="text-[10px] text-white font-bold">CHANGE IMAGE</p></div>
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity"><p className="text-[10px] text-white font-bold">REPLACE IMAGE</p></div>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-2">
-                      <Upload className="w-8 h-8 text-muted-foreground" />
-                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Tap to upload or paste</p>
+                      <Upload className="w-10 h-10 text-muted-foreground" />
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Tap to browse files</p>
                     </div>
                   )}
                 </div>
@@ -539,30 +536,30 @@ export default function AdminPage() {
             </div>
             <DialogFooter className="pt-4 border-t border-border">
               <Button onClick={saveProduct} disabled={isSaving} className="w-full h-14 bg-primary text-white font-black uppercase italic tracking-tighter text-lg rounded-xl shadow-lg shadow-primary/20">
-                {isSaving ? <Loader2 className="animate-spin" /> : 'CONFIRM UPLOAD'}
+                {isSaving ? <Loader2 className="animate-spin" /> : 'SAVE TO DATABASE'}
               </Button>
             </DialogFooter>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Add Announcement Dialog - Fully Scrollable */}
+      {/* Add Announcement Dialog */}
       <Dialog open={isAddAnnouncementOpen} onOpenChange={setIsAddAnnouncementOpen}>
-        <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 rounded-2xl border-border bg-white focus:outline-none">
+        <DialogContent className="w-[96vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 rounded-2xl border-border bg-white focus:outline-none !translate-y-0 !top-4 sm:!top-[50%] sm:!translate-y-[-50%]">
           <div className="p-6 md:p-8 space-y-6">
-            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl text-[#0a0c10]">PUBLISH UPDATE</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle className="font-headline font-black uppercase italic tracking-tighter text-xl text-[#0a0c10]">NEW UPDATE</DialogTitle></DialogHeader>
             <div className="space-y-5 py-2">
-              <div className="space-y-1.5">
-                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Headline</Label>
-                <Input value={announcementForm.title} onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})} className="bg-gray-50 border-border h-11 rounded-xl" placeholder="Enter update headline" />
+              <div className="space-y-2">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Announcement Headline</Label>
+                <Input value={announcementForm.title} onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})} className="bg-gray-50 border-border h-12 rounded-xl text-base" placeholder="Enter headline" />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Message</Label>
-                <Textarea value={announcementForm.content} onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})} className="bg-gray-50 border-border min-h-[150px] rounded-xl" placeholder="Write your announcement details..." />
+              <div className="space-y-2">
+                <Label className="text-[10px] uppercase font-black tracking-widest text-primary">Content Message</Label>
+                <Textarea value={announcementForm.content} onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})} className="bg-gray-50 border-border min-h-[180px] rounded-xl text-base" placeholder="Write your message..." />
               </div>
             </div>
             <DialogFooter className="pt-4 border-t border-border">
-              <Button onClick={saveAnnouncement} disabled={isSaving} className="w-full h-14 bg-primary text-white font-black uppercase italic tracking-tighter text-lg rounded-xl shadow-lg shadow-primary/20">PUBLISH NOW</Button>
+              <Button onClick={saveAnnouncement} disabled={isSaving} className="w-full h-14 bg-primary text-white font-black uppercase italic tracking-tighter text-lg rounded-xl shadow-lg shadow-primary/20">PUBLISH ANNOUNCEMENT</Button>
             </DialogFooter>
           </div>
         </DialogContent>
@@ -570,3 +567,4 @@ export default function AdminPage() {
     </div>
   );
 }
+

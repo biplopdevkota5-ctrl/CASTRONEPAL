@@ -116,9 +116,9 @@ export default function DashboardPage() {
         <div className="lg:col-span-8 space-y-8">
           <header>
             <h1 className="text-4xl font-headline font-black uppercase italic tracking-tighter">
-              PLAYER <span className="text-primary">DASHBOARD</span>
+              CASTRO HUB <span className="text-primary">DASHBOARD</span>
             </h1>
-            <p className="text-muted-foreground">Manage your gaming assets and order history on Castro Hub.</p>
+            <p className="text-muted-foreground">Manage your hardware assets and order history on Castro Hub.</p>
           </header>
 
           <Tabs defaultValue="orders" className="w-full">

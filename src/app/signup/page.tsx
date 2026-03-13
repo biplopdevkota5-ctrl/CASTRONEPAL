@@ -36,7 +36,7 @@ export default function SignupPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       await updateProfile(userCredential.user, { displayName: formData.fullName });
-      toast({ title: "Account Created", description: "Welcome to the armory!" });
+      toast({ title: "Account Created", description: "Welcome to Castro Hub!" });
       router.push('/dashboard');
     } catch (error: any) {
       toast({ variant: "destructive", title: "Signup Error", description: error.message });
@@ -79,9 +79,9 @@ export default function SignupPage() {
             </div>
             <div className="space-y-2">
               <CardTitle className="text-3xl font-headline font-black uppercase italic tracking-tighter">
-                JOIN THE <span className="text-secondary">ELITE</span>
+                JOIN <span className="text-secondary">CASTRO HUB</span>
               </CardTitle>
-              <CardDescription className="text-muted-foreground">Create your profile and join the Castro Hub.</CardDescription>
+              <CardDescription className="text-muted-foreground">Create your profile and start saving.</CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-6 px-8 pb-8">
