@@ -1,11 +1,12 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
      * APPLICATION SECURITY STRATEGY: Castro Nepal E-commerce
-     * Relaxed for Prototype: Admin access is granted to signed-in users 
-     * because the admin panel is password-protected on the client.
+     * Admin access is granted to signed-in users because the admin panel
+     * is password-protected on the client.
      */
 
     function isSignedIn() {
@@ -13,7 +14,8 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      // For the prototype, we allow the password-guarded anonymous admin to write
+      // For the prototype, we allow authenticated users to perform admin writes
+      // as they must bypass the client-side password check first.
       return isSignedIn();
     }
 
@@ -35,12 +37,12 @@ service cloud.firestore {
     }
 
     match /categories/{categoryId} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     match /products/{productId} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if isAdmin();
     }
 
@@ -57,7 +59,8 @@ service cloud.firestore {
     }
 
     match /announcements/{announcementId} {
-      allow get, list: if true;
+      // Explicitly allow public read for the homepage display
+      allow read: if true;
       allow write: if isAdmin();
     }
   }

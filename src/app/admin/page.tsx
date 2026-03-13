@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { 
   LayoutDashboard, 
   Package, 
@@ -46,7 +46,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { useFirestore, useCollection, useMemoFirebase, useAuth } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase, useAuth, useUser } from '@/firebase';
 import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -62,23 +62,25 @@ export default function AdminPage() {
   const { toast } = useToast();
   const db = useFirestore();
   const auth = useAuth();
+  const { user } = useUser();
 
+  // Queries now wait for both password auth AND firebase auth user object to be ready
   const productsQuery = useMemoFirebase(() => {
-    if (!db || !isAuthenticated) return null;
+    if (!db || !isAuthenticated || !user) return null;
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'));
-  }, [db, isAuthenticated]);
+  }, [db, isAuthenticated, user]);
   const { data: products } = useCollection<any>(productsQuery);
 
   const ordersQuery = useMemoFirebase(() => {
-    if (!db || !isAuthenticated) return null;
+    if (!db || !isAuthenticated || !user) return null;
     return query(collection(db, 'orders'), orderBy('orderTime', 'desc'));
-  }, [db, isAuthenticated]);
+  }, [db, isAuthenticated, user]);
   const { data: orders } = useCollection<any>(ordersQuery);
 
   const announcementsQuery = useMemoFirebase(() => {
-    if (!db || !isAuthenticated) return null;
+    if (!db || !isAuthenticated || !user) return null;
     return query(collection(db, 'announcements'), orderBy('postedAt', 'desc'));
-  }, [db, isAuthenticated]);
+  }, [db, isAuthenticated, user]);
   const { data: announcements } = useCollection<any>(announcementsQuery);
 
   const [productForm, setProductForm] = useState({
@@ -106,7 +108,8 @@ export default function AdminPage() {
       signInAnonymously(auth).then(() => {
         setIsAuthenticated(true);
         toast({ title: 'Authorized', description: 'Admin session started.' });
-      }).catch(() => {
+      }).catch((err) => {
+        console.error(err);
         toast({ variant: 'destructive', title: 'Auth Error', description: 'Could not establish secure session.' });
       });
     } else {
@@ -375,7 +378,7 @@ export default function AdminPage() {
             </Table>
           )}
 
-          {activeTab === 'orders' && (activeTab === 'orders' && (
+          {activeTab === 'orders' && (
             <Table>
               <TableHeader><TableRow><TableHead>Customer</TableHead><TableHead>Total</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
               <TableBody>
@@ -394,7 +397,23 @@ export default function AdminPage() {
                 ))}
               </TableBody>
             </Table>
-          ))}
+          )}
+
+          {activeTab === 'announcements' && (
+            <Table>
+              <TableHeader><TableRow><TableHead>Headline</TableHead><TableHead>Date</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+              <TableBody>
+                {announcements?.map((ann: any) => (
+                  <TableRow key={ann.id}>
+                    <TableCell className="font-bold">{ann.title}</TableCell>
+                    <TableCell>{ann.postedAt?.toDate ? ann.postedAt.toDate().toLocaleDateString() : 'Pending'}</TableCell>
+                    <TableCell><Badge className={ann.isActive ? 'bg-green-500/20 text-green-500' : 'bg-gray-500/20 text-gray-500'}>{ann.isActive ? 'Active' : 'Hidden'}</Badge></TableCell>
+                    <TableCell className="text-right"><Button onClick={() => deleteItem(ann.id, 'announcements')} size="icon" variant="ghost"><Trash2 className="w-4 h-4" /></Button></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </main>
 
