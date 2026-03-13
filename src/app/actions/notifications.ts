@@ -1,8 +1,8 @@
 'use server';
 
 /**
- * Server action to send order notifications to Discord.
- * Keeps the webhook URL server-side.
+ * Server action to handle order notifications.
+ * Construction of Discord and WhatsApp message strings.
  */
 export async function sendOrderToDiscord(orderData: {
   id: string;
@@ -52,4 +52,20 @@ export async function sendOrderToDiscord(orderData: {
     console.error('Failed to send Discord webhook:', error);
     return false;
   }
+}
+
+/**
+ * Generates a WhatsApp Click-to-Chat link with a pre-filled order summary.
+ */
+export async function getWhatsAppOrderLink(orderData: {
+  productName: string;
+  quantity: string;
+  totalAmount: number;
+  customerName: string;
+  customerPhoneNumber: string;
+}) {
+  const adminPhone = '9779702663187';
+  const message = `*🎮 NEW ORDER FROM CASTRO HUB*\n\n*Product:* ${orderData.productName}\n*Qty:* ${orderData.quantity}\n*Total:* Rs. ${Math.round(orderData.totalAmount).toLocaleString()}\n\n*Customer Details:*\n*Name:* ${orderData.customerName}\n*Phone:* ${orderData.customerPhoneNumber}\n\n_Please confirm my order and send payment details._`;
+  
+  return `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
 }

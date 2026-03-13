@@ -15,12 +15,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingBag, Loader2, CheckCircle2 } from 'lucide-react';
+import { ShoppingBag, Loader2, CheckCircle2, MessageCircle } from 'lucide-react';
 import { useFirestore, useUser } from '@/firebase';
 import { collection, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { sendOrderToDiscord } from '@/app/actions/notifications';
+import { sendOrderToDiscord, getWhatsAppOrderLink } from '@/app/actions/notifications';
 
 interface CheckoutDialogProps {
   product: {
@@ -35,6 +35,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [waLink, setWaLink] = useState('');
   const { toast } = useToast();
   const { user } = useUser();
   const db = useFirestore();
@@ -70,40 +71,50 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
       discordWebhookSent: false
     };
 
-    setDoc(orderRef, orderData)
-      .then(async () => {
-        // Send notification to Discord via Server Action
-        const discordSuccess = await sendOrderToDiscord({
-          id: orderId,
-          productName: product.name,
-          quantity: formData.quantity,
-          totalAmount: totalPrice,
-          customerName: formData.fullName,
-          customerPhoneNumber: formData.phone,
-          customerEmail: formData.email,
-          customerAddress: formData.address,
-          notes: formData.notes
-        });
+    try {
+      await setDoc(orderRef, orderData);
+      
+      // 1. Send Discord Notice
+      const discordSuccess = await sendOrderToDiscord({
+        id: orderId,
+        productName: product.name,
+        quantity: formData.quantity,
+        totalAmount: totalPrice,
+        customerName: formData.fullName,
+        customerPhoneNumber: formData.phone,
+        customerEmail: formData.email,
+        customerAddress: formData.address,
+        notes: formData.notes
+      });
 
-        // Update flag in database if webhook sent successfully
-        if (discordSuccess) {
-          updateDoc(orderRef, { discordWebhookSent: true }).catch(() => {});
-        }
+      if (discordSuccess) {
+        await updateDoc(orderRef, { discordWebhookSent: true });
+      }
 
-        setIsSuccess(true);
-        toast({
-          title: "Order Placed Successfully!",
-          description: "Our armory has received your request.",
-        });
-      })
-      .catch(async (error) => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          path: orderRef.path,
-          operation: 'create',
-          requestResourceData: orderData
-        }));
-      })
-      .finally(() => setIsSubmitting(false));
+      // 2. Generate WhatsApp Link for user
+      const link = await getWhatsAppOrderLink({
+        productName: product.name,
+        quantity: formData.quantity,
+        totalAmount: totalPrice,
+        customerName: formData.fullName,
+        customerPhoneNumber: formData.phone
+      });
+      setWaLink(link);
+
+      setIsSuccess(true);
+      toast({
+        title: "Order Placed!",
+        description: "Admin notified via Discord.",
+      });
+    } catch (error: any) {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: orderRef.path,
+        operation: 'create',
+        requestResourceData: orderData
+      }));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -117,27 +128,36 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
             <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-4">
               <CheckCircle2 className="w-12 h-12 text-primary animate-in zoom-in" />
             </div>
-            <h2 className="text-3xl font-headline font-bold uppercase italic tracking-tighter">ORDER CONFIRMED!</h2>
+            <h2 className="text-3xl font-headline font-bold uppercase italic tracking-tighter">ORDER PLACED!</h2>
             <p className="text-white/60 max-w-sm">
-              Thank you for choosing Castro Nepal. We'll contact you at <strong>{formData.phone}</strong> for payment and delivery within 30 minutes.
+              We have received your order. For <strong>Instant Verification</strong> and payment details, please click the WhatsApp button below.
             </p>
-            <Button 
-              className="bg-primary hover:bg-primary/90 text-white font-bold w-full h-14 rounded-2xl"
-              onClick={() => {
-                setIsOpen(false);
-                setIsSuccess(false);
-                setFormData({ fullName: '', phone: '', email: '', address: '', quantity: '1', notes: '' });
-              }}
-            >
-              CONTINUE SHOPPING
-            </Button>
+            <div className="flex flex-col gap-4 w-full">
+              <a href={waLink} target="_blank" rel="noopener noreferrer" className="w-full">
+                <Button className="bg-[#25D366] hover:bg-[#128C7E] text-white font-black w-full h-14 rounded-2xl flex items-center justify-center gap-3 italic">
+                  <MessageCircle className="w-6 h-6" />
+                  CONFIRM ON WHATSAPP
+                </Button>
+              </a>
+              <Button 
+                variant="outline"
+                className="border-white/10 hover:bg-white/5 text-white font-bold w-full h-14 rounded-2xl"
+                onClick={() => {
+                  setIsOpen(false);
+                  setIsSuccess(false);
+                  setFormData({ fullName: '', phone: '', email: '', address: '', quantity: '1', notes: '' });
+                }}
+              >
+                CLOSE WINDOW
+              </Button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-8 space-y-8">
             <DialogHeader>
               <DialogTitle className="text-2xl font-headline font-bold uppercase italic tracking-tighter flex items-center gap-3">
                 <ShoppingBag className="w-6 h-6 text-primary" />
-                Checkout <span className="text-primary">Details</span>
+                Checkout <span className="text-primary">Portal</span>
               </DialogTitle>
               <DialogDescription className="text-white/40">
                 Finalize your order for <strong className="text-white">{product.name}</strong>.
@@ -162,7 +182,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
                 <Input id="quantity" required type="number" min="1" className="bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-white/20 focus:ring-primary/50" value={formData.quantity} onChange={(e) => setFormData({...formData, quantity: e.target.value})} />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address" className="text-[10px] uppercase font-black tracking-[0.2em] text-primary">Full Address</Label>
+                <Label htmlFor="address" className="text-[10px] uppercase font-black tracking-[0.2em] text-primary">Full Address (Kathmandu/Delivery City)</Label>
                 <Input id="address" required className="bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-white/20 focus:ring-primary/50" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} />
               </div>
               <div className="space-y-2 md:col-span-2">
