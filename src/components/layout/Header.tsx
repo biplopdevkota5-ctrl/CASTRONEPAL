@@ -40,10 +40,11 @@ export function Header() {
         <nav className="hidden lg:flex items-center gap-8">
           {[
             { label: 'Home', href: '/' },
-            { label: 'Shop', href: '/products' },
-            { label: 'PlayStation', href: '/products?category=PlayStation' },
-            { label: 'Xbox', href: '/products?category=Xbox' },
-            { label: 'Nintendo', href: '/products?category=Nintendo' },
+            { label: 'GPU', href: '/products?category=GPU' },
+            { label: 'Monitor', href: '/products?category=Monitor' },
+            { label: 'PS Account', href: '/products?category=PlayStation%20Account' },
+            { label: 'Xbox Account', href: '/products?category=Xbox%20Account' },
+            { label: 'Nintendo Account', href: '/products?category=Nintendo%20Account' },
           ].map(link => (
             <Link 
               key={link.label} 
@@ -129,11 +130,11 @@ export function Header() {
         isMenuOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="flex flex-col p-8 gap-6">
-          {['Home', 'Shop', 'PlayStation', 'Xbox', 'Nintendo'].map(label => (
+          {['Home', 'GPU', 'Monitor', 'PS Account', 'Xbox Account', 'Nintendo Account'].map(label => (
             <Link 
               key={label} 
-              href={label === 'Home' ? '/' : (label === 'Shop' ? '/products' : `/products?category=${label}`)} 
-              className="text-3xl font-headline font-black uppercase italic tracking-tighter text-[#0a0c10]" 
+              href={label === 'Home' ? '/' : `/products?category=${label === 'PS Account' ? 'PlayStation Account' : label === 'Xbox Account' ? 'Xbox Account' : label === 'Nintendo Account' ? 'Nintendo Account' : label}`} 
+              className="text-2xl font-headline font-black uppercase italic tracking-tighter text-[#0a0c10]" 
               onClick={() => setIsMenuOpen(false)}
             >
               {label}

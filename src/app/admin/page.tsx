@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useCallback } from 'react';
@@ -47,7 +46,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useFirestore, useCollection, useMemoFirebase, useAuth, useUser } from '@/firebase';
-import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp, getDocs } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -64,7 +63,6 @@ export default function AdminPage() {
   const auth = useAuth();
   const { user } = useUser();
 
-  // Queries wait for both password auth AND firebase auth user object to be ready
   const productsQuery = useMemoFirebase(() => {
     if (!db || !isAuthenticated || !user) return null;
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'));
@@ -85,7 +83,7 @@ export default function AdminPage() {
 
   const [productForm, setProductForm] = useState({
     name: '',
-    category: 'PlayStation',
+    category: 'GPU',
     price: '',
     stockStatus: 'In Stock',
     customTag: '',
@@ -171,7 +169,7 @@ export default function AdminPage() {
     setDoc(productRef, data)
       .then(() => {
         setIsAddProductOpen(false);
-        setProductForm({ name: '', category: 'PlayStation', price: '', stockStatus: 'In Stock', customTag: '', shortDescription: '', fullDescription: '', imageUrl: '' });
+        setProductForm({ name: '', category: 'GPU', price: '', stockStatus: 'In Stock', customTag: '', shortDescription: '', fullDescription: '', imageUrl: '' });
         toast({ title: 'Success', description: `${data.name} saved successfully.` });
       })
       .catch(async (error) => {
@@ -187,9 +185,9 @@ export default function AdminPage() {
   const seedDatabase = async () => {
     setIsSaving(true);
     const sampleProducts = [
-      { name: "PSN $50 Gift Card", categoryId: "PlayStation", price: 6650, stockStatus: "In Stock", customTag: "POPULAR", shortDescription: "Instant digital code for US accounts.", imageUrl: "https://picsum.photos/seed/psn1/400/600" },
-      { name: "Xbox $25 Card", categoryId: "Xbox", price: 3400, stockStatus: "In Stock", customTag: "HOT", shortDescription: "Global digital code for Xbox Store.", imageUrl: "https://picsum.photos/seed/xbox1/400/600" },
-      { name: "RTX 4090 GPU", categoryId: "GPU", price: 285000, stockStatus: "In Stock", customTag: "NEW", shortDescription: "The ultimate gaming graphics card.", imageUrl: "https://picsum.photos/seed/gpu1/400/600" }
+      { name: "NVIDIA RTX 4090", categoryId: "GPU", price: 285000, stockStatus: "In Stock", customTag: "TOP TIER", shortDescription: "Ultimate gaming performance.", imageUrl: "https://picsum.photos/seed/gpu1/400/600" },
+      { name: "Samsung Odyssey G9", categoryId: "Monitor", price: 185000, stockStatus: "In Stock", customTag: "ULTRAWIDE", shortDescription: "49-inch curved gaming monitor.", imageUrl: "https://picsum.photos/seed/monitor1/400/600" },
+      { name: "PS5 Master Account", categoryId: "PlayStation Account", price: 15000, stockStatus: "In Stock", customTag: "STACKED", shortDescription: "Verified account with 50+ games.", imageUrl: "https://picsum.photos/seed/account1/400/600" }
     ];
 
     try {
@@ -207,7 +205,7 @@ export default function AdminPage() {
           updatedAt: serverTimestamp() 
         });
       }
-      toast({ title: "Database Seeded", description: "Sample products added." });
+      toast({ title: "Database Seeded", description: "Sample hardware and accounts added." });
     } catch (e) {
       toast({ variant: 'destructive', title: "Error", description: "Failed to seed database." });
     } finally {
@@ -333,7 +331,7 @@ export default function AdminPage() {
         </nav>
         <div className="pt-8 border-t border-white/5 space-y-4">
           <Button variant="outline" className="w-full border-primary/20 text-primary" onClick={seedDatabase} disabled={isSaving}>
-            <Database className="w-4 h-4 mr-2" /> SEED STORE
+            <Database className="w-4 h-4 mr-2" /> SEED ARMORY
           </Button>
           <Button variant="ghost" className="w-full justify-start text-red-500" onClick={() => setIsAuthenticated(false)}>
             <LogOut className="w-4 h-4 mr-2" /> LOGOUT
@@ -349,7 +347,7 @@ export default function AdminPage() {
             </h2>
           </div>
           <div className="flex gap-4">
-            {activeTab === 'products' && <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary text-white"><Plus className="w-4 h-4 mr-2" /> ADD PRODUCT</Button>}
+            {activeTab === 'products' && <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary text-white"><Plus className="w-4 h-4 mr-2" /> ADD ITEM</Button>}
             {activeTab === 'announcements' && <Button onClick={() => setIsAddAnnouncementOpen(true)} className="bg-primary text-white"><Plus className="w-4 h-4 mr-2" /> NEW UPDATE</Button>}
           </div>
         </header>
@@ -419,7 +417,7 @@ export default function AdminPage() {
 
       <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
         <DialogContent className="glass-panel border-white/10 sm:max-w-[600px]">
-          <DialogHeader><DialogTitle>UPLOAD PRODUCT</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>UPLOAD TO ARMORY</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-6 py-4">
             <div className="col-span-2 space-y-2">
               <Label>Product Name</Label>
@@ -430,7 +428,7 @@ export default function AdminPage() {
               <Select value={productForm.category} onValueChange={(v) => setProductForm({...productForm, category: v})}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {['PlayStation', 'Xbox', 'Steam', 'Nintendo', 'GPU', 'PC', 'Mobile'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {['GPU', 'Monitor', 'PlayStation Account', 'Xbox Account', 'Nintendo Account', 'PC', 'Mobile'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShieldCheck, Zap, ArrowRight, Star, Gamepad2, Disc } from 'lucide-react';
+import { ShieldCheck, Zap, ArrowRight, Star, Gamepad2, Disc, Cpu, Monitor, Laptop } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProductCard } from '@/components/ui/ProductCard';
@@ -47,22 +47,22 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">Instant Gaming Delivery</span>
+                <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">Premium Hardware & Digital Assets</span>
               </div>
               
               <h1 className="font-headline text-5xl md:text-7xl font-black leading-[1] tracking-tighter uppercase italic text-[#0a0c10]">
-                LEVEL UP YOUR <br />
-                <span className="text-primary">GAMING LIBRARY</span>
+                ELITE GEAR FOR <br />
+                <span className="text-primary">ELITE PLAYERS</span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed font-medium">
-                Get the latest PlayStation, Xbox, and Nintendo redeem codes delivered instantly to your inbox.
+                The ultimate destination in Nepal for high-end GPUs, Monitors, and verified Gaming Accounts.
               </p>
               
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
                 <Link href="/products">
                   <Button size="lg" className="h-14 px-10 bg-[#0a0c10] hover:bg-[#1a1d24] text-white font-bold rounded-xl shadow-lg group">
-                    EXPLORE SHOP
+                    ENTER THE ARMORY
                     <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
@@ -74,9 +74,10 @@ export default function Home() {
                 <div className="absolute inset-0 bg-[#0a0c10] rounded-[3rem] rotate-3"></div>
                 <div className="absolute inset-0 bg-white border border-border rounded-[3rem] shadow-2xl overflow-hidden">
                   <img 
-                    src="https://picsum.photos/seed/gaming-console/800/800" 
+                    src="https://picsum.photos/seed/gpu-hero/800/800" 
                     className="w-full h-full object-cover" 
-                    alt="Console"
+                    alt="High End GPU"
+                    data-ai-hint="graphics card"
                   />
                 </div>
               </div>
@@ -85,23 +86,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories Grid - 20% Dark Colour Accent */}
+      {/* Categories Grid - High Contrast Retail Look */}
       <section className="container mx-auto px-4 py-10">
         <div className="text-center mb-12">
-          <h3 className="text-4xl font-headline font-bold uppercase italic text-[#0a0c10]">SELECT YOUR PLATFORM</h3>
+          <h3 className="text-4xl font-headline font-bold uppercase italic text-[#0a0c10]">CORE CATEGORIES</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-7xl mx-auto">
           {[
-            { name: "PlayStation", icon: <Gamepad2 className="w-10 h-10" />, href: "/products?category=PlayStation" },
-            { name: "Xbox", icon: <Disc className="w-10 h-10" />, href: "/products?category=Xbox" },
-            { name: "Nintendo", icon: <Gamepad2 className="w-10 h-10" />, href: "/products?category=Nintendo" },
+            { name: "Graphic Cards", icon: <Cpu className="w-8 h-8" />, href: "/products?category=GPU" },
+            { name: "Monitors", icon: <Monitor className="w-8 h-8" />, href: "/products?category=Monitor" },
+            { name: "PS Accounts", icon: <Gamepad2 className="w-8 h-8" />, href: "/products?category=PlayStation%20Account" },
+            { name: "Xbox Accounts", icon: <Disc className="w-8 h-8" />, href: "/products?category=Xbox%20Account" },
+            { name: "Nintendo Accounts", icon: <Laptop className="w-8 h-8" />, href: "/products?category=Nintendo%20Account" },
           ].map((cat) => (
             <Link key={cat.name} href={cat.href}>
-              <div className="category-card-dark group">
-                <div className="text-white mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="category-card-dark group h-48">
+                <div className="text-white mb-4 group-hover:scale-110 transition-transform duration-300">
                   {cat.icon}
                 </div>
-                <span className="font-headline font-bold uppercase text-xl tracking-[0.2em] text-white italic">
+                <span className="font-headline font-bold uppercase text-xs tracking-[0.2em] text-white italic text-center px-2">
                   {cat.name}
                 </span>
               </div>
@@ -116,7 +119,7 @@ export default function Home() {
           <div className="relative rounded-[2.5rem] overflow-hidden bg-[#0a0c10] text-white p-10 md:p-16">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
               <div className="space-y-6">
-                <Badge className="bg-primary text-white uppercase tracking-widest font-black rounded-sm px-3 border-none">FLASH UPDATE</Badge>
+                <Badge className="bg-primary text-white uppercase tracking-widest font-black rounded-sm px-3 border-none">LIVE FEED</Badge>
                 <h2 className="text-4xl md:text-5xl font-headline font-black uppercase italic leading-none">
                   {latestAnnouncement.title}
                 </h2>
@@ -125,12 +128,12 @@ export default function Home() {
                 </p>
                 <Link href="/products">
                   <Button size="lg" className="bg-primary hover:bg-primary/90 text-white font-bold h-14 px-12 rounded-xl">
-                    CLAIM NOW
+                    VIEW DETAILS
                   </Button>
                 </Link>
               </div>
               <div className="hidden md:block relative aspect-video rounded-3xl overflow-hidden border border-white/10">
-                <img src="https://picsum.photos/seed/deal/800/450" className="w-full h-full object-cover" />
+                <img src="https://picsum.photos/seed/setup/800/450" className="w-full h-full object-cover" data-ai-hint="gaming setup" />
               </div>
             </div>
           </div>
@@ -141,13 +144,13 @@ export default function Home() {
       <section className="container mx-auto px-4 space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
           <div className="space-y-2">
-            <h2 className="text-sm font-bold text-primary tracking-[0.3em] uppercase">Latest Arrivals</h2>
+            <h2 className="text-sm font-bold text-primary tracking-[0.3em] uppercase">Inventory Status</h2>
             <h3 className="text-4xl font-headline font-bold uppercase italic tracking-tighter text-[#0a0c10]">
-              New <span className="text-primary">Stock</span>
+              New <span className="text-primary">Gear</span>
             </h3>
           </div>
           <Link href="/products" className="group text-muted-foreground hover:text-primary transition-colors font-bold text-xs uppercase tracking-widest flex items-center gap-2">
-            View All Items <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            Browse All Hardware <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
@@ -165,7 +168,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="text-center py-24 bg-gray-50 border border-dashed border-border rounded-[3rem]">
-            <p className="text-muted-foreground mb-8 font-medium">No items available currently.</p>
+            <p className="text-muted-foreground mb-8 font-medium">Armory currently empty. Restock in progress.</p>
           </div>
         )}
       </section>
@@ -174,10 +177,10 @@ export default function Home() {
       <section className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
-            { icon: <Zap className="w-5 h-5" />, label: "Delivery", value: "Instant Email" },
-            { icon: <ShieldCheck className="w-5 h-5" />, label: "Security", value: "100% Genuine" },
-            { icon: <Gamepad2 className="w-5 h-5" />, label: "Support", value: "24/7 Access" },
-            { icon: <Star className="w-5 h-5" />, label: "Pricing", value: "Best in Nepal" },
+            { icon: <Zap className="w-5 h-5" />, label: "Logistics", value: "Fast Shipping" },
+            { icon: <ShieldCheck className="w-5 h-5" />, label: "Verification", value: "Verified Accounts" },
+            { icon: <Gamepad2 className="w-5 h-5" />, label: "Support", value: "Expert Assistance" },
+            { icon: <Star className="w-5 h-5" />, label: "Quality", value: "Global Standards" },
           ].map((item, idx) => (
             <div key={idx} className="bg-white p-6 rounded-2xl flex items-center gap-4 border border-border shadow-sm">
               <div className="p-3 bg-primary/5 rounded-xl text-primary">{item.icon}</div>
