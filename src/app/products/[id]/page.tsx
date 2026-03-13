@@ -8,7 +8,7 @@ import { generateProductDescription } from '@/ai/flows/generate-product-descript
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ShoppingCart, Gamepad2, Share2, Star, ChevronLeft, Loader2 } from 'lucide-react';
+import { ShoppingCart, Gamepad2, Share2, Star, ChevronLeft, Loader2, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { CheckoutDialog } from '@/components/checkout/CheckoutDialog';
 import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -111,9 +111,9 @@ export default function ProductDetailPage() {
                 </Badge>
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">SKU: {id.slice(0, 8)}</span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-headline font-black uppercase italic tracking-tighter leading-none">{productData.name}</h1>
+              <h1 className="text-4xl md:text-5xl font-headline font-black uppercase italic tracking-tighter leading-none text-[#0a0c10]">{productData.name}</h1>
               <div className="flex items-center gap-4">
-                <span className="text-4xl font-bold text-white font-headline">Rs. {Math.round(productData.price).toLocaleString()}</span>
+                <span className="text-4xl font-bold text-[#0a0c10] font-headline">Rs. {Math.round(productData.price).toLocaleString()}</span>
                 <Badge className={productData.stockStatus === 'In Stock' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}>
                   {productData.stockStatus?.toUpperCase() || 'IN STOCK'}
                 </Badge>
@@ -124,12 +124,12 @@ export default function ProductDetailPage() {
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <CheckoutDialog product={productData}>
-                <Button size="lg" className="h-16 px-12 bg-primary hover:bg-primary/90 text-white text-xl font-bold rounded-2xl neon-border flex-grow group">
+                <Button size="lg" className="h-16 px-12 bg-primary hover:bg-primary/90 text-white text-xl font-bold rounded-2xl flex-grow group">
                   <ShoppingCart className="mr-3 w-6 h-6 group-hover:scale-110 transition-transform" />
                   BUY NOW
                 </Button>
               </CheckoutDialog>
-              <Button size="icon" variant="outline" className="h-16 w-16 rounded-2xl border-white/10 shrink-0">
+              <Button size="icon" variant="outline" className="h-16 w-16 rounded-2xl border-border shrink-0">
                 <Share2 className="w-6 h-6" />
               </Button>
             </div>
@@ -138,14 +138,14 @@ export default function ProductDetailPage() {
 
         <div className="mt-20">
           <Tabs defaultValue="description" className="w-full">
-            <TabsList className="w-full justify-start h-auto bg-transparent border-b border-white/10 p-0 gap-8 rounded-none">
+            <TabsList className="w-full justify-start h-auto bg-transparent border-b border-border p-0 gap-8 rounded-none">
               <TabsTrigger value="description" className="px-0 py-4 font-headline font-bold text-lg uppercase italic">Details</TabsTrigger>
-              <TabsTrigger value="how-to-order" className="px-0 py-4 font-headline font-bold text-lg uppercase italic">How to Order</TabsTrigger>
+              <TabsTrigger value="location" className="px-0 py-4 font-headline font-bold text-lg uppercase italic">Store Location</TabsTrigger>
             </TabsList>
             
             <TabsContent value="description" className="pt-10">
-              <div className="max-w-4xl mx-auto glass-panel p-8 md:p-12 rounded-[2rem] border-white/5">
-                <div className="prose prose-invert mb-8">
+              <div className="max-w-4xl mx-auto glass-panel p-8 md:p-12 rounded-[2rem]">
+                <div className="prose mb-8">
                   {productData.fullDescription || productData.shortDescription}
                 </div>
                 {aiLoading ? (
@@ -162,17 +162,18 @@ export default function ProductDetailPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="how-to-order" className="pt-10">
-              <div className="max-w-3xl mx-auto space-y-8">
-                {['Place Order', 'Payment Verification', 'Fast Delivery'].map((step, i) => (
-                  <div key={i} className="flex gap-6 items-start">
-                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center font-bold text-xl shrink-0">{i+1}</div>
-                    <div>
-                      <h3 className="text-xl font-bold mb-2 uppercase font-headline">{step}</h3>
-                      <p className="text-muted-foreground">{i === 0 ? "Fill details and click confirm." : i === 1 ? "Our team will call you for verification." : "Get your gear instantly after confirmation."}</p>
-                    </div>
-                  </div>
-                ))}
+            <TabsContent value="location" className="pt-10">
+              <div className="max-w-3xl mx-auto flex flex-col items-center text-center space-y-6">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+                  <MapPin className="w-10 h-10 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-headline font-bold uppercase italic text-[#0a0c10]">VISIT OUR STORE</h3>
+                  <p className="text-xl text-muted-foreground mt-2">Sitapaila, Kathmandu, Nepal</p>
+                </div>
+                <p className="max-w-md text-muted-foreground">
+                  Our professional gaming armory is open for walk-ins and physical hardware inspections. Visit us to experience premium gear first-hand.
+                </p>
               </div>
             </TabsContent>
           </Tabs>
