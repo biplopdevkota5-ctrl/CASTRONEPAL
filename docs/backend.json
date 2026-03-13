@@ -1,133 +1,31 @@
 {
   "entities": {
-    "Product": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Product",
-      "type": "object",
-      "description": "Represents a single gaming product or redeem code available for sale on Castro Nepal.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Product entity."
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the product, e.g., 'PlayStation Store Gift Card $50'."
-        },
-        "shortDescription": {
-          "type": "string",
-          "description": "A brief summary of the product, suitable for display on product cards."
-        },
-        "fullDescription": {
-          "type": "string",
-          "description": "The comprehensive description of the product, displayed on the product details page."
-        },
-        "price": {
-          "type": "number",
-          "description": "The price of the product in the local currency."
-        },
-        "imageUrl": {
-          "type": "string",
-          "description": "The URL of the main image for the product.",
-          "format": "uri"
-        },
-        "categoryIds": {
-          "type": "array",
-          "description": "References to Categories this product belongs to. (Relationship: Category N:N Product)",
-          "items": {
-            "type": "string"
-          }
-        },
-        "stockStatus": {
-          "type": "string",
-          "description": "The current availability status of the product (e.g., 'In Stock', 'Out of Stock', 'Low Stock')."
-        },
-        "isFeatured": {
-          "type": "boolean",
-          "description": "A flag indicating if the product should be prominently displayed as a featured item, typically on the homepage."
-        },
-        "isTrending": {
-          "type": "boolean",
-          "description": "A flag indicating if the product is currently trending or highly popular among users."
-        },
-        "customerInstructions": {
-          "type": "string",
-          "description": "Specific instructions for the customer regarding the use or redemption of the digital product code."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp indicating when the product was first added to the catalog.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "Timestamp indicating when the product information was last updated.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "fullDescription",
-        "price",
-        "imageUrl",
-        "stockStatus",
-        "createdAt"
-      ]
-    },
-    "Category": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Category",
-      "type": "object",
-      "description": "Organizes products into logical groups like 'PlayStation Redeem Codes' or 'Xbox Gift Cards'.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Category entity."
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the product category, e.g., 'PlayStation Redeem Codes'."
-        },
-        "description": {
-          "type": "string",
-          "description": "A short description of the category, explaining its purpose or content."
-        }
-      },
-      "required": [
-        "id",
-        "name"
-      ]
-    },
     "UserProfile": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "UserProfile",
       "type": "object",
-      "description": "Stores user-specific information for registered customers, excluding authentication credentials.",
+      "description": "Represents a user's profile information, linked to their external authentication account. Stores details like contact information for faster checkout and order history.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the UserProfile entity, corresponding to the user's account."
+          "description": "Unique identifier for the UserProfile entity. This ID should correspond to the user ID from the external authentication system."
         },
         "email": {
           "type": "string",
-          "description": "The user's email address, used for communication and manual login (managed by external auth)."
+          "description": "The user's email address, typically obtained from the external authentication system.",
+          "format": "email"
         },
         "fullName": {
           "type": "string",
-          "description": "The full name of the user."
+          "description": "The user's full name, used for order processing and display in the account dashboard."
         },
         "phoneNumber": {
           "type": "string",
-          "description": "The user's contact phone number."
+          "description": "The user's default phone number for contact and order processing, saved for convenience."
         },
         "address": {
           "type": "string",
-          "description": "The user's primary shipping or billing address for saved contact information."
-        },
-        "googleId": {
-          "type": "string",
-          "description": "An identifier provided by the Google authentication system if the user signed up via Google. (Relationship: UserProfile 1:1 ExternalAuthSystem)"
+          "description": "The user's default shipping/billing address, saved for faster checkout."
         },
         "createdAt": {
           "type": "string",
@@ -143,14 +41,136 @@
       "required": [
         "id",
         "email",
-        "createdAt"
+        "fullName",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a category for grouping products, such as 'PlayStation Redeem Codes' or 'Xbox Gift Cards'.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Category entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the category (e.g., 'PlayStation Redeem Codes')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of what this category includes, used for informational purposes."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to an image representing the category, used for UI display in navigation or listings.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a digital game redeem code or a gaming product available for sale on Castro Nepal.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Product entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the product as displayed to customers."
+        },
+        "price": {
+          "type": "number",
+          "description": "The current selling price of the product."
+        },
+        "shortDescription": {
+          "type": "string",
+          "description": "A concise summary or tagline for the product, displayed in product listings."
+        },
+        "fullDescription": {
+          "type": "string",
+          "description": "A detailed and comprehensive description of the product, shown on the product details page."
+        },
+        "mainImageUrl": {
+          "type": "string",
+          "description": "URL to the primary image representing the product.",
+          "format": "uri"
+        },
+        "additionalImageUrls": {
+          "type": "array",
+          "description": "An array of URLs to additional images or screenshots for the product.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the Category this product belongs to. (Relationship: Category 1:N Product)"
+        },
+        "stockStatus": {
+          "type": "string",
+          "description": "Indicates the general availability status of the product (e.g., 'In Stock', 'Out of Stock', 'Limited Stock')."
+        },
+        "quantityAvailable": {
+          "type": "number",
+          "description": "The current number of units of this product available in stock."
+        },
+        "customerInstructions": {
+          "type": "string",
+          "description": "Specific instructions or guidelines for the customer on how to use or redeem the product, typically for digital codes."
+        },
+        "isFeatured": {
+          "type": "boolean",
+          "description": "A flag indicating if this product should be highlighted as a featured item on the homepage."
+        },
+        "isTrending": {
+          "type": "boolean",
+          "description": "A flag indicating if this product is currently popular or trending, used for display in trending sections."
+        },
+        "releaseDate": {
+          "type": "string",
+          "description": "The date and time when the product was initially released or added to the store, used for 'Recently Added' features.",
+          "format": "date-time"
+        },
+        "relatedProductIds": {
+          "type": "array",
+          "description": "An array of Product IDs that are considered related or similar to this product, for recommendations. (Relationship: Product N:N Product)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "price",
+        "shortDescription",
+        "fullDescription",
+        "mainImageUrl",
+        "categoryId",
+        "stockStatus",
+        "quantityAvailable",
+        "customerInstructions",
+        "isFeatured",
+        "isTrending",
+        "releaseDate"
       ]
     },
     "Order": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Order",
       "type": "object",
-      "description": "Represents a customer's purchase transaction on the website.",
+      "description": "Represents a customer's purchase order, containing details about the customer and the items purchased.",
       "properties": {
         "id": {
           "type": "string",
@@ -158,41 +178,45 @@
         },
         "userId": {
           "type": "string",
-          "description": "Reference to the UserProfile who placed the order. Null if the order was placed as a guest. (Relationship: UserProfile 1:N Order)"
+          "description": "Reference to the UserProfile who placed this order. This is optional to support guest checkouts. (Relationship: UserProfile 1:N Order)"
         },
         "customerName": {
           "type": "string",
-          "description": "The full name of the customer who placed the order."
+          "description": "The full name of the customer as provided during checkout for this specific order."
         },
         "customerPhoneNumber": {
           "type": "string",
-          "description": "The phone number of the customer for order communication."
+          "description": "The phone number of the customer as provided during checkout for this specific order."
         },
         "customerAddress": {
           "type": "string",
-          "description": "The physical address provided by the customer for the order."
+          "description": "The shipping/billing address of the customer as provided during checkout for this specific order."
         },
         "customerEmail": {
           "type": "string",
-          "description": "The email address of the customer for order confirmation and communication.",
+          "description": "The email address of the customer as provided during checkout for this specific order.",
           "format": "email"
         },
         "notes": {
           "type": "string",
-          "description": "Any additional notes or messages provided by the customer with the order."
+          "description": "Any additional messages or special instructions provided by the customer for this order."
         },
         "orderTime": {
           "type": "string",
-          "description": "Timestamp indicating when the order was placed.",
+          "description": "The date and time when the order was placed.",
           "format": "date-time"
         },
-        "totalAmount": {
+        "totalPrice": {
           "type": "number",
-          "description": "The total monetary amount of the order, including all items and any applicable taxes/fees."
+          "description": "The total monetary value of all items in the order, including any taxes or fees (if applicable)."
         },
         "status": {
           "type": "string",
           "description": "The current processing status of the order (e.g., 'Pending', 'Processing', 'Completed', 'Cancelled')."
+        },
+        "discordWebhookSent": {
+          "type": "boolean",
+          "description": "A flag indicating whether the order details have been successfully sent to the Discord webhook."
         }
       },
       "required": [
@@ -202,15 +226,16 @@
         "customerAddress",
         "customerEmail",
         "orderTime",
-        "totalAmount",
-        "status"
+        "totalPrice",
+        "status",
+        "discordWebhookSent"
       ]
     },
     "OrderItem": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "OrderItem",
       "type": "object",
-      "description": "Represents a specific product and its quantity within a larger customer order.",
+      "description": "Represents a single product item within an order, detailing the product purchased, its quantity, and price at the time of purchase.",
       "properties": {
         "id": {
           "type": "string",
@@ -222,19 +247,23 @@
         },
         "productId": {
           "type": "string",
-          "description": "Reference to the Product that was ordered. (Relationship: Product 1:N OrderItem)"
+          "description": "Reference to the Product that was purchased. This links to the product's current catalog entry."
         },
         "productName": {
           "type": "string",
-          "description": "The name of the product at the time of purchase (denormalized for historical accuracy)."
-        },
-        "priceAtPurchase": {
-          "type": "number",
-          "description": "The price of the product at the time it was purchased (denormalized for historical accuracy)."
+          "description": "The name of the product at the time the order was placed (denormalized for historical accuracy)."
         },
         "quantity": {
           "type": "number",
-          "description": "The quantity of this specific product ordered."
+          "description": "The quantity of the product purchased in this order item."
+        },
+        "unitPrice": {
+          "type": "number",
+          "description": "The price of one unit of the product at the time the order was placed (denormalized for historical accuracy)."
+        },
+        "subtotal": {
+          "type": "number",
+          "description": "The total price for this specific order item (quantity * unitPrice)."
         }
       },
       "required": [
@@ -242,15 +271,16 @@
         "orderId",
         "productId",
         "productName",
-        "priceAtPurchase",
-        "quantity"
+        "quantity",
+        "unitPrice",
+        "subtotal"
       ]
     },
     "Announcement": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Announcement",
       "type": "object",
-      "description": "Stores information about system-wide announcements created by administrators.",
+      "description": "Represents an announcement created by an administrator, displayed on the homepage to inform users about updates, discounts, or new products.",
       "properties": {
         "id": {
           "type": "string",
@@ -258,44 +288,33 @@
         },
         "title": {
           "type": "string",
-          "description": "The title of the announcement."
+          "description": "The title or headline of the announcement."
         },
         "content": {
           "type": "string",
-          "description": "The main text content of the announcement."
+          "description": "The main message or body of the announcement."
         },
-        "startDate": {
+        "publicationDate": {
           "type": "string",
-          "description": "The date and time when the announcement becomes active and visible.",
+          "description": "The date and time when the announcement was published and became visible.",
           "format": "date-time"
         },
-        "endDate": {
+        "expiryDate": {
           "type": "string",
-          "description": "The date and time when the announcement expires and is no longer visible (optional).",
+          "description": "The date and time when the announcement should no longer be displayed. This field is optional.",
           "format": "date-time"
         },
         "isActive": {
           "type": "boolean",
-          "description": "A boolean indicating if the announcement is currently active and should be displayed on the homepage."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp indicating when the announcement was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "Timestamp indicating when the announcement was last updated.",
-          "format": "date-time"
+          "description": "A flag indicating whether the announcement is currently active and should be displayed on the homepage."
         }
       },
       "required": [
         "id",
         "title",
         "content",
-        "startDate",
-        "isActive",
-        "createdAt"
+        "publicationDate",
+        "isActive"
       ]
     }
   },
@@ -308,17 +327,97 @@
   "firestore": {
     "structure": [
       {
-        "path": "/products/{productId}",
+        "path": "/users/{userId}",
         "definition": {
-          "entityName": "Product",
+          "entityName": "UserProfile",
           "schema": {
-            "$ref": "#/backend/entities/Product"
+            "$ref": "#/backend/entities/UserProfile"
           },
-          "description": "Stores all gaming products and redeem codes available for sale. These products are publicly readable by all users (authenticated or not) and writable only by administrators. Includes denormalized 'isFeatured' and 'isTrending' fields to support efficient listing queries for homepage sections, directly addressing QAPs for these public lists.",
+          "description": "Stores user profile data. Each document's ID corresponds to the Firebase Authentication UID. Access is restricted to the authenticated user matching {userId}. The document must contain a 'id' field that matches the {userId} path parameter for authorization independence.",
           "params": [
             {
-              "name": "productId",
-              "description": "The unique identifier for a specific product."
+              "name": "userId",
+              "description": "The unique identifier of the user, matching their Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Stores individual orders placed by registered users. Access is restricted to the authenticated user matching {userId} or administrators. The document must contain a 'userId' field that matches the {userId} path parameter for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who placed the order, matching their Firebase Authentication UID."
+            },
+            {
+              "name": "orderId",
+              "description": "The unique identifier for the specific order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/orders/{orderId}/order_items/{orderItemId}",
+        "definition": {
+          "entityName": "OrderItem",
+          "schema": {
+            "$ref": "#/backend/entities/OrderItem"
+          },
+          "description": "Stores individual items within an order placed by a registered user. Access inherits from the parent order: restricted to the authenticated user matching {userId} or administrators. The 'orderId' field within the document must match the {orderId} path parameter.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user associated with the parent order."
+            },
+            {
+              "name": "orderId",
+              "description": "The unique identifier of the parent order."
+            },
+            {
+              "name": "orderItemId",
+              "description": "The unique identifier for the specific item within the order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/guest_orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Stores orders placed by guest users (those without a Firebase Authentication UID). This collection is accessible only by administrators for management. It is structurally segregated to ensure different security postures from user-owned orders.",
+          "params": [
+            {
+              "name": "orderId",
+              "description": "The unique identifier for the specific guest order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/guest_orders/{orderId}/order_items/{orderItemId}",
+        "definition": {
+          "entityName": "OrderItem",
+          "schema": {
+            "$ref": "#/backend/entities/OrderItem"
+          },
+          "description": "Stores individual items within an order placed by a guest user. This subcollection is accessible only by administrators, inheriting authorization from the parent guest order.",
+          "params": [
+            {
+              "name": "orderId",
+              "description": "The unique identifier of the parent guest order."
+            },
+            {
+              "name": "orderItemId",
+              "description": "The unique identifier for the specific item within the guest order."
             }
           ]
         }
@@ -330,63 +429,27 @@
           "schema": {
             "$ref": "#/backend/entities/Category"
           },
-          "description": "Contains categories for organizing products. Categories are publicly readable for navigation and filtering, and writable only by administrators. This collection supports efficient QAPs for category lists.",
+          "description": "Stores product categories. Documents are publicly readable by all users (authenticated and unauthenticated) for product browsing. Only administrators can create, update, or delete categories. Admin role check is performed via the /roles_admin collection.",
           "params": [
             {
               "name": "categoryId",
-              "description": "The unique identifier for a specific product category."
+              "description": "The unique identifier for the product category."
             }
           ]
         }
       },
       {
-        "path": "/userProfiles/{userId}",
+        "path": "/products/{productId}",
         "definition": {
-          "entityName": "UserProfile",
+          "entityName": "Product",
           "schema": {
-            "$ref": "#/backend/entities/UserProfile"
+            "$ref": "#/backend/entities/Product"
           },
-          "description": "Stores user-specific profile information. Access is restricted to the owner of the profile (request.auth.uid == userId) for read/write operations. This path adheres to path-based ownership for authorization independence, ensuring users can only manage their own data.",
+          "description": "Stores individual product listings. Documents are publicly readable by all users. Only administrators can create, update, or delete products. Admin role check is performed via the /roles_admin collection.",
           "params": [
             {
-              "name": "userId",
-              "description": "The unique identifier of the user, corresponding to Firebase Authentication UID."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/orders/{orderId}",
-        "definition": {
-          "entityName": "Order",
-          "schema": {
-            "$ref": "#/backend/entities/Order"
-          },
-          "description": "Stores customer purchase transactions. Each order document includes 'userId' (if placed by a registered user) or is null for guest orders, allowing authorization independence for individual user orders (request.auth.uid == resource.data.userId). Administrators have full read/write access to all orders. This structure enables QAPs for users to list their own orders efficiently via a query filter, and for admins to list all orders.",
-          "params": [
-            {
-              "name": "orderId",
-              "description": "The unique identifier for a specific customer order."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/orders/{orderId}/orderItems/{orderItemId}",
-        "definition": {
-          "entityName": "OrderItem",
-          "schema": {
-            "$ref": "#/backend/entities/OrderItem"
-          },
-          "description": "Represents individual products within an order. Each OrderItem document denormalizes the 'userId' from its parent Order for authorization independence. Access is granted if 'request.auth.uid == resource.data.userId' or if the user is an administrator. This ensures that access rules can be applied directly to OrderItem documents without requiring a 'get()' call to the parent Order, supporting QAPs for viewing order details.",
-          "params": [
-            {
-              "name": "orderId",
-              "description": "The unique identifier of the parent order to which this item belongs."
-            },
-            {
-              "name": "orderItemId",
-              "description": "The unique identifier for a specific item within an order."
+              "name": "productId",
+              "description": "The unique identifier for the product."
             }
           ]
         }
@@ -398,32 +461,32 @@
           "schema": {
             "$ref": "#/backend/entities/Announcement"
           },
-          "description": "Manages system-wide announcements displayed on the homepage. Announcements are publicly readable by all users and writable only by administrators. This structure provides a homogeneous security posture for efficient public listing (QAP).",
+          "description": "Stores system-wide announcements. Documents are publicly readable by all users for informational purposes. Only administrators can create, update, or delete announcements. Admin role check is performed via the /roles_admin collection.",
           "params": [
             {
               "name": "announcementId",
-              "description": "The unique identifier for a specific announcement."
+              "description": "The unique identifier for the announcement."
             }
           ]
         }
       },
       {
-        "path": "/roles_admin/{userId}",
+        "path": "/roles_admin/{uid}",
         "definition": {
           "entityName": "AdminRole",
           "schema": {
-            "$ref": "#/backend/entities/AdminRole"
+            "$ref": "#/backend/entities/UserProfile"
           },
-          "description": "This collection serves as the database-backed access control (DBAC) for administrators. The mere existence of a document at '/roles_admin/{userId}' grants administrative privileges to that 'userId'. This provides a secure and auditable way to manage administrator roles without relying on custom claims, supporting global role checks for write access on public collections and full access on sensitive collections (e.g., all orders).",
+          "description": "A collection used for Database-Backed Access Control (DBAC) to identify administrators. The existence of a document at `/roles_admin/{request.auth.uid}` grants administrator privileges. This relies on an 'existence check' in security rules for authorization independence.",
           "params": [
             {
-              "name": "userId",
-              "description": "The unique identifier (UID) of a user who has been assigned administrator privileges."
+              "name": "uid",
+              "description": "The Firebase Authentication UID of a user designated as an administrator."
             }
           ]
         }
       }
     ],
-    "reasoning": "The Firestore structure for Castro Nepal is designed with a strong emphasis on Authorization Independence and supporting Query Across Paths (QAPs) to ensure security, scalability, and debuggability. \n\n**Authorization Independence via Denormalization:**\n\n1.  **Public Collections (`/products`, `/categories`, `/announcements`):** These collections store data intended for public read access by all users (authenticated or not). Their security rules are simple (`allow read: if true;`) as there are no inherent hierarchical authorization dependencies for read operations. Write access is strictly limited to administrators, checked via the dedicated `/roles_admin/{userId}` collection. This eliminates any need for `get()` calls in read rules.\n2.  **User-Owned Data (`/userProfiles/{userId}`):** User profiles are designed using path-based ownership (`/userProfiles/{userId}`). Authorization is directly tied to the document path, where `userId` matches `request.auth.uid`. This provides absolute authorization independence, as no `get()` calls are required to verify ownership. A user can only access their own profile.\n3.  **Transactional Data (`/orders/{orderId}` and `/orders/{orderId}/orderItems/{orderItemId}`):**\n    *   **Orders:** The `/orders/{orderId}` collection is a top-level collection. Each `Order` document explicitly includes a `userId` field (or `null` for guest orders). For authenticated users, read/write access to an order is granted only if `request.auth.uid` matches the `resource.data.userId` within the order document. This denormalizes the authorization context directly into the document, avoiding any `get()` calls to a parent `UserProfile` or similar. Administrators have full access, checked by `/roles_admin/{userId}`.\n    *   **OrderItems:** `OrderItem` documents are stored in a subcollection under `/orders/{orderId}/orderItems/{orderItemId}`. Crucially, each `OrderItem` document also denormalizes the `userId` from its parent `Order` into its own fields. This ensures that security rules for `OrderItem` can independently verify ownership (`request.auth.uid == resource.data.userId`) without requiring a `get()` call to the parent `Order` document, adhering strictly to the Authorization Independence mandate.\n\n**Query Across Paths (QAPs) Support:**\n\n1.  **Public Lists (`/products`, `/categories`, `/announcements`):** These collections are designed with a homogeneous security posture (publicly readable). This enables efficient `list` operations (QAPs) across the entire collection without security rule filters. Users can query for featured products, trending items, or filter by category directly, and the rules `allow list: if true;` are performant and secure.\n2.  **User-Specific Lists (`/orders`):** For logged-in users, `list` operations on `/orders` are secured by requiring a query filter `where('userId', '==', request.auth.uid)`. The security rules will enforce that `request.auth.uid` matches the `userId` field in the documents being requested. This ensures that users can only list their own orders, directly supporting QAPs for personal order history. Administrators, identified via `/roles_admin`, can list all orders.\n3.  **Admin Roles (`/roles_admin/{userId}`):** This dedicated collection serves as a database-backed access control (DBAC) mechanism. The mere existence of a document at `/roles_admin/{userId}` (where `userId` is `request.auth.uid`) grants administrative privileges. This design avoids custom claims, simplifies rule logic (e.g., `exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))`), and provides a clean, auditable record of administrators, critical for securing write operations across public collections and granting full access to sensitive collections like `orders` and `userProfiles` for administrative oversight."
+    "reasoning": "The Firestore structure prioritizes security, scalability, and debuggability by adhering to the CORE DESIGN PRINCIPLES and DESIGN STRATEGY MANDATES. It leverages path-based authorization, structural segregation, and minimal denormalization to achieve Authorization Independence and enable secure QAPs.\n\n**Authorization Independence:**\n1.  **User-Owned Data:** User-specific data like `UserProfile` and `Orders` are structured under `/users/{userId}/...`. This design ensures that authorization rules can directly compare `request.auth.uid` with the `{userId}` wildcard in the path, eliminating the need for `get()` calls to parent documents or external checks for ownership. For instance, a user's `Order` document, though nested, implicitly carries the `userId` in its path, making authorization atomic and independent.\n2.  **Public & Admin Data:** Collections like `/categories`, `/products`, and `/announcements` are designed for public read access. Write access to these, and all access to `/guest_orders`, is restricted to administrators. Admin status is determined by the existence of a document in the `/roles_admin/{uid}` collection. This `exists()` check is a constant-time operation and does not involve `get()` calls that would break authorization independence.\n3.  **Nested Data:** `OrderItem` documents are nested under specific orders (`/users/{userId}/orders/{orderId}/order_items/{orderItemId}` or `/guest_orders/{orderId}/order_items/{orderItemId}`). Authorization for these items is implicitly handled by the parent path segments. Rules for `order_items` can directly use the `{userId}` or `{orderId}` wildcards from their parent paths without needing to retrieve the actual parent `Order` document. This avoids hierarchical dependencies.\n\n**QAPs (Rules are not Filters) Support:**\n1.  **User-Specific Lists:** For data under `/users/{userId}`, `list` operations are naturally secure. A user can only query their own path (`/users/{request.auth.uid}/orders`), ensuring that the returned results are inherently authorized and do not require further client-side filtering.\n2.  **Public Lists:** Collections like `/categories`, `/products`, and `/announcements` are designed for global public read access. Firestore rules will permit `list` operations for all users, returning a complete and authorized dataset without any filtering. This perfectly aligns with QAPs, as the collection's security posture is homogeneous.\n3.  **Admin-Only Lists:** The `/guest_orders` and `/roles_admin` collections are accessible only by administrators. `list` operations on these collections will be secured by checking the admin role (`exists(/roles_admin/$(request.auth.uid))`), ensuring that only authorized administrators can view these sensitive lists.\n\n**Structural Segregation & Denormalization:**\n*   `Order` entities are segregated into `/users/{userId}/orders/{orderId}` (for authenticated users) and `/guest_orders/{orderId}` (for non-authenticated users/admin-only management). This separates data with distinct security requirements.\n*   The `Order` document itself, when stored under `/users/{userId}/orders/{orderId}`, will include a `userId` field that matches the path, reinforcing ownership and authorization. This is a deliberate denormalization to achieve authorization independence. All wildcards are descriptive, such as `{userId}` and `{orderId}`, enhancing clarity and debuggability."
   }
 }
