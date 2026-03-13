@@ -2,11 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShieldCheck, Zap, Sparkles, ArrowRight, Star, Cpu, Monitor, Gamepad2, Smartphone, Headphones, MousePointer2 } from 'lucide-react';
+import { ShieldCheck, Zap, ArrowRight, Star, Gamepad2, Disc } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProductCard } from '@/components/ui/ProductCard';
-import { cn } from '@/lib/utils';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 
@@ -42,78 +41,42 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-16 pb-20 bg-white">
-      {/* Hero Section - Clean Pro Light */}
-      <section className="relative min-h-[80vh] flex items-center pt-20 overflow-hidden bg-gray-50">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4"></div>
-          <Image 
-            src="https://picsum.photos/seed/pc-mod-hero/1920/1080"
-            alt="Premium Gaming Setup"
-            fill
-            className="object-cover opacity-10 grayscale"
-            priority
-            data-ai-hint="gaming setup"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent"></div>
-        </div>
-
+      {/* Hero Section */}
+      <section className="relative min-h-[70vh] flex items-center pt-20 overflow-hidden bg-gray-50">
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                </span>
-                <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">Nepal's Premier Hardware Hub</span>
+                <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">Instant Gaming Delivery</span>
               </div>
               
-              <h1 className="font-headline text-5xl md:text-7xl font-black leading-[1] tracking-tighter uppercase italic text-foreground">
-                DOMINATE THE <br />
-                <span className="text-primary">DIGITAL REALM</span>
+              <h1 className="font-headline text-5xl md:text-7xl font-black leading-[1] tracking-tighter uppercase italic text-[#0a0c10]">
+                LEVEL UP YOUR <br />
+                <span className="text-primary">GAMING LIBRARY</span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed font-medium">
-                From high-performance GPUs to custom cooling. We equip champions across Nepal with world-class hardware.
+                Get the latest PlayStation, Xbox, and Nintendo redeem codes delivered instantly to your inbox.
               </p>
               
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
                 <Link href="/products">
-                  <Button size="lg" className="h-14 px-10 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg group">
-                    EXPLORE INVENTORY
+                  <Button size="lg" className="h-14 px-10 bg-[#0a0c10] hover:bg-[#1a1d24] text-white font-bold rounded-xl shadow-lg group">
+                    EXPLORE SHOP
                     <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-                <Link href="/admin">
-                  <Button variant="outline" size="lg" className="h-14 px-8 border-border hover:bg-gray-50 rounded-xl font-bold">
-                    BUILD YOUR RIG
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="flex items-center justify-center lg:justify-start gap-8 pt-8">
-                <div className="flex -space-x-3">
-                  {[1,2,3,4].map(i => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-gray-100 overflow-hidden">
-                      <img src={`https://picsum.photos/seed/user${i}/100/100`} className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
-                <div className="text-sm">
-                  <div className="font-bold text-foreground">5,000+ Gamers</div>
-                  <div className="text-muted-foreground text-xs uppercase tracking-wider font-bold">Equipped & Ready</div>
-                </div>
               </div>
             </div>
 
             <div className="hidden lg:block relative">
               <div className="relative aspect-square w-full max-w-md mx-auto">
-                <div className="absolute inset-0 bg-primary/5 rounded-[3rem] rotate-6"></div>
+                <div className="absolute inset-0 bg-[#0a0c10] rounded-[3rem] rotate-3"></div>
                 <div className="absolute inset-0 bg-white border border-border rounded-[3rem] shadow-2xl overflow-hidden">
                   <img 
-                    src="https://picsum.photos/seed/hardware-showcase/800/800" 
-                    className="w-full h-full object-cover hover:scale-105 transition-all duration-700" 
-                    alt="Hardware"
+                    src="https://picsum.photos/seed/gaming-console/800/800" 
+                    className="w-full h-full object-cover" 
+                    alt="Console"
                   />
                 </div>
               </div>
@@ -122,51 +85,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trust Stats */}
-      <section className="container mx-auto px-4 -mt-12 relative z-20">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[
-            { icon: <Zap className="w-5 h-5" />, label: "Express", value: "Instant Delivery" },
-            { icon: <ShieldCheck className="w-5 h-5" />, label: "Verified", value: "Genuine Gear" },
-            { icon: <Gamepad2 className="w-5 h-5" />, label: "Support", value: "Expert Advice" },
-            { icon: <Star className="w-5 h-5" />, label: "Pricing", value: "Competitive" },
-          ].map((item, idx) => (
-            <div key={idx} className="bg-white p-6 rounded-2xl flex items-center gap-4 group border border-border shadow-sm hover:shadow-md transition-all">
-              <div className="p-3 bg-primary/5 rounded-xl text-primary group-hover:scale-110 transition-transform">
-                {item.icon}
-              </div>
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{item.label}</div>
-                <div className="font-bold text-foreground uppercase text-sm">{item.value}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Categories Grid - Clean Pro */}
+      {/* Categories Grid - 20% Dark Colour Accent */}
       <section className="container mx-auto px-4 py-10">
-        <div className="text-center mb-12 space-y-2">
-          <h2 className="text-sm font-bold text-primary tracking-[0.3em] uppercase">The Armory</h2>
-          <h3 className="text-4xl font-headline font-bold uppercase italic text-foreground">Specialized Categories</h3>
+        <div className="text-center mb-12">
+          <h3 className="text-4xl font-headline font-bold uppercase italic text-[#0a0c10]">SELECT YOUR PLATFORM</h3>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {[
-            { name: "GPU", icon: <Cpu className="w-6 h-6" />, color: "bg-purple-50 text-purple-600" },
-            { name: "Monitors", icon: <Monitor className="w-6 h-6" />, color: "bg-blue-50 text-blue-600" },
-            { name: "Console", icon: <Gamepad2 className="w-6 h-6" />, color: "bg-red-50 text-red-600" },
-            { name: "Mobile", icon: <Smartphone className="w-6 h-6" />, color: "bg-orange-50 text-orange-600" },
-            { name: "Audio", icon: <Headphones className="w-6 h-6" />, color: "bg-cyan-50 text-cyan-600" },
-            { name: "Peripherals", icon: <MousePointer2 className="w-6 h-6" />, color: "bg-green-50 text-green-600" },
+            { name: "PlayStation", icon: <Gamepad2 className="w-10 h-10" />, href: "/products?category=PlayStation" },
+            { name: "Xbox", icon: <Disc className="w-10 h-10" />, href: "/products?category=Xbox" },
+            { name: "Nintendo", icon: <Gamepad2 className="w-10 h-10" />, href: "/products?category=Nintendo" },
           ].map((cat) => (
-            <Link key={cat.name} href={`/products?category=${cat.name}`}>
-              <div className={cn(
-                "group relative bg-white border border-border p-8 rounded-3xl flex flex-col items-center justify-center gap-4 transition-all duration-500 hover:-translate-y-2 hover:border-primary/40 shadow-sm"
-              )}>
-                <div className={cn("p-4 rounded-2xl transition-all group-hover:scale-110", cat.color)}>
+            <Link key={cat.name} href={cat.href}>
+              <div className="category-card-dark group">
+                <div className="text-white mb-6 group-hover:scale-110 transition-transform duration-300">
                   {cat.icon}
                 </div>
-                <span className="font-headline font-bold uppercase text-xs tracking-widest text-foreground">{cat.name}</span>
+                <span className="font-headline font-bold uppercase text-xl tracking-[0.2em] text-white italic">
+                  {cat.name}
+                </span>
               </div>
             </Link>
           ))}
@@ -176,27 +113,24 @@ export default function Home() {
       {/* Latest Update Banner */}
       {latestAnnouncement && (
         <section className="container mx-auto px-4">
-          <div className="relative rounded-[2.5rem] overflow-hidden bg-gray-50 p-10 md:p-16 border border-border">
-            <div className="absolute top-0 right-0 p-8">
-              <Sparkles className="w-12 h-12 text-primary/10 animate-pulse" />
-            </div>
+          <div className="relative rounded-[2.5rem] overflow-hidden bg-[#0a0c10] text-white p-10 md:p-16">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
               <div className="space-y-6">
-                <Badge className="bg-primary text-white uppercase tracking-widest font-black rounded-sm px-3">FLASH UPDATE</Badge>
-                <h2 className="text-4xl md:text-5xl font-headline font-black uppercase italic leading-none text-foreground">
+                <Badge className="bg-primary text-white uppercase tracking-widest font-black rounded-sm px-3 border-none">FLASH UPDATE</Badge>
+                <h2 className="text-4xl md:text-5xl font-headline font-black uppercase italic leading-none">
                   {latestAnnouncement.title}
                 </h2>
-                <p className="text-muted-foreground text-lg">
+                <p className="text-gray-400 text-lg">
                   {latestAnnouncement.content}
                 </p>
                 <Link href="/products">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-white font-bold h-14 px-12 rounded-xl shadow-lg">
-                    CLAIM OFFER
+                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-white font-bold h-14 px-12 rounded-xl">
+                    CLAIM NOW
                   </Button>
                 </Link>
               </div>
-              <div className="hidden md:block relative aspect-video rounded-3xl overflow-hidden border border-border shadow-xl">
-                <img src="https://picsum.photos/seed/announcement/800/450" className="w-full h-full object-cover" />
+              <div className="hidden md:block relative aspect-video rounded-3xl overflow-hidden border border-white/10">
+                <img src="https://picsum.photos/seed/deal/800/450" className="w-full h-full object-cover" />
               </div>
             </div>
           </div>
@@ -207,13 +141,13 @@ export default function Home() {
       <section className="container mx-auto px-4 space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
           <div className="space-y-2">
-            <h2 className="text-sm font-bold text-primary tracking-[0.3em] uppercase">Hardware Inventory</h2>
-            <h3 className="text-4xl font-headline font-bold uppercase italic tracking-tighter text-foreground">
-              New <span className="text-primary">Arrivals</span>
+            <h2 className="text-sm font-bold text-primary tracking-[0.3em] uppercase">Latest Arrivals</h2>
+            <h3 className="text-4xl font-headline font-bold uppercase italic tracking-tighter text-[#0a0c10]">
+              New <span className="text-primary">Stock</span>
             </h3>
           </div>
           <Link href="/products" className="group text-muted-foreground hover:text-primary transition-colors font-bold text-xs uppercase tracking-widest flex items-center gap-2">
-            View the entire armory <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            View All Items <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
@@ -231,30 +165,30 @@ export default function Home() {
           </div>
         ) : (
           <div className="text-center py-24 bg-gray-50 border border-dashed border-border rounded-[3rem]">
-            <p className="text-muted-foreground mb-8 font-medium">The vault is currently empty. Ready to restock?</p>
-            <Link href="/admin">
-              <Button variant="outline" className="h-12 px-10 rounded-xl border-primary/20 text-primary">ACCESS COMMAND CENTER</Button>
-            </Link>
+            <p className="text-muted-foreground mb-8 font-medium">No items available currently.</p>
           </div>
         )}
       </section>
 
-      {/* Featured Hardware Section */}
-      {featuredProducts && featuredProducts.length > 0 && (
-        <section className="bg-gray-50 py-24 border-y border-border">
-          <div className="container mx-auto px-4 space-y-16">
-            <div className="text-center space-y-4">
-              <Badge variant="outline" className="border-primary/30 text-primary uppercase tracking-[0.4em] font-bold px-4">Elite Choice</Badge>
-              <h2 className="text-5xl font-headline font-black uppercase italic tracking-tighter text-foreground">Featured <span className="text-primary">Picks</span></h2>
+      {/* Trust Stats */}
+      <section className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[
+            { icon: <Zap className="w-5 h-5" />, label: "Delivery", value: "Instant Email" },
+            { icon: <ShieldCheck className="w-5 h-5" />, label: "Security", value: "100% Genuine" },
+            { icon: <Gamepad2 className="w-5 h-5" />, label: "Support", value: "24/7 Access" },
+            { icon: <Star className="w-5 h-5" />, label: "Pricing", value: "Best in Nepal" },
+          ].map((item, idx) => (
+            <div key={idx} className="bg-white p-6 rounded-2xl flex items-center gap-4 border border-border shadow-sm">
+              <div className="p-3 bg-primary/5 rounded-xl text-primary">{item.icon}</div>
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{item.label}</div>
+                <div className="font-bold text-[#0a0c10] uppercase text-sm">{item.value}</div>
+              </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

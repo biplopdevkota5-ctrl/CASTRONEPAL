@@ -24,6 +24,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.75rem;
+    --gaming-dark: 222.2 84% 4.9%;
   }
 
   .dark {
@@ -70,6 +71,11 @@
 
   .retail-card {
     @apply bg-white border border-border hover:border-primary/40 hover:shadow-xl transition-all duration-300;
+  }
+
+  /* Dark Category Cards style */
+  .category-card-dark {
+    @apply bg-[#0a0c10] border border-white/5 rounded-[2rem] flex flex-col items-center justify-center p-8 transition-all duration-300 hover:bg-[#11141a] hover:border-primary/50;
   }
 
   .gaming-gradient {

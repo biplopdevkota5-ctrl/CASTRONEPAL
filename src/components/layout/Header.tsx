@@ -25,13 +25,13 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 z-[100] w-full border-b border-border bg-white/90 backdrop-blur-xl">
+    <header className="fixed top-0 z-[100] w-full border-b border-border bg-white/95 backdrop-blur-xl">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-10 h-10 flex items-center justify-center bg-primary rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-500">
+          <div className="relative w-10 h-10 flex items-center justify-center bg-[#0a0c10] rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-500">
             <Gamepad2 className="w-6 h-6 text-white" />
           </div>
-          <span className="font-headline text-2xl font-black tracking-tighter text-foreground uppercase italic">
+          <span className="font-headline text-2xl font-black tracking-tighter text-[#0a0c10] uppercase italic">
             CASTRO<span className="text-primary">NEPAL</span>
           </span>
         </Link>
@@ -40,14 +40,15 @@ export function Header() {
         <nav className="hidden lg:flex items-center gap-8">
           {[
             { label: 'Home', href: '/' },
-            { label: 'The Armory', href: '/products' },
+            { label: 'Shop', href: '/products' },
             { label: 'PlayStation', href: '/products?category=PlayStation' },
-            { label: 'Graphics Cards', href: '/products?category=GPU' },
+            { label: 'Xbox', href: '/products?category=Xbox' },
+            { label: 'Nintendo', href: '/products?category=Nintendo' },
           ].map(link => (
             <Link 
               key={link.label} 
               href={link.href} 
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors relative group"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0a0c10]/70 hover:text-primary transition-colors relative group"
             >
               {link.label}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
@@ -107,7 +108,7 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button className="ml-4 h-11 px-6 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md">
+          <Button className="ml-4 h-11 px-6 bg-[#0a0c10] hover:bg-[#1a1d24] text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-md">
             <ShoppingCart className="w-4 h-4 mr-2" />
             Cart (0)
           </Button>
@@ -128,11 +129,11 @@ export function Header() {
         isMenuOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <nav className="flex flex-col p-8 gap-6">
-          {['Home', 'Shop', 'PlayStation', 'Xbox'].map(label => (
+          {['Home', 'Shop', 'PlayStation', 'Xbox', 'Nintendo'].map(label => (
             <Link 
               key={label} 
-              href={label === 'Home' ? '/' : `/products?category=${label}`} 
-              className="text-3xl font-headline font-black uppercase italic tracking-tighter text-foreground" 
+              href={label === 'Home' ? '/' : (label === 'Shop' ? '/products' : `/products?category=${label}`)} 
+              className="text-3xl font-headline font-black uppercase italic tracking-tighter text-[#0a0c10]" 
               onClick={() => setIsMenuOpen(false)}
             >
               {label}
@@ -143,17 +144,17 @@ export function Header() {
             {user ? (
               <>
                 <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="w-full">
-                  <Button className="w-full h-14 bg-primary font-bold text-lg rounded-2xl">My Dashboard</Button>
+                  <Button className="w-full h-14 bg-[#0a0c10] text-white font-bold text-lg rounded-2xl">My Dashboard</Button>
                 </Link>
                 <Button variant="ghost" onClick={handleLogout} className="w-full h-14 text-red-500 font-bold text-lg rounded-2xl">Logout</Button>
               </>
             ) : (
               <>
                 <Link href="/login" onClick={() => setIsMenuOpen(false)} className="w-full">
-                  <Button className="w-full h-14 bg-primary font-bold text-lg rounded-2xl">Login</Button>
+                  <Button className="w-full h-14 bg-[#0a0c10] text-white font-bold text-lg rounded-2xl">Login</Button>
                 </Link>
                 <Link href="/signup" onClick={() => setIsMenuOpen(false)} className="w-full">
-                  <Button variant="outline" className="w-full h-14 border-border font-bold text-lg rounded-2xl">Sign Up</Button>
+                  <Button variant="outline" className="w-full h-14 border-border font-bold text-lg rounded-2xl text-[#0a0c10]">Sign Up</Button>
                 </Link>
               </>
             )}
