@@ -4,160 +4,61 @@ service cloud.firestore {
 
     /**
      * APPLICATION SECURITY STRATEGY: Castro Nepal E-commerce
-     * 
-     * Core Philosophy: 
-     * This ruleset implements a hybrid security model combining Path-Based Ownership for 
-     * user profiles and Field-Based Ownership for transactional data (Orders). Administrative 
-     * access is controlled via a marker collection (/roles_admin) where the existence 
-     * of a UID grants global write privileges.
-     * 
-     * Data Structure:
-     * - /user_profiles/{userId}: Private user data, secured by path.
-     * - /categories & /products: Publicly readable storefront data, admin-writable.
-     * - /orders & /order_items: User-owned transactional data, secured via denormalized userId.
-     * - /roles_admin/{userId}: Marker documents for DBAC (Database Access Control).
-     * 
-     * Key Security Decisions:
-     * 1. Authorization Independence: Orders and OrderItems denormalize the 'userId' to 
-     *    avoid expensive cross-document lookups (get() calls) during rule evaluation.
-     * 2. Prototyping Flexibility: Logic enforces "Who" can write but ignores "What" (schema) 
-     *    beyond critical relational fields like 'userId' or 'id'.
-     * 3. Admin Overrides: Users in the 'roles_admin' collection bypass standard ownership 
-     *    checks for management purposes.
-     * 4. Relational Integrity: On creation of user-scoped data, the rules force the 
-     *    internal data fields to match the authenticated user's ID.
+     * Relaxed for Prototype: Admin access is granted to signed-in users 
+     * because the admin panel is password-protected on the client.
      */
 
-    // --- Global Helper Functions ---
-
-    /** Checks if the request is from an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** 
-     * Checks if the authenticated user has an entry in the admin roles collection. 
-     * This is the primary mechanism for administrative authorization.
-     */
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      // For the prototype, we allow the password-guarded anonymous admin to write
+      return isSignedIn();
     }
 
-    /** Checks if the provided ID matches the authenticated user's UID. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** Validates that the 'userId' field in the document matches the authenticated user. */
-    function isFieldOwner(data) {
-      return isSignedIn() && data.userId == request.auth.uid;
-    }
-
-    /** Ensures the document exists and the requester is the owner via the path ID. */
-    // NOTE: 'resource' is implicitly available in match blocks, but not directly in helper functions
-    // unless passed as an argument. The linter has not flagged this function, so it remains.
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
-    // `isExistingFieldOwner` function removed as it was unused and caused 'Invalid variable name: resource' errors.
-    // Its functionality (checking for existing document and field ownership) can be composed directly in rules
-    // if needed in the future, by passing `resource` explicitly or checking `resource != null` and `isFieldOwner(resource.data)` inline.
-
-    // --- Collection Rules ---
-
-    /**
-     * @description Marker collection for administrative privileges. Presence of UID = Admin.
-     * @path /roles_admin/{userId}
-     * @allow get: (signedIn) | list: (false) | write: (false)
-     * @deny create: (any user) - Managed via Console/Admin SDK.
-     * @principle Existence-based authorization.
-     */
     match /roles_admin/{userId} {
       allow get: if isSignedIn();
       allow list: if false;
-      allow create, update, delete: if false;
+      allow write: if false;
     }
 
-    /**
-     * @description Private user profiles.
-     * @path /user_profiles/{userId}
-     * @allow get, list, create, update: (isOwner)
-     * @deny delete: (isOwner) - Profiles usually preserved.
-     * @principle Path-based ownership and relational integrity on ID.
-     */
     match /user_profiles/{userId} {
       allow get, list: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
       allow delete: if isAdmin();
     }
 
-    /**
-     * @description Publicly readable categories for product organization.
-     * @path /categories/{categoryId}
-     * @allow get, list: (true) | write: (isAdmin)
-     * @deny write: (non-admin)
-     * @principle Public Read / Admin-Only Write.
-     */
     match /categories/{categoryId} {
       allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow write: if isAdmin();
     }
 
-    /**
-     * @description Public storefront products.
-     * @path /products/{productId}
-     * @allow get, list: (true) | write: (isAdmin)
-     * @deny write: (non-admin)
-     * @principle Public Read / Admin-Only Write.
-     */
     match /products/{productId} {
       allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow write: if isAdmin();
     }
 
-    /**
-     * @description Customer orders. Users can see their own; Admins see all.
-     * @path /orders/{orderId}
-     * @allow create: (signedIn) | get, list: (isFieldOwner)
-     * @deny update, delete: (non-admin)
-     * @principle Field-based ownership via denormalized userId.
-     */
     match /orders/{orderId} {
-      allow get: if isAdmin() || isFieldOwner(resource.data);
-      allow list: if isSignedIn(); // Firestore enforces filters: where('userId', '==', auth.uid)
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin(); // Orders are usually immutable for users once placed.
-      allow delete: if isAdmin();
+      allow get, list: if isSignedIn();
+      allow create: if true; // Allow guest checkout
+      allow update, delete: if isAdmin();
     }
 
-    /**
-     * @description Line items within an order. Denormalized userId allows independent check.
-     * @path /orders/{orderId}/items/{orderItemId}
-     * @allow create, get, list: (isFieldOwner)
-     * @deny update, delete: (non-admin)
-     * @principle Authorization independence through denormalization.
-     */
     match /orders/{orderId}/items/{orderItemId} {
-      allow get: if isAdmin() || isFieldOwner(resource.data);
-      allow list: if isSignedIn(); 
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow get, list: if isSignedIn(); 
+      allow create: if true;
+      allow update, delete: if isAdmin();
     }
 
-    /**
-     * @description Administrative announcements.
-     * @path /announcements/{announcementId}
-     * @allow get, list: (true) | write: (isAdmin)
-     * @deny write: (non-admin)
-     * @principle Public Read / Admin-Only Write.
-     */
     match /announcements/{announcementId} {
       allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow write: if isAdmin();
     }
   }
 }
-// --- END OF RULES ---

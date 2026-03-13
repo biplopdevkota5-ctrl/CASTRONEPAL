@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
@@ -69,8 +68,6 @@ export default function AdminPage() {
   const db = useFirestore();
   const auth = useAuth();
 
-  // Firestore Collections with properly memoized queries using useMemoFirebase
-  // We only run these queries if isAuthenticated is true to avoid permission errors on mount
   const productsQuery = useMemoFirebase(() => {
     if (!db || !isAuthenticated) return null;
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'));
@@ -79,23 +76,23 @@ export default function AdminPage() {
 
   const ordersQuery = useMemoFirebase(() => {
     if (!db || !isAuthenticated) return null;
-    return query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+    return query(collection(db, 'orders'), orderBy('orderTime', 'desc'));
   }, [db, isAuthenticated]);
   const { data: orders, loading: ordersLoading } = useCollection<any>(ordersQuery);
 
   const announcementsQuery = useMemoFirebase(() => {
     if (!db || !isAuthenticated) return null;
-    return query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
+    return query(collection(db, 'announcements'), orderBy('postedAt', 'desc'));
   }, [db, isAuthenticated]);
   const { data: announcements, loading: announcementsLoading } = useCollection<any>(announcementsQuery);
 
-  // Form State
   const [productForm, setProductForm] = useState({
     name: '',
     category: 'PlayStation',
     price: '',
-    status: 'In Stock',
-    description: '',
+    stockStatus: 'In Stock',
+    shortDescription: '',
+    fullDescription: '',
     imageUrl: ''
   });
 
@@ -110,7 +107,6 @@ export default function AdminPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === '901020304050') {
-      // Sign in to Firebase to satisfy security rules (SignedIn check)
       signInAnonymously(auth).then(() => {
         setIsAuthenticated(true);
         toast({ title: 'Authorized', description: 'Admin session started.' });
@@ -127,7 +123,6 @@ export default function AdminPage() {
       toast({ variant: 'destructive', title: 'File too large', description: 'Maximum image size is 3MB.' });
       return;
     }
-
     const reader = new FileReader();
     reader.onloadend = () => {
       setProductForm(prev => ({ ...prev, imageUrl: reader.result as string }));
@@ -157,18 +152,27 @@ export default function AdminPage() {
     const productRef = doc(db, 'products', productId);
     
     const data = {
-      ...productForm,
       id: productId,
+      name: productForm.name,
+      categoryId: productForm.category,
       price: parseFloat(productForm.price),
+      stockStatus: productForm.stockStatus,
+      availability: true,
+      shortDescription: productForm.shortDescription,
+      fullDescription: productForm.fullDescription || productForm.shortDescription,
+      imageUrl: productForm.imageUrl,
+      isFeatured: false,
+      viewCount: 0,
+      purchaseCount: 0,
       createdAt: serverTimestamp(),
-      features: [] 
+      updatedAt: serverTimestamp()
     };
 
     setDoc(productRef, data)
       .then(() => {
         setIsAddProductOpen(false);
-        setProductForm({ name: '', category: 'PlayStation', price: '', status: 'In Stock', description: '', imageUrl: '' });
-        toast({ title: 'Success', description: `${data.name} uploaded to database.` });
+        setProductForm({ name: '', category: 'PlayStation', price: '', stockStatus: 'In Stock', shortDescription: '', fullDescription: '', imageUrl: '' });
+        toast({ title: 'Success', description: `${data.name} saved successfully.` });
       })
       .catch(async (error) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -183,19 +187,27 @@ export default function AdminPage() {
   const seedDatabase = async () => {
     setIsSaving(true);
     const sampleProducts = [
-      { name: "PSN $50 Gift Card", category: "PlayStation", price: 6650, status: "In Stock", description: "Instant digital code for US accounts.", imageUrl: "https://picsum.photos/seed/psn1/400/600" },
-      { name: "Xbox $25 Card", category: "Xbox", price: 3400, status: "In Stock", description: "Global digital code for Xbox Store.", imageUrl: "https://picsum.photos/seed/xbox1/400/600" },
-      { name: "RTX 4090 GPU", category: "GPU", price: 285000, status: "In Stock", description: "The ultimate gaming graphics card.", imageUrl: "https://picsum.photos/seed/gpu1/400/600" },
-      { name: "Nintendo $20 Card", category: "Nintendo", price: 2750, status: "In Stock", description: "eShop digital redeem code.", imageUrl: "https://picsum.photos/seed/nintendo1/400/600" },
-      { name: "Steam $10 Wallet", category: "Steam", price: 1450, status: "In Stock", description: "Steam Wallet code for global users.", imageUrl: "https://picsum.photos/seed/steam1/400/600" }
+      { name: "PSN $50 Gift Card", categoryId: "PlayStation", price: 6650, stockStatus: "In Stock", shortDescription: "Instant digital code for US accounts.", imageUrl: "https://picsum.photos/seed/psn1/400/600" },
+      { name: "Xbox $25 Card", categoryId: "Xbox", price: 3400, stockStatus: "In Stock", shortDescription: "Global digital code for Xbox Store.", imageUrl: "https://picsum.photos/seed/xbox1/400/600" },
+      { name: "RTX 4090 GPU", categoryId: "GPU", price: 285000, stockStatus: "In Stock", shortDescription: "The ultimate gaming graphics card.", imageUrl: "https://picsum.photos/seed/gpu1/400/600" }
     ];
 
     try {
       for (const p of sampleProducts) {
         const id = doc(collection(db, 'products')).id;
-        await setDoc(doc(db, 'products', id), { ...p, id, createdAt: serverTimestamp() });
+        await setDoc(doc(db, 'products', id), { 
+          ...p, 
+          id, 
+          fullDescription: p.shortDescription,
+          availability: true,
+          isFeatured: true,
+          viewCount: 0,
+          purchaseCount: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp() 
+        });
       }
-      toast({ title: "Database Seeded", description: "Real products have been added to your store." });
+      toast({ title: "Database Seeded", description: "Sample products added." });
     } catch (e) {
       toast({ variant: 'destructive', title: "Error", description: "Failed to seed database." });
     } finally {
@@ -214,17 +226,18 @@ export default function AdminPage() {
     const announcementRef = doc(db, 'announcements', announcementId);
     
     const data = {
-      ...announcementForm,
       id: announcementId,
-      date: new Date().toLocaleDateString(),
-      createdAt: serverTimestamp()
+      title: announcementForm.title,
+      content: announcementForm.content,
+      postedAt: serverTimestamp(),
+      isActive: true
     };
 
     setDoc(announcementRef, data)
       .then(() => {
         setIsAddAnnouncementOpen(false);
         setAnnouncementForm({ title: '', content: '' });
-        toast({ title: 'Update Published', description: 'New store announcement is live.' });
+        toast({ title: 'Published', description: 'Announcement is live.' });
       })
       .catch(async () => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -239,7 +252,7 @@ export default function AdminPage() {
   const updateOrderStatus = (orderId: string, newStatus: string) => {
     const orderRef = doc(db, 'orders', orderId);
     updateDoc(orderRef, { status: newStatus })
-      .then(() => toast({ title: 'Order Updated', description: `Order status changed to ${newStatus}` }))
+      .then(() => toast({ title: 'Updated', description: `Order is now ${newStatus}` }))
       .catch(async () => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: orderRef.path,
@@ -289,7 +302,6 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-background" onPaste={handlePaste}>
-      {/* Sidebar */}
       <aside className="w-full md:w-72 bg-card border-r border-white/5 p-6 space-y-8 flex flex-col">
         <div className="flex items-center gap-2 mb-8">
           <Gamepad2 className="w-8 h-8 text-primary" />
@@ -297,7 +309,6 @@ export default function AdminPage() {
             ADMIN<span className="text-primary">CORE</span>
           </span>
         </div>
-
         <nav className="space-y-2 flex-grow">
           {[
             { id: 'dashboard', icon: <LayoutDashboard className="w-5 h-5" />, label: 'Dashboard' },
@@ -320,104 +331,46 @@ export default function AdminPage() {
             </button>
           ))}
         </nav>
-
         <div className="pt-8 border-t border-white/5 space-y-4">
-          <Button 
-            variant="outline" 
-            className="w-full border-primary/20 text-primary hover:bg-primary/10" 
-            onClick={seedDatabase}
-            disabled={isSaving}
-          >
-            <Database className="w-4 h-4 mr-2" />
-            SEED STORE
+          <Button variant="outline" className="w-full border-primary/20 text-primary" onClick={seedDatabase} disabled={isSaving}>
+            <Database className="w-4 h-4 mr-2" /> SEED STORE
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-red-500 hover:bg-red-500/10 hover:text-red-400" onClick={() => setIsAuthenticated(false)}>
-            <LogOut className="w-4 h-4 mr-2" />
-            LOGOUT
+          <Button variant="ghost" className="w-full justify-start text-red-500" onClick={() => setIsAuthenticated(false)}>
+            <LogOut className="w-4 h-4 mr-2" /> LOGOUT
           </Button>
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-grow p-6 md:p-12 space-y-8 bg-black/20">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-3xl font-headline font-black uppercase italic tracking-tighter">
               {activeTab} <span className="text-primary">Management</span>
             </h2>
-            <p className="text-muted-foreground">Manage your store operations and database assets.</p>
           </div>
           <div className="flex gap-4">
-            {activeTab === 'products' && (
-              <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl px-6">
-                <Plus className="w-4 h-4 mr-2" />
-                ADD PRODUCT
-              </Button>
-            )}
-            {activeTab === 'announcements' && (
-              <Button onClick={() => setIsAddAnnouncementOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl px-6">
-                <Plus className="w-4 h-4 mr-2" />
-                NEW UPDATE
-              </Button>
-            )}
+            {activeTab === 'products' && <Button onClick={() => setIsAddProductOpen(true)} className="bg-primary text-white"><Plus className="w-4 h-4 mr-2" /> ADD PRODUCT</Button>}
+            {activeTab === 'announcements' && <Button onClick={() => setIsAddAnnouncementOpen(true)} className="bg-primary text-white"><Plus className="w-4 h-4 mr-2" /> NEW UPDATE</Button>}
           </div>
         </header>
-
-        {activeTab === 'dashboard' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="glass-panel border-white/5 p-8 space-y-2">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Active Orders</span>
-              <div className="text-3xl font-headline font-bold text-primary">{orders?.filter((o: any) => o.status !== 'Delivered').length || 0}</div>
-              <div className="text-xs text-muted-foreground">{orders?.length || 0} total orders recorded</div>
-            </Card>
-            <Card className="glass-panel border-white/5 p-8 space-y-2">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Inventory</span>
-              <div className="text-3xl font-headline font-bold text-secondary">{products?.length || 0}</div>
-              <div className="text-xs text-muted-foreground">Assets listed in database</div>
-            </Card>
-          </div>
-        )}
 
         <div className="glass-panel border-white/5 rounded-2xl overflow-hidden">
           {activeTab === 'products' && (
             <Table>
-              <TableHeader className="bg-white/5">
-                <TableRow className="hover:bg-transparent border-white/5">
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Product</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Category</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Price</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Status</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+              <TableHeader><TableRow><TableHead>Product</TableHead><TableHead>Category</TableHead><TableHead>Price</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
               <TableBody>
-                {productsLoading ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
-                ) : products?.length === 0 ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No products found. Use "Seed Store" to add some!</TableCell></TableRow>
-                ) : products?.map((row: any) => (
-                  <TableRow key={row.id} className="border-white/5 hover:bg-white/5">
-                    <TableCell className="font-bold py-6">
+                {products?.map((row: any) => (
+                  <TableRow key={row.id}>
+                    <TableCell className="font-bold">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
-                          {row.imageUrl ? <img src={row.imageUrl} className="w-full h-full object-cover" /> : <Package className="w-5 h-5 text-primary" />}
-                        </div>
-                        <div>
-                          <div className="text-sm">{row.name}</div>
-                          <div className="text-[10px] text-muted-foreground uppercase">ID: {row.id.slice(0, 8)}</div>
-                        </div>
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 overflow-hidden">{row.imageUrl && <img src={row.imageUrl} className="w-full h-full object-cover" />}</div>
+                        <div>{row.name}</div>
                       </div>
                     </TableCell>
-                    <TableCell><Badge variant="outline">{row.category}</Badge></TableCell>
-                    <TableCell className="font-bold">Rs. {Math.round(row.price).toLocaleString()}</TableCell>
-                    <TableCell>
-                      <Badge className={row.status === 'In Stock' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}>
-                        {row.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button onClick={() => deleteItem(row.id, 'products')} size="icon" variant="ghost" className="text-red-500/50 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
-                    </TableCell>
+                    <TableCell><Badge variant="outline">{row.categoryId}</Badge></TableCell>
+                    <TableCell>Rs. {Math.round(row.price).toLocaleString()}</TableCell>
+                    <TableCell><Badge className={row.stockStatus === 'In Stock' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}>{row.stockStatus}</Badge></TableCell>
+                    <TableCell className="text-right"><Button onClick={() => deleteItem(row.id, 'products')} size="icon" variant="ghost"><Trash2 className="w-4 h-4" /></Button></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -426,85 +379,19 @@ export default function AdminPage() {
 
           {activeTab === 'orders' && (
             <Table>
-              <TableHeader className="bg-white/5">
-                <TableRow className="hover:bg-transparent border-white/5">
-                  <TableHead className="uppercase font-bold text-xs tracking-widest">Order / Customer</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest">Product</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest">Total</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest">Status</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+              <TableHeader><TableRow><TableHead>Customer</TableHead><TableHead>Total</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
               <TableBody>
-                {ordersLoading ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
-                ) : orders?.length === 0 ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">No orders yet.</TableCell></TableRow>
-                ) : orders?.map((order: any) => (
-                  <TableRow key={order.id} className="border-white/5 hover:bg-white/5">
-                    <TableCell className="py-6">
-                      <div className="space-y-1">
-                        <div className="text-sm font-bold">{order.customerName}</div>
-                        <div className="text-[10px] text-muted-foreground uppercase flex items-center gap-2">
-                          <Clock className="w-3 h-3" /> {order.createdAt?.toDate().toLocaleDateString() || 'Just now'}
-                        </div>
-                        <div className="text-[10px] text-primary font-mono">{order.customerPhone}</div>
-                      </div>
-                    </TableCell>
+                {orders?.map((order: any) => (
+                  <TableRow key={order.id}>
+                    <TableCell>{order.customerName}<div className="text-[10px] text-muted-foreground">{order.customerPhoneNumber}</div></TableCell>
+                    <TableCell>Rs. {Math.round(order.totalAmount).toLocaleString()}</TableCell>
                     <TableCell>
-                      <div className="text-sm font-bold">{order.productName}</div>
-                      <div className="text-[10px] text-muted-foreground">Qty: {order.quantity}</div>
-                    </TableCell>
-                    <TableCell className="font-bold text-white">Rs. {Math.round(order.totalPrice).toLocaleString()}</TableCell>
-                    <TableCell>
-                      <Select 
-                        defaultValue={order.status} 
-                        onValueChange={(v) => updateOrderStatus(order.id, v)}
-                      >
-                        <SelectTrigger className={cn(
-                          "h-8 text-[10px] font-bold uppercase",
-                          order.status === 'Pending' ? "text-yellow-500 border-yellow-500/20 bg-yellow-500/10" :
-                          order.status === 'Delivered' ? "text-green-500 border-green-500/20 bg-green-500/10" :
-                          "text-primary border-primary/20 bg-primary/10"
-                        )}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Pending">Pending</SelectItem>
-                          <SelectItem value="Processing">Processing</SelectItem>
-                          <SelectItem value="Delivered">Delivered</SelectItem>
-                          <SelectItem value="Cancelled">Cancelled</SelectItem>
-                        </SelectContent>
+                      <Select defaultValue={order.status} onValueChange={(v) => updateOrderStatus(order.id, v)}>
+                        <SelectTrigger className="h-8 text-[10px]"><SelectValue /></SelectTrigger>
+                        <SelectContent><SelectItem value="Pending">Pending</SelectItem><SelectItem value="Processing">Processing</SelectItem><SelectItem value="Completed">Completed</SelectItem><SelectItem value="Cancelled">Cancelled</SelectItem></SelectContent>
                       </Select>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button onClick={() => deleteItem(order.id, 'orders')} size="icon" variant="ghost" className="text-red-500/50 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-
-          {activeTab === 'announcements' && (
-            <Table>
-              <TableHeader className="bg-white/5">
-                <TableRow className="hover:bg-transparent border-white/5">
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Title</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground">Date</TableHead>
-                  <TableHead className="uppercase font-bold text-xs tracking-widest text-muted-foreground text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {announcementsLoading ? (
-                  <TableRow><TableCell colSpan={3} className="text-center py-10"><Loader2 className="animate-spin mx-auto" /></TableCell></TableRow>
-                ) : announcements?.map((row: any) => (
-                  <TableRow key={row.id} className="border-white/5 hover:bg-white/5">
-                    <TableCell className="font-bold py-6">{row.title}</TableCell>
-                    <TableCell className="text-muted-foreground text-xs">{row.date}</TableCell>
-                    <TableCell className="text-right">
-                      <Button onClick={() => deleteItem(row.id, 'announcements')} size="icon" variant="ghost" className="text-red-500/50 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
-                    </TableCell>
+                    <TableCell className="text-right"><Button onClick={() => deleteItem(order.id, 'orders')} size="icon" variant="ghost"><Trash2 className="w-4 h-4" /></Button></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -513,106 +400,51 @@ export default function AdminPage() {
         </div>
       </main>
 
-      {/* Product Modal */}
       <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
-        <DialogContent className="glass-panel border-white/10 sm:max-w-[600px] rounded-[2rem]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-headline font-bold uppercase italic">UPLOAD PRODUCT</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="glass-panel border-white/10 sm:max-w-[600px]">
+          <DialogHeader><DialogTitle>UPLOAD PRODUCT</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-6 py-4">
-            <div className="space-y-2 col-span-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Product Name</Label>
-              <Input 
-                placeholder="e.g. RTX 4090" 
-                className="bg-white/5 border-white/10" 
-                value={productForm.name}
-                onChange={(e) => setProductForm({...productForm, name: e.target.value})}
-              />
+            <div className="col-span-2 space-y-2">
+              <Label>Product Name</Label>
+              <Input value={productForm.name} onChange={(e) => setProductForm({...productForm, name: e.target.value})} />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Category</Label>
+              <Label>Category</Label>
               <Select value={productForm.category} onValueChange={(v) => setProductForm({...productForm, category: v})}>
-                <SelectTrigger className="bg-white/5 border-white/10">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PlayStation">PlayStation</SelectItem>
-                  <SelectItem value="Xbox">Xbox</SelectItem>
-                  <SelectItem value="Steam">Steam</SelectItem>
-                  <SelectItem value="Nintendo">Nintendo</SelectItem>
-                  <SelectItem value="GPU">GPU</SelectItem>
-                  <SelectItem value="PC">PC</SelectItem>
-                  <SelectItem value="Mobile">Mobile</SelectItem>
+                  {['PlayStation', 'Xbox', 'Steam', 'Nintendo', 'GPU', 'PC', 'Mobile'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Price (NPR)</Label>
-              <Input 
-                type="number" 
-                placeholder="6650" 
-                className="bg-white/5 border-white/10" 
-                value={productForm.price}
-                onChange={(e) => setProductForm({...productForm, price: e.target.value})}
-              />
+              <Label>Price (NPR)</Label>
+              <Input type="number" value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} />
             </div>
-            <div className="space-y-2 col-span-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Image (Paste or Browse)</Label>
-              <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center space-y-4 hover:border-primary/50 cursor-pointer"
-              >
+            <div className="col-span-2 space-y-2">
+              <Label>Short Description</Label>
+              <Textarea value={productForm.shortDescription} onChange={(e) => setProductForm({...productForm, shortDescription: e.target.value})} />
+            </div>
+            <div className="col-span-2 space-y-2">
+              <Label>Image (Paste or Browse)</Label>
+              <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center cursor-pointer">
                 <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])} />
-                {productForm.imageUrl ? (
-                  <img src={productForm.imageUrl} className="max-h-[120px] mx-auto rounded-lg" />
-                ) : (
-                  <div className="space-y-2">
-                    <Upload className="w-10 h-10 mx-auto text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">Drop here, Browse, or <strong>Paste (Ctrl+V)</strong></p>
-                  </div>
-                )}
+                {productForm.imageUrl ? <img src={productForm.imageUrl} className="max-h-[120px] mx-auto rounded-lg" /> : <Upload className="w-10 h-10 mx-auto text-muted-foreground" />}
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button onClick={saveProduct} disabled={isSaving} className="bg-primary text-white font-bold w-full rounded-xl h-12">
-              {isSaving ? <Loader2 className="animate-spin mr-2" /> : 'UPLOAD PRODUCT'}
-            </Button>
-          </DialogFooter>
+          <DialogFooter><Button onClick={saveProduct} disabled={isSaving} className="w-full">{isSaving ? <Loader2 className="animate-spin" /> : 'UPLOAD PRODUCT'}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Announcement Modal */}
       <Dialog open={isAddAnnouncementOpen} onOpenChange={setIsAddAnnouncementOpen}>
-        <DialogContent className="glass-panel border-white/10 sm:max-w-[500px] rounded-[2rem]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-headline font-bold uppercase italic">PUBLISH UPDATE</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="glass-panel border-white/10 sm:max-w-[500px]">
+          <DialogHeader><DialogTitle>PUBLISH UPDATE</DialogTitle></DialogHeader>
           <div className="space-y-6 py-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Headline</Label>
-              <Input 
-                placeholder="e.g. New RTX 50-Series Stock Arrived" 
-                className="bg-white/5 border-white/10" 
-                value={announcementForm.title}
-                onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Message</Label>
-              <Textarea 
-                placeholder="Provide details for your customers..." 
-                className="bg-white/5 border-white/10 min-h-[150px]" 
-                value={announcementForm.content}
-                onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})}
-              />
-            </div>
+            <div className="space-y-2"><Label>Headline</Label><Input value={announcementForm.title} onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})} /></div>
+            <div className="space-y-2"><Label>Message</Label><Textarea value={announcementForm.content} onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})} /></div>
           </div>
-          <DialogFooter>
-            <Button onClick={saveAnnouncement} disabled={isSaving} className="bg-primary text-white font-bold w-full rounded-xl h-12">
-              {isSaving ? <Loader2 className="animate-spin mr-2" /> : 'PUBLISH NOW'}
-            </Button>
-          </DialogFooter>
+          <DialogFooter><Button onClick={saveAnnouncement} disabled={isSaving} className="w-full">PUBLISH NOW</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { ShoppingBag, Loader2, CheckCircle2 } from 'lucide-react';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useUser } from '@/firebase';
 import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -35,6 +35,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { toast } = useToast();
+  const { user } = useUser();
   const db = useFirestore();
 
   const [formData, setFormData] = useState({
@@ -56,17 +57,16 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
 
     const orderData = {
       id: orderId,
+      userId: user?.uid || null,
       customerName: formData.fullName,
       customerEmail: formData.email,
-      customerPhone: formData.phone,
+      customerPhoneNumber: formData.phone,
       customerAddress: formData.address,
-      productId: product.id,
-      productName: product.name,
-      quantity: parseInt(formData.quantity || '1'),
-      totalPrice: totalPrice,
-      status: 'Pending',
       notes: formData.notes,
-      createdAt: serverTimestamp()
+      orderTime: serverTimestamp(),
+      totalAmount: totalPrice,
+      status: 'Pending',
+      discordWebhookSent: false
     };
 
     setDoc(orderRef, orderData)
@@ -78,12 +78,11 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
         });
       })
       .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: orderRef.path,
           operation: 'create',
           requestResourceData: orderData
-        });
-        errorEmitter.emit('permission-error', permissionError);
+        }));
       })
       .finally(() => setIsSubmitting(false));
   };
@@ -129,66 +128,27 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="fullName" className="text-xs uppercase font-bold tracking-widest text-muted-foreground">Full Name</Label>
-                <Input 
-                  id="fullName" 
-                  required 
-                  className="bg-white/5 border-white/10 rounded-xl"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                />
+                <Input id="fullName" required className="bg-white/5 border-white/10 rounded-xl" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-xs uppercase font-bold tracking-widest text-muted-foreground">Phone Number</Label>
-                <Input 
-                  id="phone" 
-                  required 
-                  type="tel"
-                  className="bg-white/5 border-white/10 rounded-xl"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                />
+                <Input id="phone" required type="tel" className="bg-white/5 border-white/10 rounded-xl" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-xs uppercase font-bold tracking-widest text-muted-foreground">Email Address</Label>
-                <Input 
-                  id="email" 
-                  required 
-                  type="email"
-                  className="bg-white/5 border-white/10 rounded-xl"
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                />
+                <Input id="email" required type="email" className="bg-white/5 border-white/10 rounded-xl" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="quantity" className="text-xs uppercase font-bold tracking-widest text-muted-foreground">Quantity</Label>
-                <Input 
-                  id="quantity" 
-                  required 
-                  type="number" 
-                  min="1"
-                  className="bg-white/5 border-white/10 rounded-xl"
-                  value={formData.quantity}
-                  onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-                />
+                <Input id="quantity" required type="number" min="1" className="bg-white/5 border-white/10 rounded-xl" value={formData.quantity} onChange={(e) => setFormData({...formData, quantity: e.target.value})} />
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="address" className="text-xs uppercase font-bold tracking-widest text-muted-foreground">Full Address</Label>
-                <Input 
-                  id="address" 
-                  required 
-                  className="bg-white/5 border-white/10 rounded-xl"
-                  value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
-                />
+                <Input id="address" required className="bg-white/5 border-white/10 rounded-xl" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} />
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="notes" className="text-xs uppercase font-bold tracking-widest text-muted-foreground">Order Notes (Optional)</Label>
-                <Textarea 
-                  id="notes" 
-                  className="bg-white/5 border-white/10 rounded-xl min-h-[100px]"
-                  value={formData.notes}
-                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                />
+                <Textarea id="notes" className="bg-white/5 border-white/10 rounded-xl min-h-[100px]" value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} />
               </div>
             </div>
 
@@ -197,11 +157,7 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
                 <span className="text-muted-foreground font-medium text-sm">TOTAL:</span>
                 <span className="text-primary font-headline italic">Rs. {Math.round(product.price * parseInt(formData.quantity || '1')).toLocaleString()}</span>
               </div>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="bg-primary hover:bg-primary/90 text-white font-bold h-14 px-10 rounded-xl neon-border min-w-[200px]"
-              >
+              <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90 text-white font-bold h-14 px-10 rounded-xl neon-border min-w-[200px]">
                 {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : 'CONFIRM ORDER'}
               </Button>
             </DialogFooter>

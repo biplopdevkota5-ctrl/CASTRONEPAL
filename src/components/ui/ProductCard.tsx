@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from 'next/image';
@@ -13,16 +12,15 @@ interface ProductCardProps {
     id: string;
     name: string;
     price: number;
-    description: string;
+    shortDescription: string;
     imageUrl: string;
-    category?: string;
-    status?: string;
+    categoryId?: string;
+    stockStatus?: string;
   };
   className?: string;
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
-  // Use placeholder if imageUrl is missing or invalid
   const displayImage = product.imageUrl || 'https://picsum.photos/seed/placeholder/400/600';
 
   return (
@@ -30,25 +28,22 @@ export function ProductCard({ product, className }: ProductCardProps) {
       "group relative glass-panel rounded-3xl overflow-hidden transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(26,128,230,0.2)] flex flex-col h-full",
       className
     )}>
-      {/* Category Badge */}
-      {product.category && (
+      {product.categoryId && (
         <Badge className="absolute top-4 left-4 z-10 bg-primary/80 hover:bg-primary text-white backdrop-blur-md border-none px-3 py-1 text-[10px] font-bold tracking-widest uppercase">
-          {product.category}
+          {product.categoryId}
         </Badge>
       )}
 
-      {/* Stock status badge */}
       <div className={cn(
         "absolute top-4 right-4 z-10 flex items-center gap-1 backdrop-blur-md px-2 py-1 rounded-full text-[10px] font-bold uppercase border",
-        product.status === 'In Stock' 
+        product.stockStatus === 'In Stock' 
           ? "bg-green-500/20 text-green-500 border-green-500/30" 
           : "bg-red-500/20 text-red-500 border-red-500/30"
       )}>
         <Zap className="w-3 h-3 fill-current" />
-        {product.status || 'Stocked'}
+        {product.stockStatus || 'Stocked'}
       </div>
 
-      {/* Product Image */}
       <div className="relative h-64 w-full overflow-hidden shrink-0">
         <img 
           src={displayImage}
@@ -57,7 +52,6 @@ export function ProductCard({ product, className }: ProductCardProps) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60"></div>
         
-        {/* Hover Action Layer */}
         <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
           <Link href={`/products/${product.id}`}>
             <Button size="icon" variant="secondary" className="rounded-full h-12 w-12 shadow-xl hover:scale-110 transition-transform">
@@ -70,14 +64,13 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </div>
       </div>
 
-      {/* Product Details */}
       <div className="p-6 space-y-4 flex flex-col flex-grow">
         <div className="flex-grow">
           <h3 className="text-lg font-bold line-clamp-1 group-hover:text-primary transition-colors font-headline uppercase italic">
             {product.name}
           </h3>
           <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-            {product.description}
+            {product.shortDescription}
           </p>
         </div>
 
