@@ -1,8 +1,7 @@
-
 "use client";
 
 import Link from 'next/link';
-import { Search, ShoppingCart, User, Gamepad2, Menu, X, LayoutDashboard, LogOut, Package, Phone, MapPin, ShieldCheck } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, LayoutDashboard, LogOut, Package, Phone, MapPin, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
@@ -71,7 +70,7 @@ export function Header() {
 
   return (
     <header className="fixed top-0 z-[100] w-full border-b border-border bg-white">
-      {/* Top Bar for Retail Look */}
+      {/* Top Bar */}
       <div className="bg-[#0a0c10] text-white py-2 text-[10px] font-bold uppercase tracking-widest">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex gap-6">
@@ -98,15 +97,9 @@ export function Header() {
           onTouchStart={startHold}
           onTouchEnd={endHold}
         >
-          <div className="relative w-10 h-10 flex items-center justify-center bg-[#0a0c10] rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-500">
-            <Gamepad2 className="w-6 h-6 text-white" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-headline text-2xl font-black tracking-tighter text-[#0a0c10] uppercase italic select-none leading-none">
-              CASTRO<span className="text-primary">HUB</span>
-            </span>
-            <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-muted-foreground mt-1">BUY CHEAP SAVE HIGH</span>
-          </div>
+          <span className="font-headline text-2xl font-black tracking-tighter text-[#0a0c10] uppercase italic select-none">
+            ARMORY<span className="text-primary">PRO</span>
+          </span>
         </Link>
 
         {/* Desktop Nav */}

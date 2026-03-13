@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useCallback } from 'react';
@@ -11,7 +10,6 @@ import {
   LogOut, 
   Trash2,
   Lock,
-  Gamepad2,
   Upload,
   Loader2,
   Database,
@@ -314,7 +312,6 @@ export default function AdminPage() {
       {/* Mobile Top Header */}
       <div className="md:hidden flex items-center justify-between p-4 bg-card border-b border-white/5 sticky top-0 z-[110]">
         <div className="flex items-center gap-2">
-          <Gamepad2 className="w-6 h-6 text-primary" />
           <span className="font-headline font-bold uppercase italic text-sm tracking-tighter">ADMIN<span className="text-primary">CORE</span></span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -328,7 +325,6 @@ export default function AdminPage() {
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="hidden md:flex items-center gap-2 mb-8">
-          <Gamepad2 className="w-8 h-8 text-primary" />
           <span className="font-headline font-bold uppercase italic text-xl tracking-tighter">
             ADMIN<span className="text-primary">CORE</span>
           </span>
@@ -447,7 +443,7 @@ export default function AdminPage() {
         </div>
       </main>
 
-      {/* Add Product Dialog - Optimized for Mobile Scrolling */}
+      {/* Add Product Dialog */}
       <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
         <DialogContent className="glass-panel border-white/10 w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-0 rounded-2xl">
           <div className="p-6 md:p-8 space-y-6">

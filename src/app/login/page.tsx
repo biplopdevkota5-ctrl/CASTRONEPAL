@@ -1,10 +1,9 @@
-
 "use client";
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Gamepad2, Mail, Lock, LogIn, ChevronLeft, Loader2 } from 'lucide-react';
+import { Mail, Lock, LogIn, ChevronLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -63,14 +62,11 @@ export default function LoginPage() {
 
         <Card className="glass-panel border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden">
           <CardHeader className="text-center space-y-6 pt-12 pb-8">
-            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center">
-              <Gamepad2 className="w-10 h-10 text-primary" />
-            </div>
             <div className="space-y-2">
               <CardTitle className="text-3xl font-headline font-black uppercase italic tracking-tighter">
                 Welcome <span className="text-primary">Back</span>
               </CardTitle>
-              <CardDescription className="text-muted-foreground">Access your gaming portal and orders.</CardDescription>
+              <CardDescription className="text-muted-foreground">Access your portal and orders.</CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-6 px-8 pb-8">

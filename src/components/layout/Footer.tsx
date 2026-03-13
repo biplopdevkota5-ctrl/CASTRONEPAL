@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Facebook, Instagram, Gamepad2, Send, Phone, Mail, MapPin } from 'lucide-react';
+import { Facebook, Send, Phone, Mail, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -10,12 +10,9 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2 group">
-              <Gamepad2 className="w-8 h-8 text-primary" />
-              <span className="font-headline text-2xl font-bold tracking-tighter uppercase italic text-white">
-                Castro<span className="text-primary">Nepal</span>
-              </span>
-            </Link>
+            <h4 className="font-headline text-2xl font-bold tracking-tighter uppercase italic text-white">
+              ARMORY<span className="text-primary">PRO</span>
+            </h4>
             <p className="text-gray-400 leading-relaxed">
               Nepal’s Trusted Store for High-End Gaming Hardware and Professional Computers.
             </p>
@@ -25,9 +22,6 @@ export function Footer() {
               </Link>
               <Link href="https://www.tiktok.com/@castro.nepal" target="_blank" className="p-2 bg-white/5 rounded-full hover:bg-primary/20 hover:text-primary transition-all">
                 <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/></svg>
-              </Link>
-              <Link href="#" className="p-2 bg-white/5 rounded-full hover:bg-primary/20 hover:text-primary transition-all">
-                <Instagram className="w-5 h-5" />
               </Link>
             </div>
           </div>
@@ -55,7 +49,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-gray-400">
                 <Mail className="w-5 h-5 text-primary" />
-                <span>castrohub009@gmail.com</span>
+                <span>support@armorypro.com</span>
               </li>
               <li className="flex items-center gap-3 text-gray-400">
                 <MapPin className="w-5 h-5 text-primary" />
@@ -78,7 +72,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-          <p>© 2026 Castro Nepal. Gaming Hardware Authority.</p>
+          <p>© 2026 ArmoryPro. Gaming Hardware Authority.</p>
           <div className="flex gap-6 font-bold uppercase text-[10px]">
             <Link href="#" className="hover:text-primary">Privacy</Link>
             <Link href="#" className="hover:text-primary">Terms</Link>

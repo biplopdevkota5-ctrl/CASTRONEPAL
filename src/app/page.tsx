@@ -4,7 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Cpu, Monitor, Gamepad2, PcCase, Gamepad } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
@@ -21,7 +20,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-10 pb-20 bg-white overflow-hidden">
-      {/* Hero Section - Optimized for Performance & Animation */}
+      {/* Hero Section */}
       <section className="relative min-h-[40vh] flex items-center pt-16 overflow-hidden bg-gray-50">
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -31,7 +30,7 @@ export default function Home() {
               </div>
               
               <h1 className="font-headline text-5xl md:text-8xl font-black leading-[0.9] tracking-tighter uppercase italic text-[#0a0c10]">
-                CASTRO HUB
+                LEVEL <span className="text-primary">UP</span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed font-medium">
@@ -47,7 +46,7 @@ export default function Home() {
                     src="https://firm-emerald-fvkkb8nt2n.edgeone.app/Screenshot%20(6).png" 
                     fill
                     className="object-cover" 
-                    alt="Castro Nepal Armory"
+                    alt="Hardware Armory"
                     sizes="(max-width: 768px) 100vw, 500px"
                     priority
                     fetchPriority="high"
@@ -60,7 +59,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories Grid - Interactive Taps */}
+      {/* Categories Grid */}
       <section className="container mx-auto px-4">
         <div className="text-center mb-6 animate-fade-up animate-stagger-1">
           <h3 className="text-xl font-headline font-bold uppercase italic text-[#0a0c10]">THE ARMORY</h3>
@@ -91,7 +90,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Product Showcase - Staggered Load */}
+      {/* Product Showcase */}
       <section className="container mx-auto px-4 space-y-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-4 animate-fade-up">
           <div className="space-y-1">

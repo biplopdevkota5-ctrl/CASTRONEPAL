@@ -1,10 +1,9 @@
-
 "use client";
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Gamepad2, Mail, Lock, UserPlus, ChevronLeft, User, Loader2 } from 'lucide-react';
+import { Mail, Lock, UserPlus, ChevronLeft, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,7 +35,7 @@ export default function SignupPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       await updateProfile(userCredential.user, { displayName: formData.fullName });
-      toast({ title: "Account Created", description: "Welcome to the Castro Nepal armory!" });
+      toast({ title: "Account Created", description: "Welcome to the armory!" });
       router.push('/dashboard');
     } catch (error: any) {
       toast({ variant: "destructive", title: "Signup Error", description: error.message });
@@ -81,7 +80,7 @@ export default function SignupPage() {
               <CardTitle className="text-3xl font-headline font-black uppercase italic tracking-tighter">
                 JOIN THE <span className="text-secondary">ELITE</span>
               </CardTitle>
-              <CardDescription className="text-muted-foreground">Create your gaming profile and start leveling up.</CardDescription>
+              <CardDescription className="text-muted-foreground">Create your profile and start leveling up.</CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-6 px-8 pb-8">
