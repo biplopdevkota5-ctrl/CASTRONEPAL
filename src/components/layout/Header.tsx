@@ -25,7 +25,7 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 z-[100] w-full border-b border-border bg-white/95 backdrop-blur-xl">
+    <header className="fixed top-0 z-[100] w-full border-b border-border bg-white shadow-sm">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
           <div className="relative w-10 h-10 flex items-center justify-center bg-[#0a0c10] rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-500">
@@ -127,10 +127,10 @@ export function Header() {
 
       {/* Mobile Menu */}
       <div className={cn(
-        "fixed inset-0 top-20 bg-white z-[90] transition-transform duration-500 lg:hidden",
+        "fixed inset-0 top-20 bg-white z-[90] transition-transform duration-500 lg:hidden opacity-100",
         isMenuOpen ? "translate-x-0" : "translate-x-full"
       )}>
-        <nav className="flex flex-col p-8 gap-6">
+        <nav className="flex flex-col p-8 gap-6 bg-white h-full">
           {['Home', 'GPU', 'Monitor', 'Console', 'PS Account', 'Xbox Account', 'Nintendo Account'].map(label => (
             <Link 
               key={label} 
