@@ -118,7 +118,7 @@ export default function DashboardPage() {
             <h1 className="text-4xl font-headline font-black uppercase italic tracking-tighter">
               PLAYER <span className="text-primary">DASHBOARD</span>
             </h1>
-            <p className="text-muted-foreground">Manage your gaming assets and order history.</p>
+            <p className="text-muted-foreground">Manage your gaming assets and order history on Castro Hub.</p>
           </header>
 
           <Tabs defaultValue="orders" className="w-full">
@@ -161,7 +161,7 @@ export default function DashboardPage() {
                 <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
                   <Package className="w-12 h-12 text-primary/20 mx-auto mb-4" />
                   <h3 className="text-xl font-bold font-headline uppercase italic">No Orders Yet</h3>
-                  <p className="text-muted-foreground max-w-xs mx-auto mt-2">Ready to level up? Visit the armory to place your first order.</p>
+                  <p className="text-muted-foreground max-w-xs mx-auto mt-2">Ready to explore Castro Hub? Visit the armory to place your first order.</p>
                   <Button className="mt-8 bg-primary hover:bg-primary/90 rounded-xl px-8 font-bold" onClick={() => router.push('/products')}>START SHOPPING</Button>
                 </div>
               )}
@@ -171,7 +171,7 @@ export default function DashboardPage() {
               <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
                 <Star className="w-12 h-12 text-primary/20 mx-auto mb-4" />
                 <h3 className="text-xl font-bold font-headline uppercase italic">Your Armory is Empty</h3>
-                <p className="text-muted-foreground max-w-xs mx-auto mt-2">Start adding redeem codes to your saved items to track prices and availability.</p>
+                <p className="text-muted-foreground max-w-xs mx-auto mt-2">Start adding items to your saved list to track availability on Castro Hub.</p>
                 <Button className="mt-8 bg-primary hover:bg-primary/90 rounded-xl px-8 font-bold" onClick={() => router.push('/products')}>START SHOPPING</Button>
               </div>
             </TabsContent>

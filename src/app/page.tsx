@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -20,41 +21,21 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-10 pb-20 bg-white overflow-hidden">
-      {/* Hero Section */}
-      <section className="relative min-h-[40vh] flex items-center pt-16 overflow-hidden bg-gray-50">
+      {/* Hero Section - Optimized for focus without logo image */}
+      <section className="relative min-h-[30vh] flex items-center pt-16 overflow-hidden bg-gray-50">
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6 text-center lg:text-left animate-fade-up">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
-                <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">Authorized Retailer</span>
-              </div>
-              
-              <h1 className="font-headline text-5xl md:text-8xl font-black leading-[0.9] tracking-tighter uppercase italic text-[#0a0c10]">
-                CASTRO <span className="text-primary">HUB</span>
-              </h1>
-              
-              <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed font-medium">
-                The ultimate destination in Nepal for high-end GPUs, Monitors, and professional gaming systems.
-              </p>
+          <div className="max-w-4xl mx-auto text-center space-y-6 animate-fade-up">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">Authorized Retailer</span>
             </div>
-
-            <div className="hidden lg:block relative animate-fade-up animate-stagger-2">
-              <div className="relative aspect-square w-full max-w-md mx-auto">
-                <div className="absolute inset-0 bg-[#0a0c10] rounded-[2rem] rotate-1 shadow-lg transition-transform duration-700 hover:rotate-0"></div>
-                <div className="absolute inset-0 bg-white border border-border rounded-[2rem] shadow-xl overflow-hidden transition-transform duration-700 hover:-translate-y-2">
-                  <Image 
-                    src="https://picsum.photos/seed/hardware1/600/600" 
-                    fill
-                    className="object-cover" 
-                    alt="High Performance Hardware"
-                    sizes="(max-width: 768px) 100vw, 500px"
-                    priority
-                    fetchPriority="high"
-                    loading="eager"
-                  />
-                </div>
-              </div>
-            </div>
+            
+            <h1 className="font-headline text-5xl md:text-8xl font-black leading-[0.9] tracking-tighter uppercase italic text-[#0a0c10]">
+              CASTRO <span className="text-primary">HUB</span>
+            </h1>
+            
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
+              The ultimate destination in Nepal for high-end GPUs, Monitors, and professional gaming systems. Buy cheap, save high.
+            </p>
           </div>
         </div>
       </section>

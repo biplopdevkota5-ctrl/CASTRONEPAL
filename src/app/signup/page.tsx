@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -80,7 +81,7 @@ export default function SignupPage() {
               <CardTitle className="text-3xl font-headline font-black uppercase italic tracking-tighter">
                 JOIN THE <span className="text-secondary">ELITE</span>
               </CardTitle>
-              <CardDescription className="text-muted-foreground">Create your profile and start leveling up.</CardDescription>
+              <CardDescription className="text-muted-foreground">Create your profile and join the Castro Hub.</CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-6 px-8 pb-8">
