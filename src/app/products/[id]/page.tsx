@@ -1,17 +1,17 @@
+
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { aiProductRecommendations } from '@/ai/flows/ai-product-recommendations';
 import { generateProductDescription } from '@/ai/flows/generate-product-description';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ShoppingCart, Zap, ShieldCheck, Gamepad2, Share2, Info, Star, ChevronLeft, Loader2 } from 'lucide-react';
+import { ShoppingCart, Gamepad2, Share2, Star, ChevronLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { ProductCard } from '@/components/ui/ProductCard';
 import { CheckoutDialog } from '@/components/checkout/CheckoutDialog';
-import { useFirestore, useDoc } from '@/firebase';
+import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
 export default function ProductDetailPage() {
@@ -19,12 +19,12 @@ export default function ProductDetailPage() {
   const id = params?.id as string;
   const db = useFirestore();
   
-  const productRef = useMemo(() => {
+  const productRef = useMemoFirebase(() => {
     if (!db || !id) return null;
     return doc(db, 'products', id);
   }, [db, id]);
   
-  const { data: productData, loading: productLoading } = useDoc<any>(productRef);
+  const { data: productData, isLoading: productLoading } = useDoc<any>(productRef);
 
   const [aiDescription, setAiDescription] = useState<string>('');
   const [similarProducts, setSimilarProducts] = useState<any[]>([]);

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -12,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { semanticProductSearch } from '@/ai/flows/semantic-product-search';
-import { useFirestore, useCollection } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 
 export default function ProductsPage() {
@@ -23,8 +24,8 @@ export default function ProductsPage() {
   
   const db = useFirestore();
   
-  // Memoize query to prevent infinite re-renders
-  const productsRef = useMemo(() => {
+  // Memoize query to prevent infinite re-renders using useMemoFirebase
+  const productsRef = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'));
   }, [db]);

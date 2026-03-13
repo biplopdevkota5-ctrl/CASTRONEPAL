@@ -1,12 +1,10 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { 
-  User, 
   ShoppingBag, 
   Settings, 
-  Clock, 
   CreditCard, 
   ShieldCheck, 
   LogOut,
@@ -16,30 +14,30 @@ import {
   Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useUser, useFirestore, useCollection, useAuth } from '@/firebase';
+import { useUser, useFirestore, useCollection, useAuth, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
-  const { user, loading: userLoading } = useUser();
+  const { user, isUserLoading: userLoading } = useUser();
   const db = useFirestore();
   const auth = useAuth();
   const router = useRouter();
 
-  const ordersQuery = useMemo(() => {
+  const ordersQuery = useMemoFirebase(() => {
     if (!db || !user?.email) return null;
     return query(
       collection(db, 'orders'), 
       where('customerEmail', '==', user.email),
-      orderBy('createdAt', 'desc')
+      orderBy('orderTime', 'desc')
     );
   }, [db, user?.email]);
 
-  const { data: orders, loading: ordersLoading } = useCollection<any>(ordersQuery);
+  const { data: orders, isLoading: ordersLoading } = useCollection<any>(ordersQuery);
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -141,15 +139,15 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                          {order.createdAt?.toDate().toLocaleDateString() || 'Recently'} • {order.id.slice(0,8)}
+                          {order.orderTime?.toDate().toLocaleDateString() || 'Recently'} • {order.id.slice(0,8)}
                         </div>
-                        <h4 className="text-lg font-bold font-headline uppercase">{order.productName}</h4>
-                        <p className="text-sm font-bold text-white mt-1">Rs. {Math.round(order.totalPrice).toLocaleString()}</p>
+                        <h4 className="text-lg font-bold font-headline uppercase">Order for {order.totalAmount > 0 ? `NPR ${order.totalAmount}` : 'Digital Content'}</h4>
+                        <p className="text-sm font-bold text-white mt-1">Status: {order.status}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between md:justify-end gap-6">
                       <Badge className={
-                        order.status === 'Delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 
+                        order.status === 'Completed' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 
                         order.status === 'Cancelled' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
                         'bg-blue-500/10 text-blue-500 border-blue-500/20'
                       }>
