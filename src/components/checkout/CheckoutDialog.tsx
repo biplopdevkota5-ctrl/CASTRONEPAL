@@ -74,7 +74,6 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
     try {
       await setDoc(orderRef, orderData);
       
-      // 1. Send Discord Notice (Automated Admin Alert)
       const discordSuccess = await sendOrderToDiscord({
         id: orderId,
         productName: product.name,
@@ -91,7 +90,6 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
         await updateDoc(orderRef, { discordWebhookSent: true });
       }
 
-      // 2. Generate WhatsApp Link for user confirmation (to 9702663187)
       const link = await getWhatsAppOrderLink({
         productName: product.name,
         quantity: formData.quantity,
@@ -122,19 +120,19 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] bg-[#050505] text-white border-white/5 p-0 overflow-hidden rounded-[2.5rem] shadow-[0_0_50px_rgba(255,0,0,0.15)]">
+      <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[92vh] overflow-y-auto bg-[#050505] text-white border-white/5 p-0 rounded-[2rem] shadow-[0_0_50px_rgba(255,0,0,0.15)] scrollbar-hide">
         {isSuccess ? (
-          <div className="p-12 flex flex-col items-center text-center space-y-6">
-            <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle2 className="w-12 h-12 text-primary animate-in zoom-in" />
+          <div className="p-8 md:p-12 flex flex-col items-center text-center space-y-6">
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/20 rounded-full flex items-center justify-center mb-2">
+              <CheckCircle2 className="w-10 h-10 md:w-12 md:h-12 text-primary animate-in zoom-in" />
             </div>
-            <h2 className="text-3xl font-headline font-bold uppercase italic tracking-tighter">ORDER PLACED!</h2>
-            <p className="text-white/60 max-w-sm">
+            <h2 className="text-2xl md:text-3xl font-headline font-bold uppercase italic tracking-tighter text-white">ORDER PLACED!</h2>
+            <p className="text-sm md:text-base text-white/60 max-w-sm">
               We have received your order. To complete your purchase and get payment details, click the button below to message our admin on WhatsApp.
             </p>
-            <div className="flex flex-col gap-4 w-full">
+            <div className="flex flex-col gap-4 w-full pt-4">
               <a href={waLink} target="_blank" rel="noopener noreferrer" className="w-full">
-                <Button className="bg-[#25D366] hover:bg-[#128C7E] text-white font-black w-full h-14 rounded-2xl flex items-center justify-center gap-3 italic">
+                <Button className="bg-[#25D366] hover:bg-[#128C7E] text-white font-black w-full h-14 md:h-16 rounded-2xl flex items-center justify-center gap-3 italic text-base md:text-lg">
                   <MessageCircle className="w-6 h-6" />
                   CONFIRM ON WHATSAPP
                 </Button>
@@ -153,18 +151,18 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-8 space-y-8">
+          <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6 md:space-y-8">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-headline font-bold uppercase italic tracking-tighter flex items-center gap-3">
+              <DialogTitle className="text-xl md:text-2xl font-headline font-bold uppercase italic tracking-tighter flex items-center gap-3">
                 <ShoppingBag className="w-6 h-6 text-primary" />
                 Checkout <span className="text-primary">Portal</span>
               </DialogTitle>
-              <DialogDescription className="text-white/40">
+              <DialogDescription className="text-white/40 text-xs md:text-sm">
                 Finalize your order for <strong className="text-white">{product.name}</strong>.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="fullName" className="text-[10px] uppercase font-black tracking-[0.2em] text-primary">Full Name</Label>
                 <Input id="fullName" required className="bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-white/20 focus:ring-primary/50" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
@@ -182,23 +180,23 @@ export function CheckoutDialog({ product, children }: CheckoutDialogProps) {
                 <Input id="quantity" required type="number" min="1" className="bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-white/20 focus:ring-primary/50" value={formData.quantity} onChange={(e) => setFormData({...formData, quantity: e.target.value})} />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address" className="text-[10px] uppercase font-black tracking-[0.2em] text-primary">Full Address (Kathmandu/Delivery City)</Label>
-                <Input id="address" required className="bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-white/20 focus:ring-primary/50" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} />
+                <Label htmlFor="address" className="text-[10px] uppercase font-black tracking-[0.2em] text-primary">Full Address</Label>
+                <Input id="address" required placeholder="Sitapaila, Kathmandu..." className="bg-white/5 border-white/10 rounded-xl h-12 text-white placeholder:text-white/20 focus:ring-primary/50" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} />
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="notes" className="text-[10px] uppercase font-black tracking-[0.2em] text-primary">Order Notes (Optional)</Label>
-                <Textarea id="notes" className="bg-white/5 border-white/10 rounded-xl min-h-[100px] text-white placeholder:text-white/20 focus:ring-primary/50" value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} />
+                <Textarea id="notes" className="bg-white/5 border-white/10 rounded-xl min-h-[80px] text-white placeholder:text-white/20 focus:ring-primary/50" value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} />
               </div>
             </div>
 
-            <DialogFooter className="flex-col sm:flex-row gap-6 pt-4 border-t border-white/5">
-              <div className="flex-grow flex items-center justify-between">
+            <DialogFooter className="flex-col sm:flex-row gap-6 pt-6 border-t border-white/5">
+              <div className="flex-grow flex items-center justify-between sm:justify-start gap-4">
                 <div>
                   <div className="text-[10px] font-black uppercase tracking-widest text-white/40">Grand Total</div>
-                  <div className="text-2xl font-headline font-black italic text-white">Rs. {Math.round(product.price * parseInt(formData.quantity || '1')).toLocaleString()}</div>
+                  <div className="text-xl md:text-2xl font-headline font-black italic text-white">Rs. {Math.round(product.price * parseInt(formData.quantity || '1')).toLocaleString()}</div>
                 </div>
               </div>
-              <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90 text-white font-black h-16 px-12 rounded-2xl shadow-[0_0_20px_rgba(255,0,0,0.3)] min-w-[220px] text-lg italic uppercase tracking-tighter">
+              <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90 text-white font-black h-14 md:h-16 px-10 rounded-2xl shadow-[0_0_20px_rgba(255,0,0,0.3)] min-w-[180px] text-base md:text-lg italic uppercase tracking-tighter">
                 {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin mr-2" /> : 'CONFIRM ORDER'}
               </Button>
             </DialogFooter>
