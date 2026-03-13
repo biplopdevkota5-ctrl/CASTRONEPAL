@@ -467,7 +467,7 @@ export default function AdminPage() {
         </div>
       </main>
 
-      {/* Add Product Dialog - Re-Architected for Perfect Mobile Scrolling */}
+      {/* Add Product Dialog - Re-Architected for Perfect Mobile Entry */}
       <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
         <DialogContent className="w-[96vw] sm:max-w-[600px] max-h-[92vh] overflow-hidden flex flex-col p-0 rounded-2xl border-border bg-white shadow-2xl focus:outline-none">
           <div className="p-6 md:p-8 border-b border-border bg-white shrink-0">
